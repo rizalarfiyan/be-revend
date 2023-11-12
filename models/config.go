@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/rs/zerolog"
 )
 
@@ -13,7 +15,11 @@ type Config struct {
 }
 
 type LoggerConfigs struct {
-	Level zerolog.Level
+	Level         zerolog.Level
+	Path          string
+	IsCompressed  bool
+	IsDailyRotate bool
+	SleepDuration time.Duration
 }
 
 type CorsConfigs struct {

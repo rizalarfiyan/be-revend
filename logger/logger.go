@@ -32,6 +32,11 @@ func Init(conf *models.Config) {
 			},
 		}
 
+		if os.Getenv("APP_ENV") != "development" {
+			lumberjakLog := NewLumberjackLogger(conf)
+			output = zerolog.MultiLevelWriter(output, lumberjakLog.Run())
+		}
+
 		log = zerolog.New(output).
 			Level(zerolog.InfoLevel).
 			With().

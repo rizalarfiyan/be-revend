@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -34,13 +33,7 @@ func main() {
 	app := fiber.New(config.FiberConfig())
 	logs := logger.Get("main")
 	logApi := logger.Get("api").Logger()
-	app.Use(fiberzerolog.New(fiberzerolog.Config{
-		Logger: &logApi,
-		Fields: []string{"ip", "method", "path", "url", "latency", "status", "body", "error", "requestId"},
-		SkipBody: func(ctx *fiber.Ctx) bool {
-			return strings.Contains(string(ctx.Request().Header.ContentType()), "multipart/form-data")
-		},
-	}))
+	app.Use(fiberzerolog.New(config.FiberZerolog(logApi)))
 	app.Use(requestid.New())
 	app.Use(cors.New(config.CorsConfig()))
 	app.Use(compress.New())
@@ -49,6 +42,14 @@ func main() {
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return response.New(c, http.StatusOK, "Hello World!", nil)
+	})
+
+	app.Get("/error", func(c *fiber.Ctx) error {
+		if true {
+			panic(response.NewErrorMessage(http.StatusBadRequest, "invalid input", nil))
+		}
+
+		return response.New(c, http.StatusOK, "Success", nil)
 	})
 
 	baseUrl := fmt.Sprintf("%s:%d", conf.Host, conf.Port)

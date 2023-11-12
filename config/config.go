@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"time"
 
 	"github.com/rizalarfiyan/be-revend/models"
 	"github.com/rs/zerolog"
@@ -25,6 +26,10 @@ func Init() {
 	conf.Port = cc.AsInt("PORT", 8080)
 
 	conf.Logger.Level = cc.AsZerologLevel("LOG_LEVEL", zerolog.InfoLevel)
+	conf.Logger.Path = cc.AsString("LOG_PATH", "./log/logger.log")
+	conf.Logger.IsCompressed = cc.AsBool("LOG_COMPRESSED", true)
+	conf.Logger.IsDailyRotate = cc.AsBool("LOG_DAILY_ROTATE", true)
+	conf.Logger.SleepDuration = cc.AsTimeDuration("LOG_SLEEP_DURATION", 5*time.Second)
 }
 
 func Get() *models.Config {
