@@ -1,4 +1,15 @@
 basePath: /
+definitions:
+  response.BaseResponse:
+    properties:
+      code:
+        example: 999
+        type: integer
+      data: {}
+      message:
+        example: Message!
+        type: string
+    type: object
 info:
   contact:
     email: rizal.arfiyan.23@gmail.com
@@ -11,7 +22,47 @@ info:
   termsOfService: http://swagger.io/terms/
   title: BE Revend API
   version: "1.0"
-paths: {}
+paths:
+  /:
+    get:
+      consumes:
+      - application/json
+      description: Base Home
+      operationId: get-base-home
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      summary: Get Base Home based on parameter
+      tags:
+      - home
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Base Health
+      operationId: get-base-health
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      summary: Get Base Health based on parameter
+      tags:
+      - home
 securityDefinitions:
   AccessToken:
     in: header

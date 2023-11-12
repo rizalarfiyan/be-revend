@@ -10,6 +10,8 @@ import (
 	"time"
 
 	_ "github.com/rizalarfiyan/be-revend/docs"
+	"github.com/rizalarfiyan/be-revend/internal"
+	"github.com/rizalarfiyan/be-revend/internal/handler"
 
 	"github.com/gofiber/contrib/fiberzerolog"
 	"github.com/gofiber/fiber/v2"
@@ -21,7 +23,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/swagger"
 	"github.com/rizalarfiyan/be-revend/config"
-	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/logger"
 )
 
@@ -67,17 +68,13 @@ func main() {
 		DocExpansion: "list",
 	}))
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return response.New(c, http.StatusOK, "Hello World!", nil)
-	})
+	route := internal.NewRouter(app)
 
-	app.Get("/error", func(c *fiber.Ctx) error {
-		if true {
-			panic(response.NewErrorMessage(http.StatusBadRequest, "invalid input", nil))
-		}
+	// handler
+	baseHandler := handler.NewBaseHandler()
 
-		return response.New(c, http.StatusOK, "Success", nil)
-	})
+	// router
+	route.BaseRoute(baseHandler)
 
 	baseUrl := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	server := &http.Server{
