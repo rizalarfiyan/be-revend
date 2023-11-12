@@ -30,6 +30,9 @@ func Init() {
 	conf.Logger.IsCompressed = cc.AsBool("LOG_COMPRESSED", true)
 	conf.Logger.IsDailyRotate = cc.AsBool("LOG_DAILY_ROTATE", true)
 	conf.Logger.SleepDuration = cc.AsTimeDuration("LOG_SLEEP_DURATION", 5*time.Second)
+
+	conf.Swagger.Username = cc.AsString("SWAGGER_USERNAME", "admin")
+	conf.Swagger.Password = cc.AsString("SWAGGER_PASSWORD", "password")
 }
 
 func Get() *models.Config {

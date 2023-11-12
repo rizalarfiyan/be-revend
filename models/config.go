@@ -7,11 +7,12 @@ import (
 )
 
 type Config struct {
-	Env    string
-	Port   int
-	Host   string
-	Logger LoggerConfigs
-	Cors   CorsConfigs
+	Env     string
+	Port    int
+	Host    string
+	Logger  LoggerConfigs
+	Cors    CorsConfigs
+	Swagger SwaggerConfigs
 }
 
 type LoggerConfigs struct {
@@ -28,4 +29,9 @@ type CorsConfigs struct {
 	AllowHeaders     string
 	AllowCredentials bool
 	ExposeHeaders    string
+}
+
+type SwaggerConfigs struct {
+	Username string
+	Password string
 }
