@@ -12,6 +12,7 @@ import (
 	_ "github.com/rizalarfiyan/be-revend/docs"
 	"github.com/rizalarfiyan/be-revend/internal"
 	"github.com/rizalarfiyan/be-revend/internal/handler"
+	"github.com/rizalarfiyan/be-revend/internal/service"
 
 	"github.com/gofiber/contrib/fiberzerolog"
 	"github.com/gofiber/fiber/v2"
@@ -70,11 +71,18 @@ func main() {
 
 	route := internal.NewRouter(app)
 
+	// repository
+
+	// service
+	authService := service.NewAuthService()
+
 	// handler
 	baseHandler := handler.NewBaseHandler()
+	authHandler := handler.NewAuthHandler(authService)
 
 	// router
 	route.BaseRoute(baseHandler)
+	route.AuthRoute(authHandler)
 
 	baseUrl := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	server := &http.Server{

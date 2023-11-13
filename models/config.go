@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	"golang.org/x/oauth2"
 )
 
 type Config struct {
@@ -15,6 +16,7 @@ type Config struct {
 	Swagger SwaggerConfigs
 	DB      DBConfigs
 	Redis   RedisConfigs
+	Auth    AuthConfigs
 }
 
 type LoggerConfigs struct {
@@ -57,4 +59,8 @@ type RedisConfigs struct {
 	Password        string
 	ExpiredDuration time.Duration
 	DialTimeout     time.Duration
+}
+
+type AuthConfigs struct {
+	Google oauth2.Config
 }

@@ -43,6 +43,18 @@ paths:
       summary: Get Base Home based on parameter
       tags:
       - home
+  /auth/google:
+    get:
+      description: Auth Google
+      operationId: get-auth-google
+      responses:
+        "307":
+          description: Temporary Redirect
+        "500":
+          description: Internal Server Error
+      summary: Get Auth Google based on parameter
+      tags:
+      - auth
   /health:
     get:
       consumes:

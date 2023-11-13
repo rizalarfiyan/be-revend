@@ -47,6 +47,24 @@
                 }
             }
         },
+        "/auth/google": {
+            "get": {
+                "description": "Auth Google",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get Auth Google based on parameter",
+                "operationId": "get-auth-google",
+                "responses": {
+                    "307": {
+                        "description": "Temporary Redirect"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Base Health",

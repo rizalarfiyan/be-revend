@@ -19,3 +19,9 @@ func (r *router) BaseRoute(handler handler.BaseHandler) {
 	r.app.Get("", handler.Home)
 	r.app.Get("health", handler.Health)
 }
+
+func (r *router) AuthRoute(handler handler.AuthHandler) {
+	auth := r.app.Group("auth")
+	google := auth.Group("google")
+	google.Get("", handler.Google)
+}
