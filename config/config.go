@@ -14,7 +14,7 @@ var conf *models.Config
 
 func Init() {
 	cc := NewConfigConvert()
-	appEnv := cc.AsString("APP_ENV", "development")
+	appEnv := cc.AsString("ENV", "development")
 
 	err := godotenv.Load(".env")
 	if err != nil && appEnv != "production" {
@@ -33,6 +33,24 @@ func Init() {
 
 	conf.Swagger.Username = cc.AsString("SWAGGER_USERNAME", "admin")
 	conf.Swagger.Password = cc.AsString("SWAGGER_PASSWORD", "password")
+
+	conf.DB.Name = cc.AsString("DB_NAME", "app")
+	conf.DB.Host = cc.AsString("DB_HOST", "localhost")
+	conf.DB.Port = cc.AsInt("DB_PORT", 3306)
+	conf.DB.User = cc.AsString("DB_USER", "root")
+	conf.DB.Password = cc.AsString("DB_PASSWORD", "password")
+	conf.DB.ConnectionIdle = cc.AsTimeDuration("DB_CONNECTION_IDLE", 1*time.Minute)
+	conf.DB.ConnectionLifetime = cc.AsTimeDuration("DB_CONNECTION_LIFETIME", 5*time.Minute)
+	conf.DB.MaxIdle = cc.AsInt("DB_MAX_IDLE", 20)
+	conf.DB.MaxOpen = cc.AsInt("DB_MAX_OPEN", 50)
+
+	conf.Redis.Host = cc.AsString("REDIS_HOST", "")
+	conf.Redis.Port = cc.AsInt("REDIS_PORT", 6379)
+	conf.Redis.User = cc.AsString("REDIS_USER", "")
+	conf.Redis.Password = cc.AsString("REDIS_PASSWORD", "")
+	conf.Redis.ExpiredDuration = cc.AsTimeDuration("REDIS_EXPIRED_DURATION", 15*time.Minute)
+	conf.Redis.DialTimeout = cc.AsTimeDuration("REDIS_DIAL_TIMEOUT", 5*time.Minute)
+
 }
 
 func Get() *models.Config {
