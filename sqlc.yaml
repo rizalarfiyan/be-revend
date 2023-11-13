@@ -1,0 +1,9 @@
+version: "1"
+packages:
+  - name: "repository"
+    path: "internal/repository"
+    queries: "./database/query/"
+    schema: "./database/schema/"
+    engine: "postgresql"
+    sql_package: "pgx/v5"
+    json_tags_case_style: "camel"
