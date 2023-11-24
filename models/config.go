@@ -70,9 +70,19 @@ type JWTConfigs struct {
 }
 
 type AuthConfigs struct {
-	Google                oauth2.Config
-	Callback              string
-	SocialSessionDuration time.Duration
+	Google oauth2.Config
+	Social SocialAuthConfigs
+	OTP    OTPConfigs
+}
+
+type SocialAuthConfigs struct {
+	Callback        string
+	SessionDuration time.Duration
+}
+
+type OTPConfigs struct {
+	Duration  time.Duration
+	MaxAttemp int
 }
 
 type WhatsappConfigs struct {

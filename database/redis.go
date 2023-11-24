@@ -21,6 +21,7 @@ type redisInstance struct {
 
 type RedisInstance interface {
 	Ping() error
+	Conn() *redis.Client
 	Get(key string, dest interface{}) error
 	GetString(key string) (string, error)
 	Set(key string, val interface{}) error
@@ -34,6 +35,8 @@ type RedisInstance interface {
 	DelKeysByPatern(patern string) error
 	Keys(patern string) ([]string, error)
 	Duration(key string) (*time.Duration, error)
+	Increment(key string) (int64, error)
+	SetDuration(key string, duration time.Duration) error
 	Close() error
 }
 
@@ -82,6 +85,10 @@ func (r *redisInstance) Ping() error {
 		return err
 	}
 	return nil
+}
+
+func (r *redisInstance) Conn() *redis.Client {
+	return r.conn
 }
 
 func (r *redisInstance) Get(key string, dest interface{}) error {
@@ -220,6 +227,30 @@ func (r *redisInstance) Duration(key string) (*time.Duration, error) {
 	}
 
 	return &timeDuration, nil
+}
+
+func (r *redisInstance) Increment(key string) (int64, error) {
+	err := r.Ping()
+	if err != nil {
+		return 0, err
+	}
+
+	cmd := r.conn.Incr(r.ctx, key)
+	err = cmd.Err()
+	if err != nil {
+		return 0, err
+	}
+
+	return cmd.Val(), nil
+}
+
+func (r *redisInstance) SetDuration(key string, duration time.Duration) error {
+	err := r.Ping()
+	if err != nil {
+		return err
+	}
+
+	return r.conn.Expire(r.ctx, key, duration).Err()
 }
 
 func (r *redisInstance) Close() error {

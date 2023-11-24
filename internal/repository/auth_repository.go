@@ -3,15 +3,20 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/constants"
 	"github.com/rizalarfiyan/be-revend/database"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/sql"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
+	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type repository struct {
@@ -50,7 +55,7 @@ func (r *repository) CreateSocialSession(ctx context.Context, token string, payl
 	}
 
 	key := fmt.Sprintf(constants.KeySocialSession, token, payload.GoogleId)
-	return r.redis.Setxc(key, r.conf.Auth.SocialSessionDuration, string(strPayload))
+	return r.redis.Setxc(key, r.conf.Auth.Social.SessionDuration, string(strPayload))
 }
 
 func (r *repository) GetSocialSessionByToken(ctx context.Context, token string) (*models.SocialSession, error) {
@@ -81,4 +86,47 @@ func (r *repository) DeleteSocialSessionByGoogleId(ctx context.Context, googleId
 func (r *repository) DeleteSocialSessionByToken(ctx context.Context, token string) error {
 	keySearch := fmt.Sprintf(constants.KeySocialSession, token, "*")
 	return r.redis.DelKeysByPatern(keySearch)
+}
+
+func (r *repository) IncrementOTP(ctx context.Context, phoneNumber string) (int64, error) {
+	key := fmt.Sprintf(constants.KeyOTPIncrement, phoneNumber)
+	inc, err := r.redis.Increment(key)
+	if err != nil {
+		return 0, err
+	}
+
+	if inc != 1 {
+		return inc, nil
+	}
+
+	return inc, r.redis.SetDuration(key, utils.RemaniningToday())
+}
+
+func (r *repository) CreateOTP(ctx context.Context, phoneNumber, otp string) error {
+	key := fmt.Sprintf(constants.KeyOTP, phoneNumber)
+	return r.redis.Setxc(key, r.conf.Auth.OTP.Duration, otp)
+}
+
+func (r *repository) OTPInformation(ctx context.Context, phoneNumber string) (*time.Duration, *int64, error) {
+	key := fmt.Sprintf(constants.KeyOTP, phoneNumber)
+	keyInc := fmt.Sprintf(constants.KeyOTPIncrement, phoneNumber)
+	duration, err := r.redis.Duration(key)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	incStr, err := r.redis.GetString(keyInc)
+	if err != nil && !errors.Is(err, redis.Nil) {
+		return nil, nil, err
+	}
+
+	var inc int64
+	if incStr != "" {
+		inc, err = strconv.ParseInt(incStr, 10, 64)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return duration, &inc, nil
 }

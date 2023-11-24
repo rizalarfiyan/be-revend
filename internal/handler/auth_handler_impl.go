@@ -71,7 +71,7 @@ func (h *authHandler) GoogleCallback(ctx *fiber.Ctx) error {
 	req := new(request.GoogleCallbackRequest)
 	err := ctx.QueryParser(req)
 	if err != nil {
-		return ctx.Redirect(h.conf.Auth.Callback, http.StatusTemporaryRedirect)
+		return ctx.Redirect(h.conf.Auth.Social.Callback, http.StatusTemporaryRedirect)
 	}
 
 	url := h.service.GoogleCallback(ctx.Context(), *req)
@@ -101,7 +101,7 @@ func (h *authHandler) Verification(ctx *fiber.Ctx) error {
 	token, err := ksuid.Parse(req.Token)
 	utils.IsNotProcessErrorMessage(err, "Token is not valid", false)
 
-	if !token.Time().Add(h.conf.Auth.SocialSessionDuration).After(time.Now()) {
+	if !token.Time().Add(h.conf.Auth.Social.SessionDuration).After(time.Now()) {
 		utils.IsNotProcessRawMessage("Token is not valid", false)
 	}
 

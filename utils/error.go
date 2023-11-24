@@ -119,3 +119,7 @@ func IsNotProcessRawMessage(message string, isList bool) {
 	data := DefaultErrorData(isList)
 	panic(response.NewErrorMessage(http.StatusUnprocessableEntity, message, data))
 }
+
+func IsNotProcessData(message string, data interface{}) {
+	panic(response.NewErrorMessage(http.StatusUnprocessableEntity, message, data))
+}

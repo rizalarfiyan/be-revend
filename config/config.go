@@ -62,8 +62,10 @@ func Init() {
 	conf.Auth.Google.ClientSecret = cc.AsString("GOOGLE_CLIENT_SECRET", "")
 	conf.Auth.Google.Endpoint = google.Endpoint
 
-	conf.Auth.Callback = cc.AsString("AUTH_SOCIAL_CALLBACK", "")
-	conf.Auth.SocialSessionDuration = cc.AsTimeDuration("SOCIAL_SESSION_DURATION", 15*time.Minute)
+	conf.Auth.Social.Callback = cc.AsString("AUTH_SOCIAL_CALLBACK", "")
+	conf.Auth.Social.SessionDuration = cc.AsTimeDuration("SOCIAL_SESSION_DURATION", 15*time.Minute)
+	conf.Auth.OTP.Duration = cc.AsTimeDuration("OTP_DURATION", 15*time.Minute)
+	conf.Auth.OTP.MaxAttemp = cc.AsInt("OTP_MAX_ATTEMP", 3)
 
 	conf.Whatsapp.ApiUrl = cc.AsString("WHATSAPP_API_URL", "http://localhost:3001")
 }

@@ -6,6 +6,8 @@ var (
 
 	// Key Redis
 	KeySocialSession = "social:%s:%s"
+	KeyOTP           = "otp:%s"
+	KeyOTPIncrement  = "otp:%s:increment"
 
 	// Key Locals
 	KeyLocalsUser = "user"

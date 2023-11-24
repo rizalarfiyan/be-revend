@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"math"
 	"net/http"
 	"net/url"
 	"strings"
@@ -53,7 +54,7 @@ func (s *authService) Google() string {
 
 func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCallbackRequest) (redirect string) {
 	var data models.SocialSession
-	redirect = s.conf.Auth.Callback
+	redirect = s.conf.Auth.Social.Callback
 
 	defer func() {
 		token := ksuid.New().String()
@@ -182,13 +183,37 @@ func (s *authService) generateToken(ctx context.Context, payload baseModels.Auth
 }
 
 func (s *authService) SendOTP(ctx context.Context, phoneNumber string) {
+	duration, inc, err := s.repo.OTPInformation(ctx, phoneNumber)
+	utils.PanicIfError(err, false)
+
+	if !(*duration <= 0 && *inc == 0) {
+		nextOtp := time.Minute * time.Duration(math.Pow(2, float64(*inc)))
+		currentOtp := time.Duration(s.conf.Auth.OTP.Duration - *duration)
+
+		var res time.Duration
+		if *inc > int64(s.conf.Auth.OTP.MaxAttemp) {
+			utils.IsNotProcessData("OTP has been sent, please try again in 24 hours", res)
+		}
+
+		if currentOtp < nextOtp {
+			res = nextOtp - currentOtp
+			utils.IsNotProcessData("OTP has been sent, please try again in "+res.String(), res)
+		}
+	}
+
+	_, err = s.repo.IncrementOTP(ctx, phoneNumber)
+	utils.PanicIfError(err, false)
+
 	otp := utils.GenerateOtp(constants.OTPLength)
+	err = s.repo.CreateOTP(ctx, phoneNumber, otp)
+	utils.PanicIfError(err, false)
+
 	data := map[string]string{
 		"Name": s.conf.Name,
 		"Code": otp,
 	}
 
-	err := s.wa.SendMessageTemplate("0895377233002", constants.TemplateAuthOtp, data)
+	err = s.wa.SendMessageTemplate(phoneNumber, constants.TemplateAuthOtp, data)
 	utils.PanicIfError(err, false)
 }
 
