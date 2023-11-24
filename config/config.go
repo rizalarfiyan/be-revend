@@ -25,6 +25,7 @@ func Init() {
 	conf = new(models.Config)
 	conf.Host = cc.AsString("HOST", "")
 	conf.Port = cc.AsInt("PORT", 8080)
+	conf.Name = cc.AsString("APP_NAME", "Revend")
 
 	conf.Logger.Level = cc.AsZerologLevel("LOG_LEVEL", zerolog.InfoLevel)
 	conf.Logger.Path = cc.AsString("LOG_PATH", "./log/logger.log")
@@ -63,6 +64,8 @@ func Init() {
 
 	conf.Auth.Callback = cc.AsString("AUTH_SOCIAL_CALLBACK", "")
 	conf.Auth.SocialSessionDuration = cc.AsTimeDuration("SOCIAL_SESSION_DURATION", 15*time.Minute)
+
+	conf.Whatsapp.ApiUrl = cc.AsString("WHATSAPP_API_URL", "http://localhost:3001")
 }
 
 func Get() *models.Config {

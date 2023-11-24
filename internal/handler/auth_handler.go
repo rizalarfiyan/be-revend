@@ -7,4 +7,5 @@ type AuthHandler interface {
 	Google(ctx *fiber.Ctx) error
 	GoogleCallback(ctx *fiber.Ctx) error
 	Verification(ctx *fiber.Ctx) error
+	SendOTP(ctx *fiber.Ctx) error
 }

@@ -8,16 +8,18 @@ import (
 )
 
 type Config struct {
-	Env     string
-	Port    int
-	Host    string
-	Logger  LoggerConfigs
-	Cors    CorsConfigs
-	Swagger SwaggerConfigs
-	DB      DBConfigs
-	Redis   RedisConfigs
-	JWT     JWTConfigs
-	Auth    AuthConfigs
+	Env      string
+	Port     int
+	Host     string
+	Name     string
+	Logger   LoggerConfigs
+	Cors     CorsConfigs
+	Swagger  SwaggerConfigs
+	DB       DBConfigs
+	Redis    RedisConfigs
+	JWT      JWTConfigs
+	Auth     AuthConfigs
+	Whatsapp WhatsappConfigs
 }
 
 type LoggerConfigs struct {
@@ -71,4 +73,8 @@ type AuthConfigs struct {
 	Google                oauth2.Config
 	Callback              string
 	SocialSessionDuration time.Duration
+}
+
+type WhatsappConfigs struct {
+	ApiUrl string
 }

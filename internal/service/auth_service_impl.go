@@ -16,7 +16,9 @@ import (
 	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
+	"github.com/rizalarfiyan/be-revend/libs"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
+	"github.com/rizalarfiyan/be-revend/template"
 	"github.com/rizalarfiyan/be-revend/utils"
 	"github.com/segmentio/ksuid"
 )
@@ -24,12 +26,14 @@ import (
 type authService struct {
 	repo repository.Repository
 	conf *baseModels.Config
+	wa   libs.Whatsapp
 }
 
 func NewAuthService(repo repository.Repository) AuthService {
 	return &authService{
 		repo: repo,
 		conf: config.Get(),
+		wa:   libs.NewWhatsapp(),
 	}
 }
 
@@ -176,6 +180,17 @@ func (s *authService) generateToken(ctx context.Context, payload baseModels.Auth
 	token, err := utils.GenerateJwtToken(claims)
 	utils.PanicIfError(err, false)
 	return token
+}
+
+func (s *authService) SendOTP(ctx context.Context, phoneNumber string) {
+	otp := utils.GenerateOtp(constants.OTPLength)
+	data := map[string]string{
+		"Name": s.conf.Name,
+		"Code": otp,
+	}
+
+	err := s.wa.SendMessageTemplate("0895377233002", template.AuthOtp, data)
+	utils.PanicIfError(err, false)
 }
 
 //? register

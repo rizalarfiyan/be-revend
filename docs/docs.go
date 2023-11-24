@@ -137,6 +137,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/otp": {
+            "post": {
+                "description": "Auth Send OTP",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Post Auth Send OTP based on parameter",
+                "operationId": "post-auth-send-otp",
+                "parameters": [
+                    {
+                        "description": "Data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AuthSendOTP"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/verification": {
             "post": {
                 "description": "Auth Verification",
@@ -252,8 +293,20 @@ const docTemplate = `{
                 }
             }
         },
+        "request.AuthSendOTP": {
+            "type": "object",
+            "properties": {
+                "phone_number": {
+                    "type": "string",
+                    "example": "62895377233002"
+                }
+            }
+        },
         "request.AuthVerification": {
             "type": "object",
+            "required": [
+                "token"
+            ],
             "properties": {
                 "token": {
                     "type": "string",

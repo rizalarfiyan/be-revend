@@ -9,5 +9,9 @@ type GoogleCallbackRequest struct {
 }
 
 type AuthVerification struct {
-	Token string `json:"token" field:"Token" example:"2YbPyusF2G06BFQLamoKFXvGgPd"`
+	Token string `json:"token" field:"Token" validate:"required" example:"2YbPyusF2G06BFQLamoKFXvGgPd"`
+}
+
+type AuthSendOTP struct {
+	PhoneNumber string `json:"phone_number" field:"PhoneNumber" validate:"phone_number" example:"62895377233002"`
 }

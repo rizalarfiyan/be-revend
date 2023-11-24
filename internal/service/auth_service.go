@@ -11,4 +11,5 @@ type AuthService interface {
 	Google() string
 	GoogleCallback(ctx context.Context, req request.GoogleCallbackRequest) string
 	Verification(ctx context.Context, req request.AuthVerification) response.AuthVerification
+	SendOTP(ctx context.Context, phoneNumber string)
 }

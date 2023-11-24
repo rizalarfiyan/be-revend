@@ -30,4 +30,7 @@ func GetTranslator() ut.Translator {
 }
 
 func Register() {
+	regist := reValidation{}
+	regist.SetTagName()
+	regist.SetPhoneNumber()
 }
