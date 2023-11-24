@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/rizalarfiyan/be-revend/database"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 )
 
@@ -54,7 +55,8 @@ func (h *baseHandler) Health(ctx *fiber.Ctx) error {
 		Code:    http.StatusOK,
 		Message: "Success!",
 		Data: fiber.Map{
-			"status": true,
+			"postgres": database.PostgresIsConnected(),
+			"redis":    database.RedisIsConnected(),
 		},
 	})
 }

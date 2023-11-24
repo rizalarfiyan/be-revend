@@ -33,7 +33,6 @@ func InitPostgres(ctx context.Context) {
 		postgresLog.Fatal(err, "Postgres connection problem")
 	}
 
-	defer db.Close()
 	postgresConn = new(pgxpool.Pool)
 	postgresConn = db
 
@@ -42,4 +41,14 @@ func InitPostgres(ctx context.Context) {
 
 func GetPostgres() *pgxpool.Pool {
 	return postgresConn
+}
+
+func PostgresIsConnected() bool {
+	ctx := context.Background()
+	err := postgresConn.Ping(ctx)
+	if err != nil {
+		postgresLog.Error(err, "Postgres fails health check")
+		return false
+	}
+	return true
 }
