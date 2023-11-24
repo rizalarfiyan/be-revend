@@ -10,6 +10,17 @@ definitions:
     - AuthVerificationRegister
     - AuthVerificationOtp
     - AuthVerificationDone
+  models.AuthToken:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      phone_number:
+        type: string
+      role:
+        $ref: '#/definitions/sql.Role'
+    type: object
   request.AuthVerification:
     properties:
       token:
@@ -33,6 +44,14 @@ definitions:
         example: Message!
         type: string
     type: object
+  sql.Role:
+    enum:
+    - admin
+    - guest
+    type: string
+    x-enum-varnames:
+    - RoleAdmin
+    - RoleGuest
 info:
   contact:
     email: rizal.arfiyan.23@gmail.com
@@ -90,8 +109,37 @@ paths:
       summary: Get Auth Google Callback Redirection based on parameter
       tags:
       - auth
+  /auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Auth Me
+      operationId: get-auth-me
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.AuthToken'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Get Auth Me based on parameter
+      tags:
+      - auth
   /auth/verification:
     post:
+      consumes:
+      - application/json
       description: Auth Verification
       operationId: post-auth-verification
       parameters:
@@ -101,6 +149,8 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/request.AuthVerification'
+      produces:
+      - application/json
       responses:
         "200":
           description: OK

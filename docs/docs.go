@@ -90,9 +90,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/me": {
+            "get": {
+                "security": [
+                    {
+                        "AccessToken": []
+                    }
+                ],
+                "description": "Auth Me",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get Auth Me based on parameter",
+                "operationId": "get-auth-me",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.AuthToken"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/verification": {
             "post": {
                 "description": "Auth Verification",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "auth"
                 ],
@@ -182,6 +235,23 @@ const docTemplate = `{
                 "AuthVerificationDone"
             ]
         },
+        "models.AuthToken": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/sql.Role"
+                }
+            }
+        },
         "request.AuthVerification": {
             "type": "object",
             "properties": {
@@ -215,6 +285,17 @@ const docTemplate = `{
                     "example": "Message!"
                 }
             }
+        },
+        "sql.Role": {
+            "type": "string",
+            "enum": [
+                "admin",
+                "guest"
+            ],
+            "x-enum-varnames": [
+                "RoleAdmin",
+                "RoleGuest"
+            ]
         }
     },
     "securityDefinitions": {

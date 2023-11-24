@@ -26,6 +26,26 @@ func NewAuthHandler(service service.AuthService) AuthHandler {
 	}
 }
 
+// Auth Me godoc
+// @Summary      Get Auth Me based on parameter
+// @Description  Auth Me
+// @ID           get-auth-me
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Security     AccessToken
+// @Success      200  {object}  response.BaseResponse{data=models.AuthToken}
+// @Failure      500  {object}  response.BaseResponse
+// @Router       /auth/me [get]
+func (h *authHandler) Me(ctx *fiber.Ctx) error {
+	user := utils.GetUser(ctx)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+		Data:    user,
+	})
+}
+
 // Auth Google Redirection godoc
 // @Summary      Get Auth Google Redirection based on parameter
 // @Description  Auth Google Redirection
@@ -63,6 +83,8 @@ func (h *authHandler) GoogleCallback(ctx *fiber.Ctx) error {
 // @Description  Auth Verification
 // @ID           post-auth-verification
 // @Tags         auth
+// @Accept       json
+// @Produce      json
 // @Param        data body request.AuthVerification true "Data"
 // @Success      200  {object}  response.BaseResponse{data=response.AuthVerification}
 // @Failure      500  {object}  response.BaseResponse
