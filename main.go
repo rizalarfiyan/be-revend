@@ -15,6 +15,7 @@ import (
 	"github.com/rizalarfiyan/be-revend/internal/handler"
 	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/service"
+	"github.com/rizalarfiyan/be-revend/validation"
 
 	"github.com/gofiber/contrib/fiberzerolog"
 	"github.com/gofiber/fiber/v2"
@@ -38,6 +39,8 @@ func init() {
 	ctx := context.Background()
 	database.InitPostgres(ctx)
 	database.RedisInit()
+
+	validation.Init()
 }
 
 // @title BE Revend API
@@ -89,6 +92,7 @@ func main() {
 		DocExpansion: "list",
 	}))
 
+	validation.Register()
 	route := internal.NewRouter(app)
 
 	// repository

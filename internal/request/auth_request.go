@@ -7,3 +7,7 @@ type GoogleCallbackRequest struct {
 	Prompt      string `json:"prompt"`
 	ErrorReason string `json:"error_reason"`
 }
+
+type AuthVerification struct {
+	Token string `json:"token" field:"Token" example:"2YbPyusF2G06BFQLamoKFXvGgPd"`
+}

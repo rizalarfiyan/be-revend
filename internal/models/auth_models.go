@@ -5,6 +5,7 @@ type SocialSession struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Message   string `json:"message"`
+	IsError   bool   `json:"is_error"`
 }
 
 type SocialGoogle struct {

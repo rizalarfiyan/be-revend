@@ -2,12 +2,16 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/internal/request"
+	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/internal/service"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
+	"github.com/rizalarfiyan/be-revend/utils"
+	"github.com/segmentio/ksuid"
 )
 
 type authHandler struct {
@@ -44,12 +48,45 @@ func (h *authHandler) Google(ctx *fiber.Ctx) error {
 // @Failure      500
 // @Router       /auth/google/callback [get]
 func (h *authHandler) GoogleCallback(ctx *fiber.Ctx) error {
-	req := request.GoogleCallbackRequest{}
-	err := ctx.QueryParser(&req)
+	req := new(request.GoogleCallbackRequest)
+	err := ctx.QueryParser(req)
 	if err != nil {
 		return ctx.Redirect(h.conf.Auth.Callback, http.StatusTemporaryRedirect)
 	}
 
-	url := h.service.GoogleCallback(ctx.Context(), req)
+	url := h.service.GoogleCallback(ctx.Context(), *req)
 	return ctx.Redirect(url, http.StatusTemporaryRedirect)
+}
+
+// Auth Verification godoc
+// @Summary      Post Auth Verification based on parameter
+// @Description  Auth Verification
+// @ID           post-auth-verification
+// @Tags         auth
+// @Param        data body request.AuthVerification true "Data"
+// @Success      200  {object}  response.BaseResponse
+// @Failure      500  {object}  response.BaseResponse
+// @Router       /auth/verification [post]
+func (h *authHandler) Verification(ctx *fiber.Ctx) error {
+	req := new(request.AuthVerification)
+	err := ctx.BodyParser(req)
+	if err != nil {
+		return err
+	}
+
+	utils.ValidateStruct(*req, false)
+
+	token, err := ksuid.Parse(req.Token)
+	utils.IsNotProcessErrorMessage(err, "Token is not valid", false)
+
+	if !token.Time().Add(h.conf.Auth.SocialSessionDuration).After(time.Now()) {
+		utils.IsNotProcessRawMessage("Token is not valid", false)
+	}
+
+	res := h.service.Verification(ctx.Context(), *req)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: res.Message,
+		Data:    res,
+	})
 }

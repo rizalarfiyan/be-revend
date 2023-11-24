@@ -56,11 +56,11 @@ const docTemplate = `{
         },
         "/auth/google": {
             "get": {
-                "description": "Auth Google",
+                "description": "Auth Google Redirection",
                 "tags": [
                     "auth"
                 ],
-                "summary": "Get Auth Google based on parameter",
+                "summary": "Get Auth Google Redirection based on parameter",
                 "operationId": "get-auth-google",
                 "responses": {
                     "307": {
@@ -68,6 +68,59 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/auth/google/callback": {
+            "get": {
+                "description": "Auth Google Callback Redirection",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Get Auth Google Callback Redirection based on parameter",
+                "operationId": "get-auth-google-callback",
+                "responses": {
+                    "307": {
+                        "description": "Temporary Redirect"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/auth/verification": {
+            "post": {
+                "description": "Auth Verification",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Post Auth Verification based on parameter",
+                "operationId": "post-auth-verification",
+                "parameters": [
+                    {
+                        "description": "Data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AuthVerification"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
                     }
                 }
             }
@@ -104,6 +157,15 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "request.AuthVerification": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "example": "2YbPyusF2G06BFQLamoKFXvGgPd"
+                }
+            }
+        },
         "response.BaseResponse": {
             "type": "object",
             "properties": {

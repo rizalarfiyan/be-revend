@@ -9,9 +9,11 @@ import (
 	"strings"
 
 	"github.com/rizalarfiyan/be-revend/config"
+	"github.com/rizalarfiyan/be-revend/constants"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/request"
+	"github.com/rizalarfiyan/be-revend/internal/response"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
 	"github.com/rizalarfiyan/be-revend/utils"
 	"github.com/segmentio/ksuid"
@@ -49,8 +51,10 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 	redirect = s.conf.Auth.Callback
 
 	defer func() {
-		idx := ksuid.New().String()
-		err := s.repo.CreateSocialSession(ctx, idx, data)
+		token := ksuid.New().String()
+		data.IsError = data.Message != ""
+		data.Message = "Please wait, we are processing your request"
+		err := s.repo.CreateSocialSession(ctx, token, data)
 		if err != nil {
 			return
 		}
@@ -61,7 +65,7 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 		}
 
 		parameters := redirectUrl.Query()
-		parameters.Add("token", idx)
+		parameters.Add("token", token)
 		redirectUrl.RawQuery = parameters.Encode()
 	}()
 
@@ -109,3 +113,40 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 	data.LastName = res.FamilyName
 	return
 }
+
+func (s *authService) Verification(ctx context.Context, req request.AuthVerification) response.AuthVerification {
+	data, err := s.repo.GetSocialSessionByToken(ctx, req.Token)
+	utils.PanicIfError(err, false)
+	utils.IsNotProcessMessage(data, "Token is expired", false)
+
+	if data.IsError {
+		utils.IsNotProcessRawMessage(data.Message, false)
+	}
+
+	res := response.AuthVerification{
+		Message: data.Message,
+	}
+
+	if data.GoogleId == "" {
+		res.Step = constants.AuthVerificationRegister
+		res.Message = "You must register first, please fill the form below"
+		return res
+	}
+
+	user, err := s.repo.GetUserByGoogleId(ctx, data.GoogleId)
+	utils.PanicIfError(err, false)
+
+	if utils.IsEmpty(user) {
+		res.Step = constants.AuthVerificationOtp
+		res.Message = "Please fill the form below"
+		return res
+	}
+
+	//! generate token
+
+	return res
+}
+
+//? register
+//? send otp
+//? verification otp
