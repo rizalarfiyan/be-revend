@@ -187,6 +187,11 @@ func (r *redisInstance) DelKeysByPatern(patern string) error {
 	if err != nil {
 		return err
 	}
+
+	if len(val) == 0 {
+		return nil
+	}
+
 	return r.conn.Del(r.ctx, val...).Err()
 }
 

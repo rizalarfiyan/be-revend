@@ -10,6 +10,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.3.0
 	github.com/rs/zerolog v1.31.0
+	github.com/segmentio/ksuid v1.0.4
 	github.com/swaggo/swag v1.16.2
 	golang.org/x/oauth2 v0.14.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1

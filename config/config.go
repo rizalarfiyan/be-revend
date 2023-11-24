@@ -57,6 +57,9 @@ func Init() {
 	conf.Auth.Google.ClientID = cc.AsString("GOOGLE_CLIENT_ID", "")
 	conf.Auth.Google.ClientSecret = cc.AsString("GOOGLE_CLIENT_SECRET", "")
 	conf.Auth.Google.Endpoint = google.Endpoint
+
+	conf.Auth.Callback = cc.AsString("AUTH_SOCIAL_CALLBACK", "")
+	conf.Auth.SocialSessionDuration = cc.AsTimeDuration("SOCIAL_SESSION_DURATION", 15*time.Minute)
 }
 
 func Get() *models.Config {

@@ -9,9 +9,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/rizalarfiyan/be-revend/database"
 	_ "github.com/rizalarfiyan/be-revend/docs"
 	"github.com/rizalarfiyan/be-revend/internal"
 	"github.com/rizalarfiyan/be-revend/internal/handler"
+	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/service"
 
 	"github.com/gofiber/contrib/fiberzerolog"
@@ -32,6 +34,10 @@ func init() {
 	conf := config.Get()
 	logger.Init(conf)
 	logger.UpdateLogLevel(conf.Logger.Level)
+
+	ctx := context.Background()
+	database.InitPostgres(ctx)
+	database.RedisInit()
 }
 
 // @title BE Revend API
@@ -48,6 +54,20 @@ func init() {
 // @in header
 // @name Authorization
 func main() {
+	ctx := context.Background()
+	db := database.GetPostgres()
+	redis := database.RedisConnection(ctx)
+
+	defer func() {
+		if db != nil {
+			db.Close()
+		}
+
+		if redis != nil {
+			redis.Close()
+		}
+	}()
+
 	conf := config.Get()
 	app := fiber.New(config.FiberConfig())
 	logs := logger.Get("main")
@@ -72,9 +92,10 @@ func main() {
 	route := internal.NewRouter(app)
 
 	// repository
+	authRepository := repository.NewAuthRepository(db, redis)
 
 	// service
-	authService := service.NewAuthService()
+	authService := service.NewAuthService(authRepository)
 
 	// handler
 	baseHandler := handler.NewBaseHandler()

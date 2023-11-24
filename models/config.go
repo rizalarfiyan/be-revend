@@ -62,5 +62,7 @@ type RedisConfigs struct {
 }
 
 type AuthConfigs struct {
-	Google oauth2.Config
+	Google                oauth2.Config
+	Callback              string
+	SocialSessionDuration time.Duration
 }

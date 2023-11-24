@@ -1,21 +1,24 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/service"
+	baseModels "github.com/rizalarfiyan/be-revend/models"
 )
 
 type authHandler struct {
 	service service.AuthService
+	conf    *baseModels.Config
 }
 
 func NewAuthHandler(service service.AuthService) AuthHandler {
 	return &authHandler{
-		service,
+		service: service,
+		conf:    config.Get(),
 	}
 }
 
@@ -42,12 +45,11 @@ func (h *authHandler) Google(ctx *fiber.Ctx) error {
 // @Router       /auth/google/callback [get]
 func (h *authHandler) GoogleCallback(ctx *fiber.Ctx) error {
 	req := request.GoogleCallbackRequest{}
-	_ = ctx.QueryParser(&req)
-	fmt.Println(req)
+	err := ctx.QueryParser(&req)
+	if err != nil {
+		return ctx.Redirect(h.conf.Auth.Callback, http.StatusTemporaryRedirect)
+	}
 
-	mssage := h.service.GoogleCallback(ctx.Context(), req)
-	return ctx.JSON(fiber.Map{
-		"message": mssage,
-	})
-	// return ctx.Redirect(url, http.StatusTemporaryRedirect)
+	url := h.service.GoogleCallback(ctx.Context(), req)
+	return ctx.Redirect(url, http.StatusTemporaryRedirect)
 }

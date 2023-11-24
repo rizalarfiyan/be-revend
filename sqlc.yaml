@@ -1,7 +1,7 @@
 version: "1"
 packages:
-  - name: "repository"
-    path: "internal/repository"
+  - name: "sql"
+    path: "internal/sql"
     queries: "./database/query/"
     schema: "./database/schema/"
     engine: "postgresql"
