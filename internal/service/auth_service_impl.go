@@ -18,7 +18,6 @@ import (
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/libs"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
-	"github.com/rizalarfiyan/be-revend/template"
 	"github.com/rizalarfiyan/be-revend/utils"
 	"github.com/segmentio/ksuid"
 )
@@ -189,7 +188,7 @@ func (s *authService) SendOTP(ctx context.Context, phoneNumber string) {
 		"Code": otp,
 	}
 
-	err := s.wa.SendMessageTemplate("0895377233002", template.AuthOtp, data)
+	err := s.wa.SendMessageTemplate("0895377233002", constants.TemplateAuthOtp, data)
 	utils.PanicIfError(err, false)
 }
 
