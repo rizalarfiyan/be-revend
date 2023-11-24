@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/constants"
 	"github.com/rizalarfiyan/be-revend/internal/models"
@@ -142,9 +144,38 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 		return res
 	}
 
-	//! generate token
+	payload := baseModels.AuthToken{
+		FirstName:   user.FirstName,
+		PhoneNumber: user.PhoneNumber,
+		Role:        user.Role,
+	}
+
+	if user.LastName.Valid {
+		payload.LastName = user.LastName.String
+	}
+
+	token := s.generateToken(ctx, payload)
+	res.Step = constants.AuthVerificationDone
+	res.Message = "Please wait, you are being redirected"
+	res.Token = token
 
 	return res
+}
+
+func (s *authService) generateToken(ctx context.Context, payload baseModels.AuthToken) string {
+	conf := config.Get()
+	claims := baseModels.AuthTokenClaims{
+		AuthToken: payload,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(conf.JWT.Expire)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token, err := utils.GenerateJwtToken(claims)
+	utils.PanicIfError(err, false)
+	return token
 }
 
 //? register

@@ -16,6 +16,7 @@ type Config struct {
 	Swagger SwaggerConfigs
 	DB      DBConfigs
 	Redis   RedisConfigs
+	JWT     JWTConfigs
 	Auth    AuthConfigs
 }
 
@@ -59,6 +60,11 @@ type RedisConfigs struct {
 	Password        string
 	ExpiredDuration time.Duration
 	DialTimeout     time.Duration
+}
+
+type JWTConfigs struct {
+	Secret string
+	Expire time.Duration
 }
 
 type AuthConfigs struct {

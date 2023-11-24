@@ -64,7 +64,7 @@ func (h *authHandler) GoogleCallback(ctx *fiber.Ctx) error {
 // @ID           post-auth-verification
 // @Tags         auth
 // @Param        data body request.AuthVerification true "Data"
-// @Success      200  {object}  response.BaseResponse
+// @Success      200  {object}  response.BaseResponse{data=response.AuthVerification}
 // @Failure      500  {object}  response.BaseResponse
 // @Router       /auth/verification [post]
 func (h *authHandler) Verification(ctx *fiber.Ctx) error {

@@ -52,6 +52,9 @@ func Init() {
 	conf.Redis.ExpiredDuration = cc.AsTimeDuration("REDIS_EXPIRED_DURATION", 15*time.Minute)
 	conf.Redis.DialTimeout = cc.AsTimeDuration("REDIS_DIAL_TIMEOUT", 5*time.Minute)
 
+	conf.JWT.Secret = cc.AsString("JWT_SECRET", "secret")
+	conf.JWT.Expire = cc.AsTimeDuration("JWT_EXPIRE", time.Hour*24*7) // 7 days
+
 	conf.Auth.Google.Scopes = []string{"profile", "email"}
 	conf.Auth.Google.RedirectURL = cc.AsString("GOOGLE_REDIRECT_URL", "http://localhost:8080/auth/google/callback")
 	conf.Auth.Google.ClientID = cc.AsString("GOOGLE_CLIENT_ID", "")

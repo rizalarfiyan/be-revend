@@ -113,7 +113,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.BaseResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.AuthVerification"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
@@ -157,12 +169,36 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "constants.AuthVerificationStep": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "AuthVerificationRegister",
+                "AuthVerificationOtp",
+                "AuthVerificationDone"
+            ]
+        },
         "request.AuthVerification": {
             "type": "object",
             "properties": {
                 "token": {
                     "type": "string",
                     "example": "2YbPyusF2G06BFQLamoKFXvGgPd"
+                }
+            }
+        },
+        "response.AuthVerification": {
+            "type": "object",
+            "properties": {
+                "step": {
+                    "$ref": "#/definitions/constants.AuthVerificationStep"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         },

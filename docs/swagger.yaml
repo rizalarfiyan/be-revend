@@ -1,9 +1,26 @@
 basePath: /
 definitions:
+  constants.AuthVerificationStep:
+    enum:
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - AuthVerificationRegister
+    - AuthVerificationOtp
+    - AuthVerificationDone
   request.AuthVerification:
     properties:
       token:
         example: 2YbPyusF2G06BFQLamoKFXvGgPd
+        type: string
+    type: object
+  response.AuthVerification:
+    properties:
+      step:
+        $ref: '#/definitions/constants.AuthVerificationStep'
+      token:
         type: string
     type: object
   response.BaseResponse:
@@ -88,7 +105,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.BaseResponse'
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.AuthVerification'
+              type: object
         "500":
           description: Internal Server Error
           schema:

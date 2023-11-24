@@ -6,4 +6,7 @@ var (
 
 	// Key Redis
 	KeySocialSession = "social:%s:%s"
+
+	// Key Locals
+	KeyLocalsUser = "user"
 )
