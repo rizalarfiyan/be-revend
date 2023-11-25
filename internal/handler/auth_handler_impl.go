@@ -139,3 +139,31 @@ func (h *authHandler) SendOTP(ctx *fiber.Ctx) error {
 		Message: "Success!",
 	})
 }
+
+// Auth OTP Verification godoc
+// @Summary      Post Auth Verification based on parameter
+// @Description  Auth Verification
+// @ID           post-auth-otp-verification
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        data body request.AuthOTPVerification true "Data"
+// @Success      200  {object}  response.BaseResponse
+// @Failure      500  {object}  response.BaseResponse
+// @Router       /auth/otp/verification [post]
+func (h *authHandler) OTPVerification(ctx *fiber.Ctx) error {
+	req := new(request.AuthOTPVerification)
+	err := ctx.BodyParser(req)
+	if err != nil {
+		return err
+	}
+
+	utils.ValidateStruct(*req, false)
+
+	res := h.service.OTPVerification(ctx.Context(), *req)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+		Data:    res,
+	})
+}

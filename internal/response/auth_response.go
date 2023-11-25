@@ -9,3 +9,7 @@ type AuthVerification struct {
 	Token   string                         `json:"token"`
 	Message string                         `json:"-"`
 }
+
+type AuthOTPVerification struct {
+	Token string `json:"token"`
+}

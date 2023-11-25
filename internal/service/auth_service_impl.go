@@ -192,7 +192,7 @@ func (s *authService) SendOTP(ctx context.Context, phoneNumber string) {
 
 		var res time.Duration
 		if *inc > int64(s.conf.Auth.OTP.MaxAttemp) {
-			utils.IsNotProcessData("OTP has been sent, please try again in 24 hours", res)
+			utils.IsNotProcessData("OTP has been sent, please try again in next day", res)
 		}
 
 		if currentOtp < nextOtp {
@@ -217,6 +217,38 @@ func (s *authService) SendOTP(ctx context.Context, phoneNumber string) {
 	utils.PanicIfError(err, false)
 }
 
+func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVerification) response.AuthOTPVerification {
+	otp, err := s.repo.GetOTP(ctx, req.PhoneNumber)
+	utils.PanicIfError(err, false)
+	utils.IsNotProcess(otp, false)
+
+	if otp != req.OTP {
+		utils.IsNotProcessRawMessage("OTP is not valid", false)
+	}
+
+	if req.Token != "" {
+		return s.createNewUserFromOTP(ctx, req)
+	}
+
+	user, err := s.repo.GetUserByPhoneNumber(ctx, req.PhoneNumber)
+	utils.PanicIfError(err, false)
+
+	payload := baseModels.AuthToken{
+		FirstName:   user.FirstName,
+		LastName:    user.LastName.String,
+		PhoneNumber: user.PhoneNumber,
+		Role:        user.Role,
+	}
+
+	token := s.generateToken(ctx, payload)
+	return response.AuthOTPVerification{
+		Token: token,
+	}
+}
+
+func (s *authService) createNewUserFromOTP(ctx context.Context, req request.AuthOTPVerification) response.AuthOTPVerification {
+	return response.AuthOTPVerification{}
+}
+
 //? register
-//? send otp
 //? verification otp

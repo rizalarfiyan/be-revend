@@ -18,4 +18,5 @@ type Repository interface {
 	IncrementOTP(ctx context.Context, phoneNumber string) (int64, error)
 	CreateOTP(ctx context.Context, phoneNumber, otp string) error
 	OTPInformation(ctx context.Context, phoneNumber string) (*time.Duration, *int64, error)
+	GetOTP(ctx context.Context, phoneNumber string) (string, error)
 }

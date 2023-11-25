@@ -130,3 +130,8 @@ func (r *repository) OTPInformation(ctx context.Context, phoneNumber string) (*t
 
 	return duration, &inc, nil
 }
+
+func (r *repository) GetOTP(ctx context.Context, phoneNumber string) (string, error) {
+	key := fmt.Sprintf(constants.KeyOTP, phoneNumber)
+	return r.redis.GetString(key)
+}

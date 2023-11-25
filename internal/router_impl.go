@@ -28,6 +28,7 @@ func (r *router) AuthRoute(handler handler.AuthHandler) {
 
 	otp := auth.Group("otp")
 	otp.Post("", handler.SendOTP)
+	otp.Post("verification", handler.OTPVerification)
 
 	google := auth.Group("google")
 	google.Get("", handler.Google)
