@@ -1,6 +1,6 @@
 package models
 
-type SocialSession struct {
+type VerificationSession struct {
 	GoogleId  string `json:"google_id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`

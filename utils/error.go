@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v5"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/validation"
 )
@@ -22,6 +23,13 @@ func DefaultErrorData(isList bool) interface{} {
 
 func PanicIfError(err error, isList bool) {
 	if err != nil {
+		data := DefaultErrorData(isList)
+		panic(response.NewErrorMessage(http.StatusInternalServerError, err.Error(), data))
+	}
+}
+
+func PanicIfErrorWithoutNoSqlResult(err error, isList bool) {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		data := DefaultErrorData(isList)
 		panic(response.NewErrorMessage(http.StatusInternalServerError, err.Error(), data))
 	}

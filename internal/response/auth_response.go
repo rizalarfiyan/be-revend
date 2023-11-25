@@ -5,9 +5,11 @@ import (
 )
 
 type AuthVerification struct {
-	Step    constants.AuthVerificationStep `json:"step"`
-	Token   string                         `json:"token"`
-	Message string                         `json:"-"`
+	Step      constants.AuthVerificationStep `json:"step"`
+	Token     string                         `json:"token"`
+	FirstName string                         `json:"first_name"`
+	LastName  string                         `json:"last_name"`
+	Message   string                         `json:"-"`
 }
 
 type AuthOTPVerification struct {

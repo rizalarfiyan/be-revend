@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math"
 	"net/http"
@@ -53,14 +54,14 @@ func (s *authService) Google() string {
 }
 
 func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCallbackRequest) (redirect string) {
-	var data models.SocialSession
-	redirect = s.conf.Auth.Social.Callback
+	var data models.VerificationSession
+	redirect = s.conf.Auth.Verification.Callback
 
 	defer func() {
 		token := ksuid.New().String()
 		data.IsError = data.Message != ""
 		data.Message = "Please wait, we are processing your request"
-		err := s.repo.CreateSocialSession(ctx, token, data)
+		err := s.repo.CreateVerificationSession(ctx, token, data)
 		if err != nil {
 			return
 		}
@@ -73,6 +74,7 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 		parameters := redirectUrl.Query()
 		parameters.Add("token", token)
 		redirectUrl.RawQuery = parameters.Encode()
+		redirect = redirectUrl.String()
 	}()
 
 	if strings.EqualFold(req.ErrorReason, "user_denied") {
@@ -121,7 +123,7 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 }
 
 func (s *authService) Verification(ctx context.Context, req request.AuthVerification) response.AuthVerification {
-	data, err := s.repo.GetSocialSessionByToken(ctx, req.Token)
+	data, err := s.repo.GetVerificationSessionByToken(ctx, req.Token)
 	utils.PanicIfError(err, false)
 	utils.IsNotProcessMessage(data, "Token is expired", false)
 
@@ -140,11 +142,15 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 	}
 
 	user, err := s.repo.GetUserByGoogleId(ctx, data.GoogleId)
-	utils.PanicIfError(err, false)
+	fmt.Println(err)
+	utils.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
-		res.Step = constants.AuthVerificationOtp
+		//! fixme with auto fill from google
+		res.Step = constants.AuthVerificationRegister
 		res.Message = "Please fill the form below"
+		res.FirstName = data.FirstName
+		res.LastName = data.LastName
 		return res
 	}
 

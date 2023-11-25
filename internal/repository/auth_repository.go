@@ -43,8 +43,8 @@ func (r *repository) GetUserByPhoneNumber(ctx context.Context, googleID string) 
 	return r.query.GetUserByPhoneNumber(ctx, googleID)
 }
 
-func (r *repository) CreateSocialSession(ctx context.Context, token string, payload models.SocialSession) error {
-	err := r.DeleteSocialSessionByGoogleId(ctx, payload.GoogleId)
+func (r *repository) CreateVerificationSession(ctx context.Context, token string, payload models.VerificationSession) error {
+	err := r.DeleteVerificationSessionByGoogleId(ctx, payload.GoogleId)
 	if err != nil {
 		return err
 	}
@@ -55,10 +55,10 @@ func (r *repository) CreateSocialSession(ctx context.Context, token string, payl
 	}
 
 	key := fmt.Sprintf(constants.KeySocialSession, token, payload.GoogleId)
-	return r.redis.Setxc(key, r.conf.Auth.Social.SessionDuration, string(strPayload))
+	return r.redis.Setxc(key, r.conf.Auth.Verification.Duration, string(strPayload))
 }
 
-func (r *repository) GetSocialSessionByToken(ctx context.Context, token string) (*models.SocialSession, error) {
+func (r *repository) GetVerificationSessionByToken(ctx context.Context, token string) (*models.VerificationSession, error) {
 	keySearch := fmt.Sprintf(constants.KeySocialSession, token, "*")
 	key, err := r.redis.Keys(keySearch)
 	if err != nil {
@@ -69,7 +69,7 @@ func (r *repository) GetSocialSessionByToken(ctx context.Context, token string) 
 		return nil, nil
 	}
 
-	var res models.SocialSession
+	var res models.VerificationSession
 	err = r.redis.Get(key[0], &res)
 	if err != nil {
 		return nil, err
@@ -78,12 +78,12 @@ func (r *repository) GetSocialSessionByToken(ctx context.Context, token string) 
 	return &res, nil
 }
 
-func (r *repository) DeleteSocialSessionByGoogleId(ctx context.Context, googleId string) error {
+func (r *repository) DeleteVerificationSessionByGoogleId(ctx context.Context, googleId string) error {
 	keySearch := fmt.Sprintf(constants.KeySocialSession, "*", googleId)
 	return r.redis.DelKeysByPatern(keySearch)
 }
 
-func (r *repository) DeleteSocialSessionByToken(ctx context.Context, token string) error {
+func (r *repository) DeleteVerificationSessionByToken(ctx context.Context, token string) error {
 	keySearch := fmt.Sprintf(constants.KeySocialSession, token, "*")
 	return r.redis.DelKeysByPatern(keySearch)
 }

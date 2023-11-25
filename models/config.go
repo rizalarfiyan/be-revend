@@ -70,14 +70,14 @@ type JWTConfigs struct {
 }
 
 type AuthConfigs struct {
-	Google oauth2.Config
-	Social SocialAuthConfigs
-	OTP    OTPConfigs
+	Google       oauth2.Config
+	Verification VerificationAuthConfigs
+	OTP          OTPConfigs
 }
 
-type SocialAuthConfigs struct {
-	Callback        string
-	SessionDuration time.Duration
+type VerificationAuthConfigs struct {
+	Callback string
+	Duration time.Duration
 }
 
 type OTPConfigs struct {
