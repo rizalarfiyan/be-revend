@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"math"
 	"net/http"
@@ -142,7 +141,6 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 	}
 
 	user, err := s.repo.GetUserByGoogleId(ctx, data.GoogleId)
-	fmt.Println(err)
 	utils.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
@@ -257,4 +255,4 @@ func (s *authService) createNewUserFromOTP(ctx context.Context, req request.Auth
 }
 
 //? register
-//? verification otp
+//-> kalau udah, create user ke database terus lakukan verifikasi

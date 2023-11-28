@@ -36,6 +36,12 @@ func Init() {
 	conf.Swagger.Username = cc.AsString("SWAGGER_USERNAME", "admin")
 	conf.Swagger.Password = cc.AsString("SWAGGER_PASSWORD", "password")
 
+	conf.Cors.AllowOrigins = cc.AsString("ALLOW_ORIGINS", "*")
+	conf.Cors.AllowMethods = cc.AsString("ALLOW_METHODS", "GET,POST,PUT,DELETE,OPTIONS")
+	conf.Cors.AllowHeaders = cc.AsString("ALLOW_HEADERS", "Origin,Content-Type,Accept,Authorization")
+	conf.Cors.AllowCredentials = cc.AsBool("ALLOW_CREDENTIALS", false)
+	conf.Cors.ExposeHeaders = cc.AsString("EXPOSE_HEADERS", "Content-Length,Content-Type,Authorization")
+
 	conf.DB.Name = cc.AsString("DB_NAME", "app")
 	conf.DB.Host = cc.AsString("DB_HOST", "localhost")
 	conf.DB.Port = cc.AsInt("DB_PORT", 3306)
