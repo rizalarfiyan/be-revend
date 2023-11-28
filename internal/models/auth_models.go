@@ -1,11 +1,12 @@
 package models
 
 type VerificationSession struct {
-	GoogleId  string `json:"google_id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Message   string `json:"message"`
-	IsError   bool   `json:"is_error"`
+	GoogleId    string `json:"google_id"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	Message     string `json:"message"`
+	PhoneNumber string `json:"phone_number"`
+	IsError     bool   `json:"is_error"`
 }
 
 type SocialGoogle struct {

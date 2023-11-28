@@ -144,13 +144,14 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 	utils.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
-		//! fixme with auto fill from google
 		res.Step = constants.AuthVerificationRegister
 		res.Message = "Please fill the form below"
 		res.FirstName = data.FirstName
 		res.LastName = data.LastName
 		return res
 	}
+
+	//! kalau ada nomor telponnya berarti OTP
 
 	payload := baseModels.AuthToken{
 		FirstName:   user.FirstName,
@@ -186,7 +187,7 @@ func (s *authService) generateToken(ctx context.Context, payload baseModels.Auth
 	return token
 }
 
-func (s *authService) SendOTP(ctx context.Context, phoneNumber string) {
+func (s *authService) SendOTP(ctx context.Context, phoneNumber string) response.AuthSendOTP {
 	duration, inc, err := s.repo.OTPInformation(ctx, phoneNumber)
 	utils.PanicIfError(err, false)
 
@@ -205,6 +206,27 @@ func (s *authService) SendOTP(ctx context.Context, phoneNumber string) {
 		}
 	}
 
+	user, err := s.repo.GetUserByPhoneNumber(ctx, phoneNumber)
+	utils.PanicIfErrorWithoutNoSqlResult(err, false)
+
+	if utils.IsEmpty(user) {
+		utils.IsNotProcessRawMessage("Opps. Something wrong for your phone number", false)
+	}
+
+	token := ksuid.New().String()
+	payload := models.VerificationSession{
+		PhoneNumber: phoneNumber,
+		GoogleId:    user.GoogleID,
+		FirstName:   user.FirstName,
+	}
+
+	if user.LastName.Valid {
+		payload.LastName = user.LastName.String
+	}
+
+	err = s.repo.CreateVerificationSession(ctx, token, payload)
+	utils.PanicIfError(err, false)
+
 	_, err = s.repo.IncrementOTP(ctx, phoneNumber)
 	utils.PanicIfError(err, false)
 
@@ -219,6 +241,10 @@ func (s *authService) SendOTP(ctx context.Context, phoneNumber string) {
 
 	err = s.wa.SendMessageTemplate(phoneNumber, constants.TemplateAuthOtp, data)
 	utils.PanicIfError(err, false)
+
+	return response.AuthSendOTP{
+		Token: token,
+	}
 }
 
 func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVerification) response.AuthOTPVerification {

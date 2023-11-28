@@ -54,12 +54,12 @@ func (r *repository) CreateVerificationSession(ctx context.Context, token string
 		return err
 	}
 
-	key := fmt.Sprintf(constants.KeySocialSession, token, payload.GoogleId)
+	key := fmt.Sprintf(constants.KeyVerificationSession, token, payload.GoogleId)
 	return r.redis.Setxc(key, r.conf.Auth.Verification.Duration, string(strPayload))
 }
 
 func (r *repository) GetVerificationSessionByToken(ctx context.Context, token string) (*models.VerificationSession, error) {
-	keySearch := fmt.Sprintf(constants.KeySocialSession, token, "*")
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*")
 	key, err := r.redis.Keys(keySearch)
 	if err != nil {
 		return nil, err
@@ -79,12 +79,12 @@ func (r *repository) GetVerificationSessionByToken(ctx context.Context, token st
 }
 
 func (r *repository) DeleteVerificationSessionByGoogleId(ctx context.Context, googleId string) error {
-	keySearch := fmt.Sprintf(constants.KeySocialSession, "*", googleId)
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", googleId)
 	return r.redis.DelKeysByPatern(keySearch)
 }
 
 func (r *repository) DeleteVerificationSessionByToken(ctx context.Context, token string) error {
-	keySearch := fmt.Sprintf(constants.KeySocialSession, token, "*")
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*")
 	return r.redis.DelKeysByPatern(keySearch)
 }
 

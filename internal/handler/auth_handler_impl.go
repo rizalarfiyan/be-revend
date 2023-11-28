@@ -133,10 +133,11 @@ func (h *authHandler) SendOTP(ctx *fiber.Ctx) error {
 
 	utils.ValidateStruct(*req, false)
 
-	h.service.SendOTP(ctx.Context(), req.PhoneNumber)
+	res := h.service.SendOTP(ctx.Context(), req.PhoneNumber)
 	return ctx.JSON(response.BaseResponse{
 		Code:    http.StatusOK,
 		Message: "Success!",
+		Data:    res,
 	})
 }
 

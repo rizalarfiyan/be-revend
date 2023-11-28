@@ -15,3 +15,7 @@ type AuthVerification struct {
 type AuthOTPVerification struct {
 	Token string `json:"token"`
 }
+
+type AuthSendOTP struct {
+	Token string `json:"string"`
+}
