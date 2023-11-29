@@ -17,7 +17,13 @@ type AuthSendOTP struct {
 }
 
 type AuthOTPVerification struct {
+	OTP   string `json:"otp" field:"OTP" example:"651721"`
+	Token string `json:"token" field:"Token" example:"2YbPyusF2G06BFQLamoKFXvGgPd"`
+}
+
+type AuthRegister struct {
+	Token       string `json:"token" field:"Token" validate:"required" example:"2YbPyusF2G06BFQLamoKFXvGgPd"`
 	PhoneNumber string `json:"phone_number" field:"PhoneNumber" validate:"phone_number" example:"62895377233002"`
-	OTP         string `json:"otp" field:"OTP" example:"651721"`
-	Token       string `json:"token" field:"Token" example:"2YbPyusF2G06BFQLamoKFXvGgPd"`
+	FirstName   string `json:"first_name" field:"FirstName" validate:"required,min=3" example:"Rizal"`
+	LastName    string `json:"last_name" field:"LastName" validate:"omitempty,min=3" example:"Arfiyan"`
 }

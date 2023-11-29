@@ -78,6 +78,36 @@ func (h *authHandler) GoogleCallback(ctx *fiber.Ctx) error {
 	return ctx.Redirect(url, http.StatusTemporaryRedirect)
 }
 
+// Auth Register godoc
+// @Summary      Post Auth Register based on parameter
+// @Description  Auth Register
+// @ID           post-auth-register
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        data body request.AuthRegister true "Data"
+// @Success      200  {object}  response.BaseResponse{data=response.AuthRegister}
+// @Failure      500  {object}  response.BaseResponse
+// @Router       /auth/register [post]
+func (h *authHandler) Register(ctx *fiber.Ctx) error {
+	req := new(request.AuthRegister)
+	err := ctx.BodyParser(req)
+	if err != nil {
+		return err
+	}
+
+	utils.ValidateStruct(*req, false)
+
+	_, err = ksuid.Parse(req.Token)
+	utils.IsNotProcessErrorMessage(err, "Token is not valid", false)
+
+	h.service.Register(ctx.Context(), *req)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+	})
+}
+
 // Auth Verification godoc
 // @Summary      Post Auth Verification based on parameter
 // @Description  Auth Verification

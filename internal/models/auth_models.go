@@ -7,6 +7,7 @@ type VerificationSession struct {
 	Message     string `json:"message"`
 	PhoneNumber string `json:"phone_number"`
 	IsError     bool   `json:"is_error"`
+	IsNew       bool   `json:"is_new"`
 }
 
 type SocialGoogle struct {

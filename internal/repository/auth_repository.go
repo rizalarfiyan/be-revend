@@ -43,6 +43,17 @@ func (r *repository) GetUserByPhoneNumber(ctx context.Context, googleID string) 
 	return r.query.GetUserByPhoneNumber(ctx, googleID)
 }
 
+func (r *repository) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, googleID, phoneNumber string) (sql.User, error) {
+	return r.query.GetUserByGoogleIdOrPhoneNumber(ctx, sql.GetUserByGoogleIdOrPhoneNumberParams{
+		GoogleID:    googleID,
+		PhoneNumber: phoneNumber,
+	})
+}
+
+func (r *repository) CreateUser(ctx context.Context, payload sql.CreateUserParams) error {
+	return r.query.CreateUser(ctx, payload)
+}
+
 func (r *repository) CreateVerificationSession(ctx context.Context, token string, payload models.VerificationSession) error {
 	err := r.DeleteVerificationSessionByGoogleId(ctx, payload.GoogleId)
 	if err != nil {

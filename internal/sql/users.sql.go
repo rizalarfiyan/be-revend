@@ -7,7 +7,31 @@ package sql
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createUser = `-- name: CreateUser :exec
+INSERT INTO users (first_name, last_name, phone_number, google_id)
+VALUES ($1, $2, $3, $4)
+`
+
+type CreateUserParams struct {
+	FirstName   string
+	LastName    pgtype.Text
+	PhoneNumber string
+	GoogleID    string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.Exec(ctx, createUser,
+		arg.FirstName,
+		arg.LastName,
+		arg.PhoneNumber,
+		arg.GoogleID,
+	)
+	return err
+}
 
 const getUserByGoogleId = `-- name: GetUserByGoogleId :one
 SELECT id, first_name, last_name, phone_number, google_id, role, created_at, updated_at FROM users
@@ -16,6 +40,32 @@ WHERE google_id = $1 LIMIT 1
 
 func (q *Queries) GetUserByGoogleId(ctx context.Context, googleID string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByGoogleId, googleID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.PhoneNumber,
+		&i.GoogleID,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByGoogleIdOrPhoneNumber = `-- name: GetUserByGoogleIdOrPhoneNumber :one
+SELECT id, first_name, last_name, phone_number, google_id, role, created_at, updated_at FROM users
+WHERE google_id = $1 OR phone_number = $2 LIMIT 1
+`
+
+type GetUserByGoogleIdOrPhoneNumberParams struct {
+	GoogleID    string
+	PhoneNumber string
+}
+
+func (q *Queries) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, arg GetUserByGoogleIdOrPhoneNumberParams) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByGoogleIdOrPhoneNumber, arg.GoogleID, arg.PhoneNumber)
 	var i User
 	err := row.Scan(
 		&i.ID,

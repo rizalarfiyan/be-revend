@@ -24,6 +24,7 @@ func (r *router) BaseRoute(handler handler.BaseHandler) {
 func (r *router) AuthRoute(handler handler.AuthHandler) {
 	auth := r.app.Group("auth")
 	auth.Post("verification", handler.Verification)
+	auth.Post("register", handler.Register)
 	auth.Get("me", middleware.Auth(false), handler.Me)
 
 	otp := auth.Group("otp")

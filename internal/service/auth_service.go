@@ -13,4 +13,5 @@ type AuthService interface {
 	Verification(ctx context.Context, req request.AuthVerification) response.AuthVerification
 	SendOTP(ctx context.Context, phoneNumber string) response.AuthSendOTP
 	OTPVerification(ctx context.Context, req request.AuthOTPVerification) response.AuthOTPVerification
+	Register(ctx context.Context, req request.AuthRegister)
 }

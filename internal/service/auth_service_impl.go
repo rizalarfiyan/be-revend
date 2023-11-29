@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math"
 	"net/http"
@@ -11,12 +12,14 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/constants"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
+	"github.com/rizalarfiyan/be-revend/internal/sql"
 	"github.com/rizalarfiyan/be-revend/libs"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
 	"github.com/rizalarfiyan/be-revend/utils"
@@ -116,16 +119,24 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 	}
 
 	data.GoogleId = res.ID
+
+	//! check valid schema first name and last lame
 	data.FirstName = res.GivenName
 	data.LastName = res.FamilyName
 	return
 }
 
-func (s *authService) Verification(ctx context.Context, req request.AuthVerification) response.AuthVerification {
-	data, err := s.repo.GetVerificationSessionByToken(ctx, req.Token)
+func (s *authService) GetSession(ctx context.Context, token string) models.VerificationSession {
+	data, err := s.repo.GetVerificationSessionByToken(ctx, token)
 	utils.PanicIfError(err, false)
-	utils.IsNotProcessMessage(data, "Token is expired", false)
+	fmt.Println(data, token)
 
+	utils.IsNotProcessMessage(data, "Token is expired", false)
+	return *data
+}
+
+func (s *authService) Verification(ctx context.Context, req request.AuthVerification) response.AuthVerification {
+	data := s.GetSession(ctx, req.Token)
 	if data.IsError {
 		utils.IsNotProcessRawMessage(data.Message, false)
 	}
@@ -134,13 +145,21 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 		Message: data.Message,
 	}
 
-	if data.GoogleId == "" {
+	if data.GoogleId == "" && data.PhoneNumber == "" {
 		res.Step = constants.AuthVerificationRegister
 		res.Message = "You must register first, please fill the form below"
 		return res
 	}
 
-	user, err := s.repo.GetUserByGoogleId(ctx, data.GoogleId)
+	isBlocked, remainingTime := s.getOTPDetail(ctx, data.PhoneNumber)
+	if isBlocked || remainingTime > 0 {
+		res.Step = constants.AuthVerificationOtp
+		res.PhoneNumber = data.PhoneNumber
+		res.RemainingTime = int64(remainingTime.Seconds())
+		return res
+	}
+
+	user, err := s.repo.GetUserByGoogleIdOrPhoneNumber(ctx, data.GoogleId, data.PhoneNumber)
 	utils.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
@@ -150,8 +169,6 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 		res.LastName = data.LastName
 		return res
 	}
-
-	//! kalau ada nomor telponnya berarti OTP
 
 	payload := baseModels.AuthToken{
 		FirstName:   user.FirstName,
@@ -187,44 +204,8 @@ func (s *authService) generateToken(ctx context.Context, payload baseModels.Auth
 	return token
 }
 
-func (s *authService) SendOTP(ctx context.Context, phoneNumber string) response.AuthSendOTP {
-	duration, inc, err := s.repo.OTPInformation(ctx, phoneNumber)
-	utils.PanicIfError(err, false)
-
-	if !(*duration <= 0 && *inc == 0) {
-		nextOtp := time.Minute * time.Duration(math.Pow(2, float64(*inc)))
-		currentOtp := time.Duration(s.conf.Auth.OTP.Duration - *duration)
-
-		var res time.Duration
-		if *inc > int64(s.conf.Auth.OTP.MaxAttemp) {
-			utils.IsNotProcessData("OTP has been sent, please try again in next day", res)
-		}
-
-		if currentOtp < nextOtp {
-			res = nextOtp - currentOtp
-			utils.IsNotProcessData("OTP has been sent, please try again in "+res.String(), res)
-		}
-	}
-
-	user, err := s.repo.GetUserByPhoneNumber(ctx, phoneNumber)
-	utils.PanicIfErrorWithoutNoSqlResult(err, false)
-
-	if utils.IsEmpty(user) {
-		utils.IsNotProcessRawMessage("Opps. Something wrong for your phone number", false)
-	}
-
-	token := ksuid.New().String()
-	payload := models.VerificationSession{
-		PhoneNumber: phoneNumber,
-		GoogleId:    user.GoogleID,
-		FirstName:   user.FirstName,
-	}
-
-	if user.LastName.Valid {
-		payload.LastName = user.LastName.String
-	}
-
-	err = s.repo.CreateVerificationSession(ctx, token, payload)
+func (s *authService) createAndSendOTP(ctx context.Context, phoneNumber, token string, payload models.VerificationSession) {
+	err := s.repo.CreateVerificationSession(ctx, token, payload)
 	utils.PanicIfError(err, false)
 
 	_, err = s.repo.IncrementOTP(ctx, phoneNumber)
@@ -241,14 +222,66 @@ func (s *authService) SendOTP(ctx context.Context, phoneNumber string) response.
 
 	err = s.wa.SendMessageTemplate(phoneNumber, constants.TemplateAuthOtp, data)
 	utils.PanicIfError(err, false)
+}
 
+func (s *authService) getOTPDetail(ctx context.Context, phoneNumber string) (bool, time.Duration) {
+	duration, inc, err := s.repo.OTPInformation(ctx, phoneNumber)
+	utils.PanicIfError(err, false)
+
+	if !(*duration <= 0 && *inc == 0) {
+		nextOtp := time.Minute * time.Duration(math.Pow(2, float64(*inc)))
+		currentOtp := time.Duration(s.conf.Auth.OTP.Duration - *duration)
+
+		if *inc > int64(s.conf.Auth.OTP.MaxAttemp) {
+			return true, 0
+		}
+
+		if currentOtp < nextOtp {
+			return false, nextOtp - currentOtp
+		}
+	}
+
+	return false, 0
+}
+
+func (s *authService) SendOTP(ctx context.Context, phoneNumber string) response.AuthSendOTP {
+	isBlocked, remainingTime := s.getOTPDetail(ctx, phoneNumber)
+	if isBlocked {
+		utils.IsNotProcessData("OTP has been sent, please try again in next day", remainingTime)
+	}
+
+	if remainingTime > 0 {
+		utils.IsNotProcessData("OTP has been sent, please try again in "+remainingTime.String(), remainingTime)
+	}
+
+	user, err := s.repo.GetUserByPhoneNumber(ctx, phoneNumber)
+	utils.PanicIfErrorWithoutNoSqlResult(err, false)
+
+	if utils.IsEmpty(user) {
+		utils.IsNotProcessRawMessage("Opps. Something wrong for your phone number", false)
+	}
+
+	payload := models.VerificationSession{
+		PhoneNumber: phoneNumber,
+		GoogleId:    user.GoogleID,
+		FirstName:   user.FirstName,
+	}
+
+	if user.LastName.Valid {
+		payload.LastName = user.LastName.String
+	}
+
+	token := ksuid.New().String()
+	s.createAndSendOTP(ctx, phoneNumber, token, payload)
 	return response.AuthSendOTP{
 		Token: token,
 	}
 }
 
 func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVerification) response.AuthOTPVerification {
-	otp, err := s.repo.GetOTP(ctx, req.PhoneNumber)
+	data := s.GetSession(ctx, req.Token)
+
+	otp, err := s.repo.GetOTP(ctx, data.PhoneNumber)
 	utils.PanicIfError(err, false)
 	utils.IsNotProcess(otp, false)
 
@@ -256,12 +289,19 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 		utils.IsNotProcessRawMessage("OTP is not valid", false)
 	}
 
-	if req.Token != "" {
-		return s.createNewUserFromOTP(ctx, req)
-	}
+	user, err := s.repo.GetUserByPhoneNumber(ctx, data.PhoneNumber)
+	utils.PanicIfErrorWithoutNoSqlResult(err, false)
 
-	user, err := s.repo.GetUserByPhoneNumber(ctx, req.PhoneNumber)
-	utils.PanicIfError(err, false)
+	if utils.IsEmpty(user) {
+		payload := sql.CreateUserParams{
+			FirstName:   data.FirstName,
+			LastName:    pgtype.Text{String: data.LastName, Valid: data.LastName != ""},
+			PhoneNumber: data.PhoneNumber,
+			GoogleID:    data.GoogleId,
+		}
+		err = s.repo.CreateUser(ctx, payload)
+		utils.PanicIfError(err, false)
+	}
 
 	payload := baseModels.AuthToken{
 		FirstName:   user.FirstName,
@@ -276,9 +316,21 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 	}
 }
 
-func (s *authService) createNewUserFromOTP(ctx context.Context, req request.AuthOTPVerification) response.AuthOTPVerification {
-	return response.AuthOTPVerification{}
-}
+func (s *authService) Register(ctx context.Context, req request.AuthRegister) {
+	data := s.GetSession(ctx, req.Token)
 
-//? register
-//-> kalau udah, create user ke database terus lakukan verifikasi
+    //! FIX user
+	// user, err := s.repo.GetUserByPhoneNumber(ctx, req.PhoneNumber)
+	// utils.PanicIfErrorWithoutNoSqlResult(err, false)
+
+	// if utils.IsEmpty(user) {
+	// 	utils.IsNotProcessRawMessage("Opps. Something wrong for your phone number", false)
+	// }
+
+	data.PhoneNumber = req.PhoneNumber
+	data.FirstName = req.FirstName
+	data.LastName = req.LastName
+	err := s.repo.CreateVerificationSession(ctx, req.Token, data)
+	utils.PanicIfError(err, false)
+	s.createAndSendOTP(ctx, req.PhoneNumber, req.Token, data)
+}
