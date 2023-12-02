@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -65,12 +64,11 @@ func (r *repository) CreateVerificationSession(ctx context.Context, token string
 		return err
 	}
 
-	key := fmt.Sprintf(constants.KeyVerificationSession, token, payload.GoogleId)
+	key := fmt.Sprintf(constants.KeyVerificationSession, token, payload.GoogleId, payload.PhoneNumber)
 	return r.redis.Setxc(key, r.conf.Auth.Verification.Duration, string(strPayload))
 }
 
-func (r *repository) GetVerificationSessionByToken(ctx context.Context, token string) (*models.VerificationSession, error) {
-	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*")
+func (r *repository) getVerificationSession(ctx context.Context, keySearch string) (*models.VerificationSession, error) {
 	key, err := r.redis.Keys(keySearch)
 	if err != nil {
 		return nil, err
@@ -89,13 +87,23 @@ func (r *repository) GetVerificationSessionByToken(ctx context.Context, token st
 	return &res, nil
 }
 
+func (r *repository) GetVerificationSessionByToken(ctx context.Context, token string) (*models.VerificationSession, error) {
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*", "*")
+	return r.getVerificationSession(ctx, keySearch)
+}
+
+func (r *repository) GetVerificationSessionByPhoneNumber(ctx context.Context, phoneNumber string) (*models.VerificationSession, error) {
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", "*", phoneNumber)
+	return r.getVerificationSession(ctx, keySearch)
+}
+
 func (r *repository) DeleteVerificationSessionByGoogleId(ctx context.Context, googleId string) error {
-	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", googleId)
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", googleId, "*")
 	return r.redis.DelKeysByPatern(keySearch)
 }
 
 func (r *repository) DeleteVerificationSessionByToken(ctx context.Context, token string) error {
-	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*")
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*", "*")
 	return r.redis.DelKeysByPatern(keySearch)
 }
 
@@ -118,28 +126,44 @@ func (r *repository) CreateOTP(ctx context.Context, phoneNumber, otp string) err
 	return r.redis.Setxc(key, r.conf.Auth.OTP.Duration, otp)
 }
 
-func (r *repository) OTPInformation(ctx context.Context, phoneNumber string) (*time.Duration, *int64, error) {
+func (r *repository) OTPInformation(ctx context.Context, phoneNumber string) (*models.OTPInformation, error) {
+	res := models.OTPInformation{}
 	key := fmt.Sprintf(constants.KeyOTP, phoneNumber)
 	keyInc := fmt.Sprintf(constants.KeyOTPIncrement, phoneNumber)
 	duration, err := r.redis.Duration(key)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	incStr, err := r.redis.GetString(keyInc)
 	if err != nil && !errors.Is(err, redis.Nil) {
-		return nil, nil, err
+		return nil, err
 	}
 
 	var inc int64
 	if incStr != "" {
 		inc, err = strconv.ParseInt(incStr, 10, 64)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 	}
 
-	return duration, &inc, nil
+	otp, err := r.GetVerificationSessionByPhoneNumber(ctx, phoneNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	res.Increment = inc
+
+	if otp != nil {
+		res.Data = *otp
+	}
+
+	if duration != nil {
+		res.Duration = *duration
+	}
+
+	return &res, nil
 }
 
 func (r *repository) GetOTP(ctx context.Context, phoneNumber string) (string, error) {

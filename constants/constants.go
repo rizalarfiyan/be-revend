@@ -5,7 +5,7 @@ var (
 	FiberBodyLimit = 5 * 1024 * 1024
 
 	// Key Redis
-	KeyVerificationSession = "verification:%s:%s"
+	KeyVerificationSession = "verification:%s:%s:%s"
 	KeyOTP                 = "otp:%s"
 	KeyOTPIncrement        = "otp:%s:increment"
 

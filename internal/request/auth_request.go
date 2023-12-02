@@ -14,6 +14,7 @@ type AuthVerification struct {
 
 type AuthSendOTP struct {
 	PhoneNumber string `json:"phone_number" field:"PhoneNumber" validate:"phone_number" example:"62895377233002"`
+	Token       string `json:"token" field:"Token" validate:"omitempty,required" example:"2YbPyusF2G06BFQLamoKFXvGgPd"`
 }
 
 type AuthOTPVerification struct {

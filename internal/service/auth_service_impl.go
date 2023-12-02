@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"math"
 	"net/http"
@@ -63,6 +62,7 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 		token := ksuid.New().String()
 		data.IsError = data.Message != ""
 		data.Message = "Please wait, we are processing your request"
+		data.Token = token
 		err := s.repo.CreateVerificationSession(ctx, token, data)
 		if err != nil {
 			return
@@ -129,7 +129,6 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 func (s *authService) GetSession(ctx context.Context, token string) models.VerificationSession {
 	data, err := s.repo.GetVerificationSessionByToken(ctx, token)
 	utils.PanicIfError(err, false)
-	fmt.Println(data, token)
 
 	utils.IsNotProcessMessage(data, "Token is expired", false)
 	return *data
@@ -151,11 +150,11 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 		return res
 	}
 
-	isBlocked, remainingTime := s.getOTPDetail(ctx, data.PhoneNumber)
-	if isBlocked || remainingTime > 0 {
+	otp := s.getOTPDetail(ctx, data.PhoneNumber)
+	if otp.IsBlocked || otp.RemainingTime > 0 || !otp.IsVerified {
 		res.Step = constants.AuthVerificationOtp
 		res.PhoneNumber = data.PhoneNumber
-		res.RemainingTime = int64(remainingTime.Seconds())
+		res.RemainingTime = int64(otp.RemainingTime.Seconds())
 		return res
 	}
 
@@ -224,55 +223,72 @@ func (s *authService) createAndSendOTP(ctx context.Context, phoneNumber, token s
 	utils.PanicIfError(err, false)
 }
 
-func (s *authService) getOTPDetail(ctx context.Context, phoneNumber string) (bool, time.Duration) {
-	duration, inc, err := s.repo.OTPInformation(ctx, phoneNumber)
+func (s *authService) getOTPDetail(ctx context.Context, phoneNumber string) models.OTPDetailStatus {
+	otp, err := s.repo.OTPInformation(ctx, phoneNumber)
 	utils.PanicIfError(err, false)
 
-	if !(*duration <= 0 && *inc == 0) {
-		nextOtp := time.Minute * time.Duration(math.Pow(2, float64(*inc)))
-		currentOtp := time.Duration(s.conf.Auth.OTP.Duration - *duration)
+	res := models.OTPDetailStatus{
+		Token: otp.Data.Token,
+	}
 
-		if *inc > int64(s.conf.Auth.OTP.MaxAttemp) {
-			return true, 0
+	if !(otp.Duration <= 0 && otp.Increment == 0) {
+		nextOtp := time.Minute * time.Duration(math.Pow(2, float64(otp.Increment)))
+		currentOtp := time.Duration(s.conf.Auth.OTP.Duration - otp.Duration)
+
+		if otp.Increment > int64(s.conf.Auth.OTP.MaxAttemp) {
+			res.IsBlocked = true
 		}
 
 		if currentOtp < nextOtp {
-			return false, nextOtp - currentOtp
+			res.RemainingTime = nextOtp - currentOtp
 		}
 	}
 
-	return false, 0
+	res.IsVerified = otp.Data.IsVerified
+	return res
 }
 
-func (s *authService) SendOTP(ctx context.Context, phoneNumber string) response.AuthSendOTP {
-	isBlocked, remainingTime := s.getOTPDetail(ctx, phoneNumber)
-	if isBlocked {
-		utils.IsNotProcessData("OTP has been sent, please try again in next day", remainingTime)
+func (s *authService) SendOTP(ctx context.Context, req request.AuthSendOTP) response.AuthSendOTP {
+	otp := s.getOTPDetail(ctx, req.PhoneNumber)
+	// utils.IsNotProcessData("OTP has been sent, please try again in next day", response.AuthSendOTP{
+	// 	Token: otp.Token,
+	// })
+
+	if otp.IsBlocked {
+		utils.IsNotProcessData("OTP has been sent, please try again in next day", response.AuthSendOTP{
+			Token: otp.Token,
+		})
 	}
 
-	if remainingTime > 0 {
-		utils.IsNotProcessData("OTP has been sent, please try again in "+remainingTime.String(), remainingTime)
+	if otp.RemainingTime > 0 {
+		utils.IsNotProcessData("OTP has been sent, please try again in "+otp.RemainingTime.String(), response.AuthSendOTP{
+			Token: otp.Token,
+		})
 	}
 
-	user, err := s.repo.GetUserByPhoneNumber(ctx, phoneNumber)
+	user, err := s.repo.GetUserByPhoneNumber(ctx, req.PhoneNumber)
 	utils.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
 		utils.IsNotProcessRawMessage("Opps. Something wrong for your phone number", false)
 	}
 
+	token := ksuid.New().String()
+	if !utils.IsEmpty(req.Token) {
+		token = req.Token
+	}
 	payload := models.VerificationSession{
-		PhoneNumber: phoneNumber,
+		PhoneNumber: req.PhoneNumber,
 		GoogleId:    user.GoogleID,
 		FirstName:   user.FirstName,
+		Token:       token,
 	}
 
 	if user.LastName.Valid {
 		payload.LastName = user.LastName.String
 	}
 
-	token := ksuid.New().String()
-	s.createAndSendOTP(ctx, phoneNumber, token, payload)
+	s.createAndSendOTP(ctx, req.PhoneNumber, token, payload)
 	return response.AuthSendOTP{
 		Token: token,
 	}
@@ -319,7 +335,7 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 func (s *authService) Register(ctx context.Context, req request.AuthRegister) {
 	data := s.GetSession(ctx, req.Token)
 
-    //! FIX user
+	//! FIX user
 	// user, err := s.repo.GetUserByPhoneNumber(ctx, req.PhoneNumber)
 	// utils.PanicIfErrorWithoutNoSqlResult(err, false)
 

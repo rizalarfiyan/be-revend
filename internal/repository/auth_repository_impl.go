@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"time"
 
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/sql"
@@ -17,8 +16,9 @@ type Repository interface {
 	GetVerificationSessionByToken(ctx context.Context, token string) (*models.VerificationSession, error)
 	DeleteVerificationSessionByGoogleId(ctx context.Context, googleId string) error
 	DeleteVerificationSessionByToken(ctx context.Context, token string) error
+	GetVerificationSessionByPhoneNumber(ctx context.Context, phoneNumber string) (*models.VerificationSession, error)
 	IncrementOTP(ctx context.Context, phoneNumber string) (int64, error)
 	CreateOTP(ctx context.Context, phoneNumber, otp string) error
-	OTPInformation(ctx context.Context, phoneNumber string) (*time.Duration, *int64, error)
+	OTPInformation(ctx context.Context, phoneNumber string) (*models.OTPInformation, error)
 	GetOTP(ctx context.Context, phoneNumber string) (string, error)
 }

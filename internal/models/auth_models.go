@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type VerificationSession struct {
 	GoogleId    string `json:"google_id"`
 	FirstName   string `json:"first_name"`
@@ -7,7 +9,9 @@ type VerificationSession struct {
 	Message     string `json:"message"`
 	PhoneNumber string `json:"phone_number"`
 	IsError     bool   `json:"is_error"`
+	Token       string `json:"token"`
 	IsNew       bool   `json:"is_new"`
+	IsVerified  bool   `json:"is_verified"`
 }
 
 type SocialGoogle struct {
@@ -19,4 +23,17 @@ type SocialGoogle struct {
 	FamilyName    string `json:"family_name"`
 	Picture       string `json:"picture"`
 	Locale        string `json:"locale"`
+}
+
+type OTPInformation struct {
+	Duration  time.Duration
+	Increment int64
+	Data      VerificationSession
+}
+
+type OTPDetailStatus struct {
+	IsBlocked     bool
+	IsVerified    bool
+	RemainingTime time.Duration
+	Token         string
 }
