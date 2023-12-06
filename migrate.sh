@@ -13,7 +13,7 @@ fi
 
 # Action goose
 DSN_DB="postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable"
-OPTIONS="-dir ./sql/schema postgres $DSN_DB"
+OPTIONS="-dir ./database/schema postgres $DSN_DB"
 
 case "$1" in
     "new")

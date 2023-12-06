@@ -34,7 +34,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 }
 
 const getUserByGoogleId = `-- name: GetUserByGoogleId :one
-SELECT id, first_name, last_name, phone_number, google_id, role, created_at, updated_at FROM users
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
 WHERE google_id = $1 LIMIT 1
 `
 
@@ -47,6 +47,7 @@ func (q *Queries) GetUserByGoogleId(ctx context.Context, googleID string) (User,
 		&i.LastName,
 		&i.PhoneNumber,
 		&i.GoogleID,
+		&i.Identity,
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -55,7 +56,7 @@ func (q *Queries) GetUserByGoogleId(ctx context.Context, googleID string) (User,
 }
 
 const getUserByGoogleIdOrPhoneNumber = `-- name: GetUserByGoogleIdOrPhoneNumber :one
-SELECT id, first_name, last_name, phone_number, google_id, role, created_at, updated_at FROM users
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
 WHERE google_id = $1 OR phone_number = $2 LIMIT 1
 `
 
@@ -73,6 +74,29 @@ func (q *Queries) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, arg GetUse
 		&i.LastName,
 		&i.PhoneNumber,
 		&i.GoogleID,
+		&i.Identity,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByIdentity = `-- name: GetUserByIdentity :one
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
+WHERE identity = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserByIdentity(ctx context.Context, identity string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByIdentity, identity)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.PhoneNumber,
+		&i.GoogleID,
+		&i.Identity,
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -81,7 +105,7 @@ func (q *Queries) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, arg GetUse
 }
 
 const getUserByPhoneNumber = `-- name: GetUserByPhoneNumber :one
-SELECT id, first_name, last_name, phone_number, google_id, role, created_at, updated_at FROM users
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
 WHERE phone_number = $1 LIMIT 1
 `
 
@@ -94,6 +118,7 @@ func (q *Queries) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) 
 		&i.LastName,
 		&i.PhoneNumber,
 		&i.GoogleID,
+		&i.Identity,
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,

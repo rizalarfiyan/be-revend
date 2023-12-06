@@ -42,6 +42,10 @@ func (r *repository) GetUserByPhoneNumber(ctx context.Context, googleID string) 
 	return r.query.GetUserByPhoneNumber(ctx, googleID)
 }
 
+func (r *repository) GetUserByIdentity(ctx context.Context, identity string) (sql.User, error) {
+	return r.query.GetUserByIdentity(ctx, identity)
+}
+
 func (r *repository) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, googleID, phoneNumber string) (sql.User, error) {
 	return r.query.GetUserByGoogleIdOrPhoneNumber(ctx, sql.GetUserByGoogleIdOrPhoneNumberParams{
 		GoogleID:    googleID,

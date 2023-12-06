@@ -6,11 +6,12 @@ CREATE TABLE IF NOT EXISTS users (
     last_name varchar(100),
     phone_number varchar(20) UNIQUE NOT NULL,
     google_id varchar(30) UNIQUE NOT NULL,
+    identity varchar(50) UNIQUE NOT NULL,
     role role NOT NULL DEFAULT ('guest'),
     created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at timestamp
 );
-CREATE INDEX idx_users ON users(id, phone_number, google_id);
+CREATE INDEX idx_users ON users(id, phone_number, identity, google_id);
 -- +goose StatementEnd
 
 -- +goose Down

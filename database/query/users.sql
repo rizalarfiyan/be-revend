@@ -6,6 +6,10 @@ WHERE phone_number = $1 LIMIT 1;
 SELECT * FROM users
 WHERE google_id = $1 LIMIT 1;
 
+-- name: GetUserByIdentity :one
+SELECT * FROM users
+WHERE identity = $1 LIMIT 1;
+
 -- name: GetUserByGoogleIdOrPhoneNumber :one
 SELECT * FROM users
 WHERE google_id = $1 OR phone_number = $2 LIMIT 1;
