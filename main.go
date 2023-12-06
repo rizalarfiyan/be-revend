@@ -103,10 +103,11 @@ func main() {
 	authRepository := repository.NewAuthRepository(db, redis)
 
 	// service
+	mqttService := service.NewMQTTService(authRepository)
 	authService := service.NewAuthService(authRepository)
 
 	// handler
-	mqttHandler := handler.NewMQTTHandler()
+	mqttHandler := handler.NewMQTTHandler(mqttService)
 	baseHandler := handler.NewBaseHandler()
 	authHandler := handler.NewAuthHandler(authService)
 

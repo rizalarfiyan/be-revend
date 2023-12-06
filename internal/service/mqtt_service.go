@@ -1,3 +1,7 @@
 package service
 
-type MQTTService interface{}
+import "github.com/rizalarfiyan/be-revend/internal/request"
+
+type MQTTService interface {
+	Trigger(req request.MQTTTriggerRequest)
+}

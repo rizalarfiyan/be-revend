@@ -5,12 +5,17 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/rizalarfiyan/be-revend/internal/request"
+	"github.com/rizalarfiyan/be-revend/internal/service"
 )
 
-type mqttHandler struct{}
+type mqttHandler struct {
+	service service.MQTTService
+}
 
-func NewMQTTHandler() MQTTHandler {
-	return &mqttHandler{}
+func NewMQTTHandler(service service.MQTTService) MQTTHandler {
+	return &mqttHandler{
+		service: service,
+	}
 }
 
 func (h *mqttHandler) Trigger(client mqtt.Client, msg mqtt.Message) {
@@ -29,5 +34,5 @@ func (h *mqttHandler) Trigger(client mqtt.Client, msg mqtt.Message) {
 		return
 	}
 
-	// client.Publish("revend/action/"+req.Data.DeviceId, 0, false, "Hello World")
+	h.service.Trigger(req)
 }

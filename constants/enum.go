@@ -24,3 +24,11 @@ func (v BaseMQTTActionStep) IsValid() bool {
 
 	return false
 }
+
+type MQTTCheckUserState int
+
+const (
+	MQTTCheckUserLogin MQTTCheckUserState = iota + 1
+	MQTTCheckUserMustRegister
+	MQTTCheckUserSuccessRegister
+)
