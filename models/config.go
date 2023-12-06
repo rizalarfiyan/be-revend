@@ -20,6 +20,7 @@ type Config struct {
 	JWT      JWTConfigs
 	Auth     AuthConfigs
 	Whatsapp WhatsappConfigs
+	MQTT     MQTTConfigs
 }
 
 type LoggerConfigs struct {
@@ -87,4 +88,12 @@ type OTPConfigs struct {
 
 type WhatsappConfigs struct {
 	ApiUrl string
+}
+
+type MQTTConfigs struct {
+	ClientId string
+	Server   string
+	Port     int
+	User     string
+	Password string
 }

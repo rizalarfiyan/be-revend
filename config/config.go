@@ -74,6 +74,12 @@ func Init() {
 	conf.Auth.OTP.MaxAttemp = cc.AsInt("OTP_MAX_ATTEMP", 3)
 
 	conf.Whatsapp.ApiUrl = cc.AsString("WHATSAPP_API_URL", "http://localhost:3001")
+
+	conf.MQTT.ClientId = cc.AsString("MQTT_CLIENT_ID", "be-revend")
+	conf.MQTT.Server = cc.AsString("MQTT_SERVER", "")
+	conf.MQTT.Port = cc.AsInt("MQTT_PORT", 1883)
+	conf.MQTT.User = cc.AsString("MQTT_USER", "")
+	conf.MQTT.Password = cc.AsString("MQTT_PASSWORD", "")
 }
 
 func Get() *models.Config {

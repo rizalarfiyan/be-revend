@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/rizalarfiyan/be-revend/adapter"
 	"github.com/rizalarfiyan/be-revend/database"
 	_ "github.com/rizalarfiyan/be-revend/docs"
 	"github.com/rizalarfiyan/be-revend/internal"
@@ -40,6 +41,7 @@ func init() {
 	database.InitPostgres(ctx)
 	database.RedisInit()
 
+	adapter.MQTTInit()
 	validation.Init()
 }
 
@@ -94,6 +96,8 @@ func main() {
 
 	validation.Register()
 	route := internal.NewRouter(app)
+	mqtt := adapter.MQTTConnection()
+	subscribe := internal.NewSubscribe(*mqtt)
 
 	// repository
 	authRepository := repository.NewAuthRepository(db, redis)
@@ -102,10 +106,12 @@ func main() {
 	authService := service.NewAuthService(authRepository)
 
 	// handler
+	mqttHandler := handler.NewMQTTHandler()
 	baseHandler := handler.NewBaseHandler()
 	authHandler := handler.NewAuthHandler(authService)
 
 	// router
+	subscribe.BaseSubscribe(mqttHandler)
 	route.BaseRoute(baseHandler)
 	route.AuthRoute(authHandler)
 
