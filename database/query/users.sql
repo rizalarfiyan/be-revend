@@ -15,5 +15,5 @@ SELECT * FROM users
 WHERE google_id = $1 OR phone_number = $2 LIMIT 1;
 
 -- name: CreateUser :exec
-INSERT INTO users (first_name, last_name, phone_number, google_id)
-VALUES ($1, $2, $3, $4);
+INSERT INTO users (first_name, last_name, phone_number, google_id, identity)
+VALUES ($1, $2, $3, $4, $5);

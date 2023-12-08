@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -68,8 +69,13 @@ func (r *repository) CreateVerificationSession(ctx context.Context, token string
 		return err
 	}
 
+	duration := r.conf.Auth.Verification.Duration
+	if payload.IsError {
+		duration = 1 * time.Minute
+	}
+
 	key := fmt.Sprintf(constants.KeyVerificationSession, token, payload.GoogleId, payload.PhoneNumber)
-	return r.redis.Setxc(key, r.conf.Auth.Verification.Duration, string(strPayload))
+	return r.redis.Setxc(key, duration, string(strPayload))
 }
 
 func (r *repository) getVerificationSession(ctx context.Context, keySearch string) (*models.VerificationSession, error) {
@@ -173,4 +179,9 @@ func (r *repository) OTPInformation(ctx context.Context, phoneNumber string) (*m
 func (r *repository) GetOTP(ctx context.Context, phoneNumber string) (string, error) {
 	key := fmt.Sprintf(constants.KeyOTP, phoneNumber)
 	return r.redis.GetString(key)
+}
+
+func (r *repository) DeleteAllOTP(ctx context.Context, phoneNumber string) error {
+	keySearch := fmt.Sprintf(constants.KeyOTP+"*", phoneNumber)
+	return r.redis.DelKeysByPatern(keySearch)
 }

@@ -12,8 +12,8 @@ import (
 )
 
 const createUser = `-- name: CreateUser :exec
-INSERT INTO users (first_name, last_name, phone_number, google_id)
-VALUES ($1, $2, $3, $4)
+INSERT INTO users (first_name, last_name, phone_number, google_id, identity)
+VALUES ($1, $2, $3, $4, $5)
 `
 
 type CreateUserParams struct {
@@ -21,6 +21,7 @@ type CreateUserParams struct {
 	LastName    pgtype.Text
 	PhoneNumber string
 	GoogleID    string
+	Identity    string
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
@@ -29,6 +30,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 		arg.LastName,
 		arg.PhoneNumber,
 		arg.GoogleID,
+		arg.Identity,
 	)
 	return err
 }

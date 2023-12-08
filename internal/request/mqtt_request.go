@@ -19,15 +19,19 @@ type MQTTTriggerRequest struct {
 }
 
 type MQTTTriggerDataRequest struct {
-	DeviceId   string `json:"device_id"`
-	Identifier string `json:"identifier"`
-	Failed     int    `json:"failed"`
-	Success    int    `json:"success"`
+	DeviceId string `json:"device_id"`
+	Identity string `json:"identity"`
+	Failed   int    `json:"failed"`
+	Success  int    `json:"success"`
 }
 
 func (bs *MQTTTriggerRequest) IsValid() bool {
 	bs.Data.DeviceId = strings.ToLower(strings.TrimSpace(bs.Data.DeviceId))
 	if bs.Data.DeviceId == "" || len(bs.Data.DeviceId) != 42 {
+		return false
+	}
+
+	if strings.TrimSpace(bs.Data.Identity) == "" {
 		return false
 	}
 

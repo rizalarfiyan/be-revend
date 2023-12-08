@@ -9,6 +9,8 @@ type VerificationSession struct {
 	Message     string `json:"message"`
 	PhoneNumber string `json:"phone_number"`
 	IsError     bool   `json:"is_error"`
+	DeviceId    string `json:"device_id"`
+	Identity    string `json:"identity"`
 	Token       string `json:"token"`
 	IsNew       bool   `json:"is_new"`
 	IsVerified  bool   `json:"is_verified"`

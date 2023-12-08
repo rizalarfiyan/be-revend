@@ -22,4 +22,5 @@ type Repository interface {
 	CreateOTP(ctx context.Context, phoneNumber, otp string) error
 	OTPInformation(ctx context.Context, phoneNumber string) (*models.OTPInformation, error)
 	GetOTP(ctx context.Context, phoneNumber string) (string, error)
+	DeleteAllOTP(ctx context.Context, phoneNumber string) error
 }

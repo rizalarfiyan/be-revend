@@ -104,7 +104,7 @@ func main() {
 
 	// service
 	mqttService := service.NewMQTTService(authRepository)
-	authService := service.NewAuthService(authRepository)
+	authService := service.NewAuthService(authRepository, *mqtt)
 
 	// handler
 	mqttHandler := handler.NewMQTTHandler(mqttService)
