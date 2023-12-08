@@ -59,9 +59,18 @@ func (r *repository) CreateUser(ctx context.Context, payload sql.CreateUserParam
 }
 
 func (r *repository) CreateVerificationSession(ctx context.Context, token string, payload models.VerificationSession) error {
-	err := r.DeleteVerificationSessionByGoogleId(ctx, payload.GoogleId)
-	if err != nil {
-		return err
+	if !utils.IsEmpty(payload.GoogleId) {
+		err := r.DeleteVerificationSessionByGoogleId(ctx, payload.GoogleId)
+		if err != nil {
+			return err
+		}
+	}
+
+	if !utils.IsEmpty(payload.Identity) {
+		err := r.DeleteVerificationSessionByIdentity(ctx, payload.Identity)
+		if err != nil {
+			return err
+		}
 	}
 
 	strPayload, err := json.Marshal(payload)
@@ -74,7 +83,7 @@ func (r *repository) CreateVerificationSession(ctx context.Context, token string
 		duration = 1 * time.Minute
 	}
 
-	key := fmt.Sprintf(constants.KeyVerificationSession, token, payload.GoogleId, payload.PhoneNumber)
+	key := fmt.Sprintf(constants.KeyVerificationSession, token, payload.GoogleId, payload.PhoneNumber, payload.Identity)
 	return r.redis.Setxc(key, duration, string(strPayload))
 }
 
@@ -98,22 +107,27 @@ func (r *repository) getVerificationSession(ctx context.Context, keySearch strin
 }
 
 func (r *repository) GetVerificationSessionByToken(ctx context.Context, token string) (*models.VerificationSession, error) {
-	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*", "*")
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*", "*", "*")
 	return r.getVerificationSession(ctx, keySearch)
 }
 
 func (r *repository) GetVerificationSessionByPhoneNumber(ctx context.Context, phoneNumber string) (*models.VerificationSession, error) {
-	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", "*", phoneNumber)
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", "*", phoneNumber, "*")
 	return r.getVerificationSession(ctx, keySearch)
 }
 
 func (r *repository) DeleteVerificationSessionByGoogleId(ctx context.Context, googleId string) error {
-	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", googleId, "*")
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", googleId, "*", "*")
+	return r.redis.DelKeysByPatern(keySearch)
+}
+
+func (r *repository) DeleteVerificationSessionByIdentity(ctx context.Context, identity string) error {
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", "*", "*", identity)
 	return r.redis.DelKeysByPatern(keySearch)
 }
 
 func (r *repository) DeleteVerificationSessionByToken(ctx context.Context, token string) error {
-	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*", "*")
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*", "*", "*")
 	return r.redis.DelKeysByPatern(keySearch)
 }
 
