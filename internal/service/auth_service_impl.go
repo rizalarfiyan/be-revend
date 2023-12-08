@@ -166,7 +166,7 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 	}
 
 	if utils.IsEmpty(data.Identity) {
-		res.Message = "Opps... Something wrong for your request"
+		res.Message = "Something wrong for your request"
 		return res
 	}
 
@@ -189,7 +189,7 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 	utils.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
-		res.Message = "Opps... Something wrong for your request"
+		res.Message = "Something wrong for your request"
 		return res
 	}
 
@@ -295,7 +295,7 @@ func (s *authService) SendOTP(ctx context.Context, req request.AuthSendOTP) resp
 	utils.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
-		utils.IsNotProcessRawMessage("Opps. Something wrong for your phone number", false)
+		utils.IsNotProcessRawMessage("Something wrong for your phone number", false)
 	}
 
 	token := ksuid.New().String()
@@ -389,7 +389,7 @@ func (s *authService) Register(ctx context.Context, req request.AuthRegister) {
 	utils.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if !utils.IsEmpty(user) {
-		utils.IsNotProcessRawMessage("Opps. Phone number is already exist", false)
+		utils.IsNotProcessRawMessage("Phone number is already exist", false)
 	}
 
 	data := s.GetSession(ctx, req.Token)

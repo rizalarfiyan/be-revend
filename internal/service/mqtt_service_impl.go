@@ -67,6 +67,7 @@ func (s *mqttService) checkUser(ctx context.Context, req request.MQTTTriggerRequ
 		DeviceId: req.Data.DeviceId,
 		IsNew:    true,
 		Token:    token,
+		GoogleId: "99999999999",
 		Message:  "You must register first, please fill the form below",
 	}
 
