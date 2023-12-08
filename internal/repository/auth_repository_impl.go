@@ -116,6 +116,11 @@ func (r *repository) GetVerificationSessionByPhoneNumber(ctx context.Context, ph
 	return r.getVerificationSession(ctx, keySearch)
 }
 
+func (r *repository) GetVerificationSessionByIdentity(ctx context.Context, identity string) (*models.VerificationSession, error) {
+	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", "*", "*", identity)
+	return r.getVerificationSession(ctx, keySearch)
+}
+
 func (r *repository) DeleteVerificationSessionByGoogleId(ctx context.Context, googleId string) error {
 	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", googleId, "*", "*")
 	return r.redis.DelKeysByPatern(keySearch)

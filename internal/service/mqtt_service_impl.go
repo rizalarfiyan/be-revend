@@ -36,6 +36,7 @@ func (s *mqttService) Trigger(req request.MQTTTriggerRequest) {
 	ctx := context.Background()
 	switch req.Step {
 	case constants.MQTTStepCancel:
+		s.cancelRequest(ctx, req)
 		return
 	case constants.MQTTStepCheckUser:
 		s.checkUser(ctx, req)
@@ -88,6 +89,23 @@ func (s *mqttService) checkUser(ctx context.Context, req request.MQTTTriggerRequ
 			State: constants.MQTTCheckUserMustRegister,
 			Link:  redirectUrl.String(),
 		},
+	})
+}
+
+func (s *mqttService) cancelRequest(ctx context.Context, req request.MQTTTriggerRequest) {
+	data, err := s.authRepo.GetVerificationSessionByIdentity(ctx, req.Data.Identity)
+	s.utils.PanicIfError(err)
+
+	err = s.authRepo.DeleteVerificationSessionByIdentity(ctx, req.Data.Identity)
+	s.utils.PanicIfError(err)
+
+	if !utils.IsEmpty(data) && !utils.IsEmpty(data.PhoneNumber) {
+		err = s.authRepo.DeleteAllOTP(ctx, data.PhoneNumber)
+		s.utils.PanicIfError(err)
+	}
+
+	s.sendTopic(req, response.MQTTActionResponse{
+		Step: constants.MQTTStepCancel,
 	})
 }
 
