@@ -86,7 +86,7 @@ func (h *authHandler) GoogleCallback(ctx *fiber.Ctx) error {
 // @Accept       json
 // @Produce      json
 // @Param        data body request.AuthRegister true "Data"
-// @Success      200  {object}  response.BaseResponse{data=response.AuthRegister}
+// @Success      200  {object}  response.BaseResponse
 // @Failure      500  {object}  response.BaseResponse
 // @Router       /auth/register [post]
 func (h *authHandler) Register(ctx *fiber.Ctx) error {

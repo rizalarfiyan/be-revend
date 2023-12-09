@@ -171,6 +171,88 @@
                 }
             }
         },
+        "/auth/otp/verification": {
+            "post": {
+                "description": "Auth Verification",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Post Auth Verification based on parameter",
+                "operationId": "post-auth-otp-verification",
+                "parameters": [
+                    {
+                        "description": "Data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AuthOTPVerification"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Auth Register",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Post Auth Register based on parameter",
+                "operationId": "post-auth-register",
+                "parameters": [
+                    {
+                        "description": "Data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AuthRegister"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/verification": {
             "post": {
                 "description": "Auth Verification",
@@ -286,12 +368,59 @@
                 }
             }
         },
+        "request.AuthOTPVerification": {
+            "type": "object",
+            "properties": {
+                "otp": {
+                    "type": "string",
+                    "example": "651721"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "2YbPyusF2G06BFQLamoKFXvGgPd"
+                }
+            }
+        },
+        "request.AuthRegister": {
+            "type": "object",
+            "required": [
+                "first_name",
+                "token"
+            ],
+            "properties": {
+                "first_name": {
+                    "type": "string",
+                    "minLength": 3,
+                    "example": "Rizal"
+                },
+                "last_name": {
+                    "type": "string",
+                    "minLength": 3,
+                    "example": "Arfiyan"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "62895377233002"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "2YbPyusF2G06BFQLamoKFXvGgPd"
+                }
+            }
+        },
         "request.AuthSendOTP": {
             "type": "object",
+            "required": [
+                "token"
+            ],
             "properties": {
                 "phone_number": {
                     "type": "string",
                     "example": "62895377233002"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "2YbPyusF2G06BFQLamoKFXvGgPd"
                 }
             }
         },
@@ -310,6 +439,18 @@
         "response.AuthVerification": {
             "type": "object",
             "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "remaining_time": {
+                    "type": "integer"
+                },
                 "step": {
                     "$ref": "#/definitions/constants.AuthVerificationStep"
                 },
