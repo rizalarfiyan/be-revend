@@ -19,15 +19,15 @@ import (
 	"github.com/rizalarfiyan/be-revend/utils"
 )
 
-type repository struct {
+type authRepository struct {
 	db    *pgxpool.Pool
 	query *sql.Queries
 	redis database.RedisInstance
 	conf  *baseModels.Config
 }
 
-func NewAuthRepository(db *pgxpool.Pool, redis database.RedisInstance) Repository {
-	return &repository{
+func NewAuthRepository(db *pgxpool.Pool, redis database.RedisInstance) AuthRepository {
+	return &authRepository{
 		db:    db,
 		query: sql.New(db),
 		redis: redis,
@@ -35,30 +35,30 @@ func NewAuthRepository(db *pgxpool.Pool, redis database.RedisInstance) Repositor
 	}
 }
 
-func (r *repository) GetUserByGoogleId(ctx context.Context, googleID string) (sql.User, error) {
+func (r *authRepository) GetUserByGoogleId(ctx context.Context, googleID string) (sql.User, error) {
 	return r.query.GetUserByGoogleId(ctx, googleID)
 }
 
-func (r *repository) GetUserByPhoneNumber(ctx context.Context, googleID string) (sql.User, error) {
+func (r *authRepository) GetUserByPhoneNumber(ctx context.Context, googleID string) (sql.User, error) {
 	return r.query.GetUserByPhoneNumber(ctx, googleID)
 }
 
-func (r *repository) GetUserByIdentity(ctx context.Context, identity string) (sql.User, error) {
+func (r *authRepository) GetUserByIdentity(ctx context.Context, identity string) (sql.User, error) {
 	return r.query.GetUserByIdentity(ctx, identity)
 }
 
-func (r *repository) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, googleID, phoneNumber string) (sql.User, error) {
+func (r *authRepository) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, googleID, phoneNumber string) (sql.User, error) {
 	return r.query.GetUserByGoogleIdOrPhoneNumber(ctx, sql.GetUserByGoogleIdOrPhoneNumberParams{
 		GoogleID:    googleID,
 		PhoneNumber: phoneNumber,
 	})
 }
 
-func (r *repository) CreateUser(ctx context.Context, payload sql.CreateUserParams) error {
+func (r *authRepository) CreateUser(ctx context.Context, payload sql.CreateUserParams) error {
 	return r.query.CreateUser(ctx, payload)
 }
 
-func (r *repository) CreateVerificationSession(ctx context.Context, token string, payload models.VerificationSession) error {
+func (r *authRepository) CreateVerificationSession(ctx context.Context, token string, payload models.VerificationSession) error {
 	if !utils.IsEmpty(payload.GoogleId) {
 		err := r.DeleteVerificationSessionByGoogleId(ctx, payload.GoogleId)
 		if err != nil {
@@ -87,7 +87,7 @@ func (r *repository) CreateVerificationSession(ctx context.Context, token string
 	return r.redis.Setxc(key, duration, string(strPayload))
 }
 
-func (r *repository) getVerificationSession(ctx context.Context, keySearch string) (*models.VerificationSession, error) {
+func (r *authRepository) getVerificationSession(ctx context.Context, keySearch string) (*models.VerificationSession, error) {
 	key, err := r.redis.Keys(keySearch)
 	if err != nil {
 		return nil, err
@@ -106,37 +106,37 @@ func (r *repository) getVerificationSession(ctx context.Context, keySearch strin
 	return &res, nil
 }
 
-func (r *repository) GetVerificationSessionByToken(ctx context.Context, token string) (*models.VerificationSession, error) {
+func (r *authRepository) GetVerificationSessionByToken(ctx context.Context, token string) (*models.VerificationSession, error) {
 	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*", "*", "*")
 	return r.getVerificationSession(ctx, keySearch)
 }
 
-func (r *repository) GetVerificationSessionByPhoneNumber(ctx context.Context, phoneNumber string) (*models.VerificationSession, error) {
+func (r *authRepository) GetVerificationSessionByPhoneNumber(ctx context.Context, phoneNumber string) (*models.VerificationSession, error) {
 	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", "*", phoneNumber, "*")
 	return r.getVerificationSession(ctx, keySearch)
 }
 
-func (r *repository) GetVerificationSessionByIdentity(ctx context.Context, identity string) (*models.VerificationSession, error) {
+func (r *authRepository) GetVerificationSessionByIdentity(ctx context.Context, identity string) (*models.VerificationSession, error) {
 	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", "*", "*", identity)
 	return r.getVerificationSession(ctx, keySearch)
 }
 
-func (r *repository) DeleteVerificationSessionByGoogleId(ctx context.Context, googleId string) error {
+func (r *authRepository) DeleteVerificationSessionByGoogleId(ctx context.Context, googleId string) error {
 	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", googleId, "*", "*")
 	return r.redis.DelKeysByPatern(keySearch)
 }
 
-func (r *repository) DeleteVerificationSessionByIdentity(ctx context.Context, identity string) error {
+func (r *authRepository) DeleteVerificationSessionByIdentity(ctx context.Context, identity string) error {
 	keySearch := fmt.Sprintf(constants.KeyVerificationSession, "*", "*", "*", identity)
 	return r.redis.DelKeysByPatern(keySearch)
 }
 
-func (r *repository) DeleteVerificationSessionByToken(ctx context.Context, token string) error {
+func (r *authRepository) DeleteVerificationSessionByToken(ctx context.Context, token string) error {
 	keySearch := fmt.Sprintf(constants.KeyVerificationSession, token, "*", "*", "*")
 	return r.redis.DelKeysByPatern(keySearch)
 }
 
-func (r *repository) IncrementOTP(ctx context.Context, phoneNumber string) (int64, error) {
+func (r *authRepository) IncrementOTP(ctx context.Context, phoneNumber string) (int64, error) {
 	key := fmt.Sprintf(constants.KeyOTPIncrement, phoneNumber)
 	inc, err := r.redis.Increment(key)
 	if err != nil {
@@ -150,12 +150,12 @@ func (r *repository) IncrementOTP(ctx context.Context, phoneNumber string) (int6
 	return inc, r.redis.SetDuration(key, utils.RemaniningToday())
 }
 
-func (r *repository) CreateOTP(ctx context.Context, phoneNumber, otp string) error {
+func (r *authRepository) CreateOTP(ctx context.Context, phoneNumber, otp string) error {
 	key := fmt.Sprintf(constants.KeyOTP, phoneNumber)
 	return r.redis.Setxc(key, r.conf.Auth.OTP.Duration, otp)
 }
 
-func (r *repository) OTPInformation(ctx context.Context, phoneNumber string) (*models.OTPInformation, error) {
+func (r *authRepository) OTPInformation(ctx context.Context, phoneNumber string) (*models.OTPInformation, error) {
 	res := models.OTPInformation{}
 	key := fmt.Sprintf(constants.KeyOTP, phoneNumber)
 	keyInc := fmt.Sprintf(constants.KeyOTPIncrement, phoneNumber)
@@ -195,12 +195,12 @@ func (r *repository) OTPInformation(ctx context.Context, phoneNumber string) (*m
 	return &res, nil
 }
 
-func (r *repository) GetOTP(ctx context.Context, phoneNumber string) (string, error) {
+func (r *authRepository) GetOTP(ctx context.Context, phoneNumber string) (string, error) {
 	key := fmt.Sprintf(constants.KeyOTP, phoneNumber)
 	return r.redis.GetString(key)
 }
 
-func (r *repository) DeleteAllOTP(ctx context.Context, phoneNumber string) error {
+func (r *authRepository) DeleteAllOTP(ctx context.Context, phoneNumber string) error {
 	keySearch := fmt.Sprintf(constants.KeyOTP+"*", phoneNumber)
 	return r.redis.DelKeysByPatern(keySearch)
 }

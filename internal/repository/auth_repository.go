@@ -7,7 +7,7 @@ import (
 	"github.com/rizalarfiyan/be-revend/internal/sql"
 )
 
-type Repository interface {
+type AuthRepository interface {
 	GetUserByGoogleId(ctx context.Context, googleID string) (sql.User, error)
 	GetUserByPhoneNumber(ctx context.Context, googleID string) (sql.User, error)
 	GetUserByIdentity(ctx context.Context, identity string) (sql.User, error)

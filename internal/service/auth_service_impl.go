@@ -27,13 +27,13 @@ import (
 )
 
 type authService struct {
-	repo repository.Repository
+	repo repository.AuthRepository
 	conf *baseModels.Config
 	wa   libs.Whatsapp
 	mqtt mqtt.Client
 }
 
-func NewAuthService(repo repository.Repository, mqtt mqtt.Client) AuthService {
+func NewAuthService(repo repository.AuthRepository, mqtt mqtt.Client) AuthService {
 	return &authService{
 		repo: repo,
 		conf: config.Get(),

@@ -17,12 +17,12 @@ import (
 )
 
 type mqttService struct {
-	authRepo repository.Repository
+	authRepo repository.AuthRepository
 	conf     *baseModels.Config
 	utils    utils.MQTTUtils
 }
 
-func NewMQTTService(authRepo repository.Repository) MQTTService {
+func NewMQTTService(authRepo repository.AuthRepository) MQTTService {
 	return &mqttService{
 		authRepo: authRepo,
 		conf:     config.Get(),
