@@ -147,7 +147,7 @@ func (s *authService) GetSession(ctx context.Context, token string) models.Verif
 	data, err := s.repo.GetVerificationSessionByToken(ctx, token)
 	utils.PanicIfError(err, false)
 
-	utils.IsNotProcessMessage(data, "Token is expired", false)
+	utils.IsNotProcessMessage(data, "Session is expired", false)
 	return *data
 }
 
