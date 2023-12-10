@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/request"
@@ -24,10 +25,6 @@ func NewUserRepository(db *pgxpool.Pool) UserRepository {
 		query:        sql.New(db),
 		queryBuilder: sql.New(utils.QueryWrap(db)),
 	}
-}
-
-func (r *userRepository) GetUserById(ctx context.Context, userId uuid.UUID) (sql.User, error) {
-	return r.query.GetUserById(ctx, utils.UUID(userId))
 }
 
 func (r *userRepository) AllUser(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.User], error) {
@@ -61,4 +58,35 @@ func (r *userRepository) AllUser(ctx context.Context, req request.BasePagination
 	res.Content = users
 	res.Count = count
 	return &res, nil
+}
+
+func (r *userRepository) GetUserById(ctx context.Context, userId uuid.UUID) (sql.User, error) {
+	return r.query.GetUserById(ctx, utils.UUID(userId))
+}
+
+func (r *userRepository) GetUserByGoogleId(ctx context.Context, googleID string) (sql.User, error) {
+	return r.query.GetUserByGoogleId(ctx, pgtype.Text{
+		String: googleID,
+	})
+}
+
+func (r *userRepository) GetUserByPhoneNumber(ctx context.Context, googleID string) (sql.User, error) {
+	return r.query.GetUserByPhoneNumber(ctx, googleID)
+}
+
+func (r *userRepository) GetUserByIdentity(ctx context.Context, identity string) (sql.User, error) {
+	return r.query.GetUserByIdentity(ctx, identity)
+}
+
+func (r *userRepository) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, googleID, phoneNumber string) (sql.User, error) {
+	return r.query.GetUserByGoogleIdOrPhoneNumber(ctx, sql.GetUserByGoogleIdOrPhoneNumberParams{
+		GoogleID: pgtype.Text{
+			String: googleID,
+		},
+		PhoneNumber: phoneNumber,
+	})
+}
+
+func (r *userRepository) CreateUser(ctx context.Context, payload sql.CreateUserParams) error {
+	return r.query.CreateUser(ctx, payload)
 }

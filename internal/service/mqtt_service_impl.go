@@ -18,13 +18,15 @@ import (
 
 type mqttService struct {
 	authRepo repository.AuthRepository
+	userRepo repository.UserRepository
 	conf     *baseModels.Config
 	utils    utils.MQTTUtils
 }
 
-func NewMQTTService(authRepo repository.AuthRepository) MQTTService {
+func NewMQTTService(authRepo repository.AuthRepository, userRepo repository.UserRepository) MQTTService {
 	return &mqttService{
 		authRepo: authRepo,
+		userRepo: userRepo,
 		conf:     config.Get(),
 		utils:    utils.NewMqttUtils(),
 	}
@@ -49,7 +51,7 @@ func (s *mqttService) Trigger(req request.MQTTTriggerRequest) {
 }
 
 func (s *mqttService) checkUser(ctx context.Context, req request.MQTTTriggerRequest) {
-	user, err := s.authRepo.GetUserByIdentity(ctx, req.Data.Identity)
+	user, err := s.userRepo.GetUserByIdentity(ctx, req.Data.Identity)
 	s.utils.PanicIfErrorWithoutNoSqlResult(err)
 
 	if !utils.IsEmpty(user) {

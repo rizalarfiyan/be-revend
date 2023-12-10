@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rizalarfiyan/be-revend/config"
@@ -34,33 +33,6 @@ func NewAuthRepository(db *pgxpool.Pool, redis database.RedisInstance) AuthRepos
 		redis: redis,
 		conf:  config.Get(),
 	}
-}
-
-func (r *authRepository) GetUserByGoogleId(ctx context.Context, googleID string) (sql.User, error) {
-	return r.query.GetUserByGoogleId(ctx, pgtype.Text{
-		String: googleID,
-	})
-}
-
-func (r *authRepository) GetUserByPhoneNumber(ctx context.Context, googleID string) (sql.User, error) {
-	return r.query.GetUserByPhoneNumber(ctx, googleID)
-}
-
-func (r *authRepository) GetUserByIdentity(ctx context.Context, identity string) (sql.User, error) {
-	return r.query.GetUserByIdentity(ctx, identity)
-}
-
-func (r *authRepository) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, googleID, phoneNumber string) (sql.User, error) {
-	return r.query.GetUserByGoogleIdOrPhoneNumber(ctx, sql.GetUserByGoogleIdOrPhoneNumberParams{
-		GoogleID: pgtype.Text{
-			String: googleID,
-		},
-		PhoneNumber: phoneNumber,
-	})
-}
-
-func (r *authRepository) CreateUser(ctx context.Context, payload sql.CreateUserParams) error {
-	return r.query.CreateUser(ctx, payload)
 }
 
 func (r *authRepository) CreateVerificationSession(ctx context.Context, token string, payload models.VerificationSession) error {

@@ -104,8 +104,8 @@ func main() {
 	userRepository := repository.NewUserRepository(db)
 
 	// service
-	mqttService := service.NewMQTTService(authRepository)
-	authService := service.NewAuthService(authRepository, *mqtt)
+	mqttService := service.NewMQTTService(authRepository, userRepository)
+	authService := service.NewAuthService(authRepository, userRepository, *mqtt)
 	userService := service.NewUserService(userRepository)
 
 	// handler

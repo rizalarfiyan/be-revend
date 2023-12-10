@@ -28,18 +28,20 @@ import (
 )
 
 type authService struct {
-	repo repository.AuthRepository
-	conf *baseModels.Config
-	wa   libs.Whatsapp
-	mqtt mqtt.Client
+	repo     repository.AuthRepository
+	userRepo repository.UserRepository
+	conf     *baseModels.Config
+	wa       libs.Whatsapp
+	mqtt     mqtt.Client
 }
 
-func NewAuthService(repo repository.AuthRepository, mqtt mqtt.Client) AuthService {
+func NewAuthService(repo repository.AuthRepository, userRepo repository.UserRepository, mqtt mqtt.Client) AuthService {
 	return &authService{
-		repo: repo,
-		conf: config.Get(),
-		wa:   libs.NewWhatsapp(),
-		mqtt: mqtt,
+		repo:     repo,
+		userRepo: userRepo,
+		conf:     config.Get(),
+		wa:       libs.NewWhatsapp(),
+		mqtt:     mqtt,
 	}
 }
 
@@ -127,7 +129,7 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 	}
 
 	data.GoogleId = res.ID
-	user, err := s.repo.GetUserByGoogleId(ctx, data.GoogleId)
+	user, err := s.userRepo.GetUserByGoogleId(ctx, data.GoogleId)
 	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
@@ -186,7 +188,7 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 		return res
 	}
 
-	user, err := s.repo.GetUserByGoogleIdOrPhoneNumber(ctx, data.GoogleId, data.PhoneNumber)
+	user, err := s.userRepo.GetUserByGoogleIdOrPhoneNumber(ctx, data.GoogleId, data.PhoneNumber)
 	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
@@ -292,7 +294,7 @@ func (s *authService) SendOTP(ctx context.Context, req request.AuthSendOTP) resp
 		})
 	}
 
-	user, err := s.repo.GetUserByPhoneNumber(ctx, req.PhoneNumber)
+	user, err := s.userRepo.GetUserByPhoneNumber(ctx, req.PhoneNumber)
 	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
@@ -335,11 +337,10 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 		exception.IsNotProcessRawMessage("OTP is not valid", false)
 	}
 
-	user, err := s.repo.GetUserByPhoneNumber(ctx, data.PhoneNumber)
+	user, err := s.userRepo.GetUserByPhoneNumber(ctx, data.PhoneNumber)
 	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
-		//! FIXME duplicate google id and allow null
 		payload := sql.CreateUserParams{
 			FirstName:   data.FirstName,
 			LastName:    pgtype.Text{String: data.LastName, Valid: data.LastName != ""},
@@ -347,10 +348,10 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 			GoogleID:    pgtype.Text{String: data.GoogleId, Valid: data.GoogleId != ""},
 			Identity:    data.Identity,
 		}
-		err = s.repo.CreateUser(ctx, payload)
+		err = s.userRepo.CreateUser(ctx, payload)
 		exception.PanicIfError(err, false)
 
-		user, err = s.repo.GetUserByPhoneNumber(ctx, data.PhoneNumber)
+		user, err = s.userRepo.GetUserByPhoneNumber(ctx, data.PhoneNumber)
 		exception.PanicIfErrorWithoutNoSqlResult(err, false)
 	}
 
@@ -389,7 +390,7 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 }
 
 func (s *authService) Register(ctx context.Context, req request.AuthRegister) {
-	user, err := s.repo.GetUserByPhoneNumber(ctx, req.PhoneNumber)
+	user, err := s.userRepo.GetUserByPhoneNumber(ctx, req.PhoneNumber)
 	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if !utils.IsEmpty(user) {

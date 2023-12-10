@@ -4,15 +4,9 @@ import (
 	"context"
 
 	"github.com/rizalarfiyan/be-revend/internal/models"
-	"github.com/rizalarfiyan/be-revend/internal/sql"
 )
 
 type AuthRepository interface {
-	GetUserByGoogleId(ctx context.Context, googleID string) (sql.User, error)
-	GetUserByPhoneNumber(ctx context.Context, googleID string) (sql.User, error)
-	GetUserByIdentity(ctx context.Context, identity string) (sql.User, error)
-	GetUserByGoogleIdOrPhoneNumber(ctx context.Context, googleID, phoneNumber string) (sql.User, error)
-	CreateUser(ctx context.Context, payload sql.CreateUserParams) error
 	CreateVerificationSession(ctx context.Context, idx string, payload models.VerificationSession) error
 	GetVerificationSessionByToken(ctx context.Context, token string) (*models.VerificationSession, error)
 	GetVerificationSessionByPhoneNumber(ctx context.Context, phoneNumber string) (*models.VerificationSession, error)
