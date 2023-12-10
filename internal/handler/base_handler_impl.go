@@ -1,11 +1,16 @@
 package handler
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/rizalarfiyan/be-revend/database"
 	"github.com/rizalarfiyan/be-revend/internal/response"
+	"github.com/rizalarfiyan/be-revend/internal/sql"
+	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type baseHandler struct{}
@@ -59,4 +64,23 @@ func (h *baseHandler) Health(ctx *fiber.Ctx) error {
 			"redis":    database.RedisIsConnected(),
 		},
 	})
+}
+
+func (h *baseHandler) Test(ctx *fiber.Ctx) error {
+	db := database.GetPostgres()
+	query := sql.New(utils.QueryWrap(db))
+
+	users, err := query.GetAllUsers(utils.QueryBuild(ctx.Context(), func(b *utils.QueryBuilder) {
+		b.Where("phone_number = $1", "62895377233002")
+		b.Limit(10)
+	}))
+
+	if err != nil {
+		log.Fatalln("ListAuthors", err)
+	}
+
+	data, _ := json.MarshalIndent(users, "", "  ")
+	fmt.Println(string(data))
+
+	return ctx.SendString("OKE!")
 }

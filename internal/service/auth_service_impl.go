@@ -304,10 +304,13 @@ func (s *authService) SendOTP(ctx context.Context, req request.AuthSendOTP) resp
 	}
 	payload := models.VerificationSession{
 		PhoneNumber: req.PhoneNumber,
-		GoogleId:    user.GoogleID,
 		FirstName:   user.FirstName,
 		Identity:    user.Identity,
 		Token:       token,
+	}
+
+	if user.GoogleID.Valid {
+		payload.GoogleId = user.GoogleID.String
 	}
 
 	if user.LastName.Valid {
@@ -340,7 +343,7 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 			FirstName:   data.FirstName,
 			LastName:    pgtype.Text{String: data.LastName, Valid: data.LastName != ""},
 			PhoneNumber: data.PhoneNumber,
-			GoogleID:    data.GoogleId,
+			GoogleID:    pgtype.Text{String: data.GoogleId, Valid: data.GoogleId != ""},
 			Identity:    data.Identity,
 		}
 		err = s.repo.CreateUser(ctx, payload)

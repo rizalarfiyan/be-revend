@@ -19,4 +19,5 @@ var (
 	// Anything
 	WhatsappNumberSuffix = "@s.whatsapp.net"
 	OTPLength            = 6
+	DefaultPageLimit     = 10
 )

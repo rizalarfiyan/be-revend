@@ -20,7 +20,7 @@ type CreateUserParams struct {
 	FirstName   string
 	LastName    pgtype.Text
 	PhoneNumber string
-	GoogleID    string
+	GoogleID    pgtype.Text
 	Identity    string
 }
 
@@ -35,12 +35,46 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
+const getAllUsers = `-- name: GetAllUsers :many
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
+`
+
+func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getAllUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.FirstName,
+			&i.LastName,
+			&i.PhoneNumber,
+			&i.GoogleID,
+			&i.Identity,
+			&i.Role,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserByGoogleId = `-- name: GetUserByGoogleId :one
 SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
 WHERE google_id = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserByGoogleId(ctx context.Context, googleID string) (User, error) {
+func (q *Queries) GetUserByGoogleId(ctx context.Context, googleID pgtype.Text) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByGoogleId, googleID)
 	var i User
 	err := row.Scan(
@@ -63,7 +97,7 @@ WHERE google_id = $1 OR phone_number = $2 LIMIT 1
 `
 
 type GetUserByGoogleIdOrPhoneNumberParams struct {
-	GoogleID    string
+	GoogleID    pgtype.Text
 	PhoneNumber string
 }
 

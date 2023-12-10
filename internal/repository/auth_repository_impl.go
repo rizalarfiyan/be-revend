@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rizalarfiyan/be-revend/config"
@@ -36,7 +37,9 @@ func NewAuthRepository(db *pgxpool.Pool, redis database.RedisInstance) AuthRepos
 }
 
 func (r *authRepository) GetUserByGoogleId(ctx context.Context, googleID string) (sql.User, error) {
-	return r.query.GetUserByGoogleId(ctx, googleID)
+	return r.query.GetUserByGoogleId(ctx, pgtype.Text{
+		String: googleID,
+	})
 }
 
 func (r *authRepository) GetUserByPhoneNumber(ctx context.Context, googleID string) (sql.User, error) {
@@ -49,7 +52,9 @@ func (r *authRepository) GetUserByIdentity(ctx context.Context, identity string)
 
 func (r *authRepository) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, googleID, phoneNumber string) (sql.User, error) {
 	return r.query.GetUserByGoogleIdOrPhoneNumber(ctx, sql.GetUserByGoogleIdOrPhoneNumberParams{
-		GoogleID:    googleID,
+		GoogleID: pgtype.Text{
+			String: googleID,
+		},
 		PhoneNumber: phoneNumber,
 	})
 }

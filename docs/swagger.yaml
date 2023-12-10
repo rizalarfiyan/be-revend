@@ -84,6 +84,15 @@ definitions:
       token:
         type: string
     type: object
+  response.BaseMetadataPagination:
+    properties:
+      page:
+        type: integer
+      per_page:
+        type: integer
+      total:
+        type: integer
+    type: object
   response.BaseResponse:
     properties:
       code:
@@ -92,6 +101,24 @@ definitions:
       data: {}
       message:
         example: Message!
+        type: string
+    type: object
+  response.BaseResponsePagination-response_User:
+    properties:
+      content:
+        items:
+          $ref: '#/definitions/response.User'
+        type: array
+      metadata:
+        $ref: '#/definitions/response.BaseMetadataPagination'
+    type: object
+  response.User:
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      phone_number:
         type: string
     type: object
   sql.Role:
@@ -319,6 +346,48 @@ paths:
       summary: Get Base Health based on parameter
       tags:
       - home
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: All User
+      operationId: get-all-user
+      parameters:
+      - default: 1
+        description: Page
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.BaseResponsePagination-response_User'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Get All User based on parameter
+      tags:
+      - user
 securityDefinitions:
   AccessToken:
     in: header

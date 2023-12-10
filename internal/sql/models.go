@@ -75,7 +75,7 @@ type User struct {
 	FirstName   string
 	LastName    pgtype.Text
 	PhoneNumber string
-	GoogleID    string
+	GoogleID    pgtype.Text
 	Identity    string
 	Role        Role
 	CreatedAt   pgtype.Timestamp

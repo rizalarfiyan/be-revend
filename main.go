@@ -101,20 +101,24 @@ func main() {
 
 	// repository
 	authRepository := repository.NewAuthRepository(db, redis)
+	userRepository := repository.NewUserRepository(db)
 
 	// service
 	mqttService := service.NewMQTTService(authRepository)
 	authService := service.NewAuthService(authRepository, *mqtt)
+	userService := service.NewUserService(userRepository)
 
 	// handler
 	mqttHandler := handler.NewMQTTHandler(mqttService)
 	baseHandler := handler.NewBaseHandler()
 	authHandler := handler.NewAuthHandler(authService)
+	userHandler := handler.NewUserHandler(userService)
 
 	// router
 	subscribe.BaseSubscribe(mqttHandler)
 	route.BaseRoute(baseHandler)
 	route.AuthRoute(authHandler)
+	route.UserRoute(userHandler)
 
 	baseUrl := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	server := &http.Server{

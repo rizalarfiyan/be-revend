@@ -1,3 +1,7 @@
 package handler
 
-type UserHandler interface{}
+import "github.com/gofiber/fiber/v2"
+
+type UserHandler interface {
+	AllUser(ctx *fiber.Ctx) error
+}

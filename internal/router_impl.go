@@ -19,6 +19,7 @@ func NewRouter(app *fiber.App) Router {
 func (r *router) BaseRoute(handler handler.BaseHandler) {
 	r.app.Get("", handler.Home)
 	r.app.Get("health", handler.Health)
+	r.app.Get("test", handler.Test)
 }
 
 func (r *router) AuthRoute(handler handler.AuthHandler) {
@@ -34,4 +35,9 @@ func (r *router) AuthRoute(handler handler.AuthHandler) {
 	google := auth.Group("google")
 	google.Get("", handler.Google)
 	google.Get("callback", handler.GoogleCallback)
+}
+
+func (r *router) UserRoute(handler handler.UserHandler) {
+	user := r.app.Group("user")
+	user.Get("", handler.AllUser)
 }

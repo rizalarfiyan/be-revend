@@ -1,0 +1,181 @@
+package utils
+
+import (
+	"context"
+	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+)
+
+type (
+	QueryBuilder struct {
+		filters       []queryFilter
+		order         string
+		offset, limit int
+	}
+
+	queryFilter struct {
+		expression string
+		args       []interface{}
+	}
+)
+
+type QueryDBTX interface {
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
+}
+
+type queryWrappedDB struct {
+	QueryDBTX
+}
+
+func QueryWrap(db QueryDBTX) QueryDBTX {
+	return &queryWrappedDB{
+		db,
+	}
+}
+
+func (w queryWrappedDB) Exec(ctx context.Context, query string, args ...interface{}) (pgconn.CommandTag, error) {
+	if b, ok := QueryBuilderFrom(ctx); ok {
+		query, args = b.Build(query, args...)
+	}
+
+	return w.QueryDBTX.Exec(ctx, query, args...)
+}
+
+func (w queryWrappedDB) Query(ctx context.Context, query string, args ...interface{}) (pgx.Rows, error) {
+	if b, ok := QueryBuilderFrom(ctx); ok {
+		query, args = b.Build(query, args...)
+	}
+
+	return w.QueryDBTX.Query(ctx, query, args...)
+}
+
+func (w queryWrappedDB) QueryRow(ctx context.Context, query string, args ...interface{}) pgx.Row {
+	if b, ok := QueryBuilderFrom(ctx); ok {
+		query, args = b.Build(query, args...)
+	}
+
+	return w.QueryDBTX.QueryRow(ctx, query, args...)
+}
+
+type queryBuilderContextKey struct{}
+
+func QueryWithBuilder(ctx context.Context, b *QueryBuilder) context.Context {
+	return context.WithValue(ctx, queryBuilderContextKey{}, b)
+}
+
+func QueryBuilderFrom(ctx context.Context) (*QueryBuilder, bool) {
+	b, ok := ctx.Value(queryBuilderContextKey{}).(*QueryBuilder)
+	return b, ok
+}
+
+func QueryBuild(ctx context.Context, f func(builder *QueryBuilder)) context.Context {
+	b, ok := QueryBuilderFrom(ctx)
+	if !ok {
+		b = &QueryBuilder{}
+	} else {
+		b = b.clone()
+	}
+
+	f(b)
+	return QueryWithBuilder(ctx, b)
+}
+
+func (b *QueryBuilder) clone() *QueryBuilder {
+	cb := QueryBuilder{}
+	cb = *b
+	return &cb
+}
+
+// Where set conditions of where in SELECT
+// Where("user = ?","tom")
+// Where("a = ? OR b = ?",1,2)
+// Where("foo = $1","bar")
+func (b *QueryBuilder) Where(query string, args ...interface{}) *QueryBuilder {
+	b.filters = append(b.filters, queryFilter{
+		expression: query,
+		args:       args,
+	})
+
+	return b
+}
+
+// In is an equivalent of Where("column IN (?,?,?)", args...).
+// In("id", 1, 2, 3)
+func (b *QueryBuilder) In(column string, args ...interface{}) *QueryBuilder {
+	placeholders := make([]string, len(args))
+	for i := range args {
+		placeholders[i] = "?"
+	}
+
+	query := fmt.Sprintf("%s IN (%s)", column, strings.Join(placeholders, ","))
+	return b.Where(query, args...)
+}
+
+// Order sets columns of ORDER BY in SELECT.
+// Order("name, age DESC")
+func (b *QueryBuilder) Order(cols string) *QueryBuilder {
+	b.order = cols
+	return b
+}
+
+// Offset sets the offset in SELECT.
+func (b *QueryBuilder) Offset(x int) *QueryBuilder {
+	b.offset = x
+	return b
+}
+
+// Limit sets the limit in SELECT.
+func (b *QueryBuilder) Limit(x int) *QueryBuilder {
+	b.limit = x
+	return b
+}
+
+// Build returns compiled SELECT string and args.
+func (b *QueryBuilder) Build(query string, args ...interface{}) (string, []interface{}) {
+	var sb strings.Builder
+
+	sb.WriteString(query)
+	sb.WriteByte('\n')
+
+	// append where conditions
+	for idx, filter := range b.filters {
+		if idx == 0 {
+			sb.WriteString("WHERE ")
+		} else {
+			sb.WriteString("AND ")
+		}
+
+		sb.WriteByte('(')
+		sb.WriteString(filter.expression)
+		sb.WriteByte(')')
+		sb.WriteByte('\n')
+
+		args = append(args, filter.args...)
+	}
+
+	if b.order != "" {
+		sb.WriteString("ORDER BY ")
+		sb.WriteString(b.order)
+		sb.WriteByte('\n')
+	}
+
+	if b.limit > 0 {
+		sb.WriteString("LIMIT ")
+		sb.WriteString(strconv.Itoa(b.limit))
+		sb.WriteByte('\n')
+	}
+
+	if b.offset > 0 {
+		sb.WriteString("OFFSET ")
+		sb.WriteString(strconv.Itoa(b.offset))
+		sb.WriteByte('\n')
+	}
+
+	return sb.String(), args
+}
