@@ -298,7 +298,7 @@ func (s *authService) SendOTP(ctx context.Context, req request.AuthSendOTP) resp
 	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
-		exception.IsNotProcessRawMessage("Something wrong for your phone number", false)
+		exception.ErrorManualValidation("phone_number", "Unable to process phone number")
 	}
 
 	token := ksuid.New().String()
