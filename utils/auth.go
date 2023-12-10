@@ -5,7 +5,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/constants"
 	"github.com/rizalarfiyan/be-revend/internal/sql"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
@@ -49,10 +48,9 @@ func GetUser(ctx *fiber.Ctx) baseModels.AuthToken {
 	return *user
 }
 
-func GenerateJwtToken(claims jwt.Claims) (string, error) {
-	conf := config.Get()
+func GenerateJwtToken(secret string, claims jwt.Claims) (string, error) {
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, err := jwtToken.SignedString([]byte(conf.JWT.Secret))
+	token, err := jwtToken.SignedString([]byte(secret))
 	if err != nil {
 		return "", err
 	}

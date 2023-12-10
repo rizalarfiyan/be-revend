@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/rizalarfiyan/be-revend/exception"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/internal/sql"
 	"github.com/rizalarfiyan/be-revend/utils"
@@ -15,7 +16,7 @@ var (
 )
 
 func baseRoles(roles []sql.Role, isList bool) fiber.Handler {
-	data := utils.DefaultErrorData(isList)
+	data := exception.DefaultErrorData(isList)
 	mapRoles := make(map[sql.Role]bool)
 
 	for _, role := range roles {

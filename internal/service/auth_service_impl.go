@@ -15,6 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/constants"
+	"github.com/rizalarfiyan/be-revend/exception"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/request"
@@ -127,7 +128,7 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 
 	data.GoogleId = res.ID
 	user, err := s.repo.GetUserByGoogleId(ctx, data.GoogleId)
-	utils.PanicIfErrorWithoutNoSqlResult(err, false)
+	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
 		data.Message = "You must register first or bind your account"
@@ -145,16 +146,16 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 
 func (s *authService) GetSession(ctx context.Context, token string) models.VerificationSession {
 	data, err := s.repo.GetVerificationSessionByToken(ctx, token)
-	utils.PanicIfError(err, false)
+	exception.PanicIfError(err, false)
 
-	utils.IsNotProcessMessage(data, "Session is expired", false)
+	exception.IsNotProcessMessage(data, "Session is expired", false)
 	return *data
 }
 
 func (s *authService) Verification(ctx context.Context, req request.AuthVerification) response.AuthVerification {
 	data := s.GetSession(ctx, req.Token)
 	if data.IsError {
-		utils.IsNotProcessRawMessage(data.Message, false)
+		exception.IsNotProcessRawMessage(data.Message, false)
 	}
 
 	res := response.AuthVerification{
@@ -186,7 +187,7 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 	}
 
 	user, err := s.repo.GetUserByGoogleIdOrPhoneNumber(ctx, data.GoogleId, data.PhoneNumber)
-	utils.PanicIfErrorWithoutNoSqlResult(err, false)
+	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
 		res.Message = "Something wrong for your request"
@@ -204,10 +205,10 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 	}
 
 	err = s.repo.DeleteVerificationSessionByToken(ctx, req.Token)
-	utils.PanicIfError(err, false)
+	exception.PanicIfError(err, false)
 
 	err = s.repo.DeleteAllOTP(ctx, data.PhoneNumber)
-	utils.PanicIfError(err, false)
+	exception.PanicIfError(err, false)
 
 	token := s.generateToken(ctx, payload)
 	res.Step = constants.AuthVerificationDone
@@ -228,8 +229,8 @@ func (s *authService) generateToken(ctx context.Context, payload baseModels.Auth
 		},
 	}
 
-	token, err := utils.GenerateJwtToken(claims)
-	utils.PanicIfError(err, false)
+	token, err := utils.GenerateJwtToken(conf.JWT.Secret, claims)
+	exception.PanicIfError(err, false)
 	return token
 }
 
@@ -241,21 +242,21 @@ func (s *authService) createAndSendOTP(ctx context.Context, phoneNumber, token s
 	}
 
 	err := s.wa.SendMessageTemplate(phoneNumber, constants.TemplateAuthOtp, data)
-	utils.PanicIfError(err, false)
+	exception.PanicIfError(err, false)
 
 	err = s.repo.CreateVerificationSession(ctx, token, payload)
-	utils.PanicIfError(err, false)
+	exception.PanicIfError(err, false)
 
 	_, err = s.repo.IncrementOTP(ctx, phoneNumber)
-	utils.PanicIfError(err, false)
+	exception.PanicIfError(err, false)
 
 	err = s.repo.CreateOTP(ctx, phoneNumber, otp)
-	utils.PanicIfError(err, false)
+	exception.PanicIfError(err, false)
 }
 
 func (s *authService) getOTPDetail(ctx context.Context, phoneNumber string) models.OTPDetailStatus {
 	otp, err := s.repo.OTPInformation(ctx, phoneNumber)
-	utils.PanicIfError(err, false)
+	exception.PanicIfError(err, false)
 
 	res := models.OTPDetailStatus{
 		Token: otp.Data.Token,
@@ -280,22 +281,22 @@ func (s *authService) getOTPDetail(ctx context.Context, phoneNumber string) mode
 func (s *authService) SendOTP(ctx context.Context, req request.AuthSendOTP) response.AuthSendOTP {
 	otp := s.getOTPDetail(ctx, req.PhoneNumber)
 	if otp.IsBlocked {
-		utils.IsNotProcessData("OTP has been sent, please try again in next day", response.AuthSendOTP{
+		exception.IsNotProcessData("OTP has been sent, please try again in next day", response.AuthSendOTP{
 			Token: otp.Token,
 		})
 	}
 
 	if otp.RemainingTime > 0 {
-		utils.IsNotProcessData("OTP has been sent, please try again in "+otp.RemainingTime.String(), response.AuthSendOTP{
+		exception.IsNotProcessData("OTP has been sent, please try again in "+otp.RemainingTime.String(), response.AuthSendOTP{
 			Token: otp.Token,
 		})
 	}
 
 	user, err := s.repo.GetUserByPhoneNumber(ctx, req.PhoneNumber)
-	utils.PanicIfErrorWithoutNoSqlResult(err, false)
+	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
-		utils.IsNotProcessRawMessage("Something wrong for your phone number", false)
+		exception.IsNotProcessRawMessage("Something wrong for your phone number", false)
 	}
 
 	token := ksuid.New().String()
@@ -327,15 +328,15 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 	data := s.GetSession(ctx, req.Token)
 
 	otp, err := s.repo.GetOTP(ctx, data.PhoneNumber)
-	utils.PanicIfError(err, false)
-	utils.IsNotProcess(otp, false)
+	exception.PanicIfError(err, false)
+	exception.IsNotProcess(otp, false)
 
 	if otp != req.OTP {
-		utils.IsNotProcessRawMessage("OTP is not valid", false)
+		exception.IsNotProcessRawMessage("OTP is not valid", false)
 	}
 
 	user, err := s.repo.GetUserByPhoneNumber(ctx, data.PhoneNumber)
-	utils.PanicIfErrorWithoutNoSqlResult(err, false)
+	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if utils.IsEmpty(user) {
 		//! FIXME duplicate google id and allow null
@@ -347,10 +348,10 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 			Identity:    data.Identity,
 		}
 		err = s.repo.CreateUser(ctx, payload)
-		utils.PanicIfError(err, false)
+		exception.PanicIfError(err, false)
 
 		user, err = s.repo.GetUserByPhoneNumber(ctx, data.PhoneNumber)
-		utils.PanicIfErrorWithoutNoSqlResult(err, false)
+		exception.PanicIfErrorWithoutNoSqlResult(err, false)
 	}
 
 	payload := baseModels.AuthToken{
@@ -361,10 +362,10 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 	}
 
 	err = s.repo.DeleteVerificationSessionByToken(ctx, req.Token)
-	utils.PanicIfError(err, false)
+	exception.PanicIfError(err, false)
 
 	err = s.repo.DeleteAllOTP(ctx, data.PhoneNumber)
-	utils.PanicIfError(err, false)
+	exception.PanicIfError(err, false)
 
 	if data.IsNew {
 		mqttPayload := response.MQTTActionResponse{
@@ -375,7 +376,7 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 		}
 
 		mqttBytePayload, err := json.Marshal(mqttPayload)
-		utils.PanicIfError(err, false)
+		exception.PanicIfError(err, false)
 
 		topic := "revend/action/" + data.DeviceId
 		s.mqtt.Publish(topic, 0, false, mqttBytePayload)
@@ -389,10 +390,10 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 
 func (s *authService) Register(ctx context.Context, req request.AuthRegister) {
 	user, err := s.repo.GetUserByPhoneNumber(ctx, req.PhoneNumber)
-	utils.PanicIfErrorWithoutNoSqlResult(err, false)
+	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if !utils.IsEmpty(user) {
-		utils.IsNotProcessRawMessage("Phone number is already exist", false)
+		exception.IsNotProcessRawMessage("Phone number is already exist", false)
 	}
 
 	data := s.GetSession(ctx, req.Token)
@@ -400,6 +401,6 @@ func (s *authService) Register(ctx context.Context, req request.AuthRegister) {
 	data.FirstName = req.FirstName
 	data.LastName = req.LastName
 	err = s.repo.CreateVerificationSession(ctx, req.Token, data)
-	utils.PanicIfError(err, false)
+	exception.PanicIfError(err, false)
 	s.createAndSendOTP(ctx, req.PhoneNumber, req.Token, data)
 }

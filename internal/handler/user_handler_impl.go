@@ -7,11 +7,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/constants"
+	"github.com/rizalarfiyan/be-revend/exception"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/internal/service"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
-	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type userHandler struct {
@@ -85,7 +85,7 @@ func (h *userHandler) GetAllUser(ctx *fiber.Ctx) error {
 func (h *userHandler) GetUserById(ctx *fiber.Ctx) error {
 	userId, err := uuid.Parse(ctx.Params("id", ""))
 	if err != nil {
-		utils.IsNotFound(nil, false)
+		exception.IsNotFound(nil, false)
 	}
 
 	res := h.service.GetUserById(ctx.Context(), userId)

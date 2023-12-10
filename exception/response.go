@@ -1,4 +1,4 @@
-package utils
+package exception
 
 import (
 	"errors"
@@ -11,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5"
 	"github.com/rizalarfiyan/be-revend/internal/response"
+	"github.com/rizalarfiyan/be-revend/utils"
 	"github.com/rizalarfiyan/be-revend/validation"
 )
 
@@ -36,7 +37,7 @@ func PanicIfErrorWithoutNoSqlResult(err error, isList bool) {
 }
 
 func responseIfNull(value interface{}, isList bool, callback func(isList bool, data interface{}) *response.BaseResponse) {
-	if IsNil(value) || IsZeroLength(value) {
+	if utils.IsNil(value) || utils.IsZeroLength(value) {
 		data := DefaultErrorData(isList)
 		panic(callback(isList, data))
 	}

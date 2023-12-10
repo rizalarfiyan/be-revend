@@ -3,6 +3,7 @@ package response
 import (
 	"github.com/google/uuid"
 	"github.com/rizalarfiyan/be-revend/internal/sql"
+	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type User struct {
@@ -12,4 +13,16 @@ type User struct {
 	PhoneNumber string    `json:"phone_number"`
 	Identity    string    `json:"identity"`
 	Role        sql.Role  `json:"role"`
+}
+
+func (u *User) FromDB(user sql.User) {
+	u.Id = utils.ToUUID(user.ID)
+	u.FirstName = user.FirstName
+	u.PhoneNumber = user.PhoneNumber
+	u.Identity = user.Identity
+	u.Role = user.Role
+
+	if user.LastName.Valid {
+		u.LastName = user.LastName.String
+	}
 }

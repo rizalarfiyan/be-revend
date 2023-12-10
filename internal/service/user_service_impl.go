@@ -5,12 +5,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rizalarfiyan/be-revend/config"
+	"github.com/rizalarfiyan/be-revend/exception"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
-	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type userService struct {
@@ -27,8 +27,8 @@ func NewUserService(repo repository.UserRepository) UserService {
 
 func (s *userService) GetAllUser(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.User] {
 	data, err := s.repo.AllUser(ctx, req)
-	utils.PanicIfError(err, true)
-	utils.IsNotFound(data, true)
+	exception.PanicIfError(err, true)
+	exception.IsNotFound(data, true)
 
 	content := models.ContentPagination[response.User]{
 		Count:   data.Count,
@@ -36,18 +36,8 @@ func (s *userService) GetAllUser(ctx context.Context, req request.BasePagination
 	}
 
 	for _, val := range data.Content {
-		user := response.User{
-			Id:          utils.ToUUID(val.ID),
-			FirstName:   val.FirstName,
-			PhoneNumber: val.PhoneNumber,
-			Identity:    val.Identity,
-			Role:        val.Role,
-		}
-
-		if val.LastName.Valid {
-			user.LastName = val.LastName.String
-		}
-
+		user := response.User{}
+		user.FromDB(val)
 		content.Content = append(content.Content, user)
 	}
 
@@ -56,20 +46,10 @@ func (s *userService) GetAllUser(ctx context.Context, req request.BasePagination
 
 func (s *userService) GetUserById(ctx context.Context, userId uuid.UUID) response.User {
 	data, err := s.repo.GetUserById(ctx, userId)
-	utils.PanicIfError(err, true)
-	utils.IsNotFound(data, true)
+	exception.PanicIfError(err, true)
+	exception.IsNotFound(data, true)
 
-	user := response.User{
-		Id:          utils.ToUUID(data.ID),
-		FirstName:   data.FirstName,
-		PhoneNumber: data.PhoneNumber,
-		Identity:    data.Identity,
-		Role:        data.Role,
-	}
-
-	if data.LastName.Valid {
-		user.LastName = data.LastName.String
-	}
-
+	user := response.User{}
+	user.FromDB(data)
 	return user
 }

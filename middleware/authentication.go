@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/constants"
+	"github.com/rizalarfiyan/be-revend/exception"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/utils"
 )
@@ -15,7 +16,7 @@ var errJwt = errors.New("unauthorize, invalid or expired jwt")
 
 func baseAuth(isList bool, isMandatory bool) fiber.Handler {
 	conf := config.Get()
-	data := utils.DefaultErrorData(isList)
+	data := exception.DefaultErrorData(isList)
 	return jwtMiddleware.New(jwtMiddleware.Config{
 		ContextKey: constants.KeyLocalsUser,
 		SigningKey: jwtMiddleware.SigningKey{

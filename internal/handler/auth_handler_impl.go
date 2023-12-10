@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/rizalarfiyan/be-revend/config"
+	"github.com/rizalarfiyan/be-revend/exception"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/internal/service"
@@ -96,10 +97,10 @@ func (h *authHandler) Register(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	utils.ValidateStruct(*req, false)
+	exception.ValidateStruct(*req, false)
 
 	_, err = ksuid.Parse(req.Token)
-	utils.IsNotProcessErrorMessage(err, "Token is not valid", false)
+	exception.IsNotProcessErrorMessage(err, "Token is not valid", false)
 
 	h.service.Register(ctx.Context(), *req)
 	return ctx.JSON(response.BaseResponse{
@@ -126,13 +127,13 @@ func (h *authHandler) Verification(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	utils.ValidateStruct(*req, false)
+	exception.ValidateStruct(*req, false)
 
 	token, err := ksuid.Parse(req.Token)
-	utils.IsNotProcessErrorMessage(err, "Token is not valid", false)
+	exception.IsNotProcessErrorMessage(err, "Token is not valid", false)
 
 	if !token.Time().Add(h.conf.Auth.Verification.Duration).After(time.Now()) {
-		utils.IsNotProcessRawMessage("Token is not valid", false)
+		exception.IsNotProcessRawMessage("Token is not valid", false)
 	}
 
 	res := h.service.Verification(ctx.Context(), *req)
@@ -161,7 +162,7 @@ func (h *authHandler) SendOTP(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	utils.ValidateStruct(*req, false)
+	exception.ValidateStruct(*req, false)
 
 	res := h.service.SendOTP(ctx.Context(), *req)
 	return ctx.JSON(response.BaseResponse{
@@ -189,7 +190,7 @@ func (h *authHandler) OTPVerification(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	utils.ValidateStruct(*req, false)
+	exception.ValidateStruct(*req, false)
 
 	res := h.service.OTPVerification(ctx.Context(), *req)
 	return ctx.JSON(response.BaseResponse{
