@@ -4,12 +4,14 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/constants"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/internal/service"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
+	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type userHandler struct {
@@ -24,7 +26,7 @@ func NewUserHandler(service service.UserService) UserHandler {
 	}
 }
 
-// AllUser godoc
+// GetAllUser godoc
 // @Summary      Get All User based on parameter
 // @Description  All User
 // @ID           get-all-user
@@ -40,7 +42,7 @@ func NewUserHandler(service service.UserService) UserHandler {
 // @Success      200  {object}  response.BaseResponse{data=response.BaseResponsePagination[response.User]}
 // @Failure      500  {object}  response.BaseResponse
 // @Router       /user [get]
-func (h *userHandler) AllUser(ctx *fiber.Ctx) error {
+func (h *userHandler) GetAllUser(ctx *fiber.Ctx) error {
 	req := request.BasePagination{
 		Page:    ctx.QueryInt("page", 1),
 		Limit:   ctx.QueryInt("limit", constants.DefaultPageLimit),
@@ -60,7 +62,33 @@ func (h *userHandler) AllUser(ctx *fiber.Ctx) error {
 	req.ValidateAndUpdateOrderBy(fieldOrder)
 	req.Normalize()
 
-	res := h.service.AllUser(ctx.Context(), req)
+	res := h.service.GetAllUser(ctx.Context(), req)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+		Data:    res,
+	})
+}
+
+// GetUserById godoc
+// @Summary      Get User By Id based on parameter
+// @Description  Get User By Id
+// @ID           get-user-by-id
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Security     AccessToken
+// @Param        id path string true "User Id"
+// @Success      200  {object}  response.BaseResponse{data=response.User}
+// @Failure      500  {object}  response.BaseResponse
+// @Router       /user/{id} [get]
+func (h *userHandler) GetUserById(ctx *fiber.Ctx) error {
+	userId, err := uuid.Parse(ctx.Params("id", ""))
+	if err != nil {
+		utils.IsNotFound(nil, false)
+	}
+
+	res := h.service.GetUserById(ctx.Context(), userId)
 	return ctx.JSON(response.BaseResponse{
 		Code:    http.StatusOK,
 		Message: "Success!",

@@ -1,3 +1,7 @@
+-- name: GetUserById :one
+SELECT * FROM users
+WHERE id = $1 LIMIT 1;
+
 -- name: GetUserByPhoneNumber :one
 SELECT * FROM users
 WHERE phone_number = $1 LIMIT 1;

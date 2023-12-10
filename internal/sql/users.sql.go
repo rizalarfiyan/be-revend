@@ -129,6 +129,28 @@ func (q *Queries) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, arg GetUse
 	return i, err
 }
 
+const getUserById = `-- name: GetUserById :one
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserById(ctx context.Context, id pgtype.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUserById, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.PhoneNumber,
+		&i.GoogleID,
+		&i.Identity,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getUserByIdentity = `-- name: GetUserByIdentity :one
 SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
 WHERE identity = $1 LIMIT 1

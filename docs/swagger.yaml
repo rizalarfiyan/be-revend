@@ -409,6 +409,39 @@ paths:
       summary: Get All User based on parameter
       tags:
       - user
+  /user/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get User By Id
+      operationId: get-user-by-id
+      parameters:
+      - description: User Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.User'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Get User By Id based on parameter
+      tags:
+      - user
 securityDefinitions:
   AccessToken:
     in: header

@@ -38,5 +38,6 @@ func (r *router) AuthRoute(handler handler.AuthHandler) {
 
 func (r *router) UserRoute(handler handler.UserHandler) {
 	user := r.app.Group("user")
-	user.Get("", handler.AllUser)
+	user.Get("", handler.GetAllUser)
+	user.Get(":id", handler.GetUserById)
 }

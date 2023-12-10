@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/repository"
@@ -24,7 +25,7 @@ func NewUserService(repo repository.UserRepository) UserService {
 	}
 }
 
-func (s *userService) AllUser(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.User] {
+func (s *userService) GetAllUser(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.User] {
 	data, err := s.repo.AllUser(ctx, req)
 	utils.PanicIfError(err, true)
 	utils.IsNotFound(data, true)
@@ -36,7 +37,7 @@ func (s *userService) AllUser(ctx context.Context, req request.BasePagination) r
 
 	for _, val := range data.Content {
 		user := response.User{
-			Id:          utils.ConvertUUID(val.ID),
+			Id:          utils.ToUUID(val.ID),
 			FirstName:   val.FirstName,
 			PhoneNumber: val.PhoneNumber,
 			Identity:    val.Identity,
@@ -51,4 +52,24 @@ func (s *userService) AllUser(ctx context.Context, req request.BasePagination) r
 	}
 
 	return response.WithPagination[response.User](content, req)
+}
+
+func (s *userService) GetUserById(ctx context.Context, userId uuid.UUID) response.User {
+	data, err := s.repo.GetUserById(ctx, userId)
+	utils.PanicIfError(err, true)
+	utils.IsNotFound(data, true)
+
+	user := response.User{
+		Id:          utils.ToUUID(data.ID),
+		FirstName:   data.FirstName,
+		PhoneNumber: data.PhoneNumber,
+		Identity:    data.Identity,
+		Role:        data.Role,
+	}
+
+	if data.LastName.Valid {
+		user.LastName = data.LastName.String
+	}
+
+	return user
 }

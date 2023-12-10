@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/request"
@@ -23,6 +24,10 @@ func NewUserRepository(db *pgxpool.Pool) UserRepository {
 		query:        sql.New(db),
 		queryBuilder: sql.New(utils.QueryWrap(db)),
 	}
+}
+
+func (r *userRepository) GetUserById(ctx context.Context, userId uuid.UUID) (sql.User, error) {
+	return r.query.GetUserById(ctx, utils.UUID(userId))
 }
 
 func (r *userRepository) AllUser(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.User], error) {
