@@ -1,6 +1,9 @@
 package request
 
-import "strings"
+import (
+	"html"
+	"strings"
+)
 
 type BasePagination struct {
 	Page    int    `json:"page" field:"Page" validate:"omitempty,min=1" example:"1"`
@@ -8,6 +11,12 @@ type BasePagination struct {
 	Search  string `json:"search" field:"Search"`
 	OrderBy string `json:"order_by" field:"Order By"`
 	Order   string `json:"order" field:"Order"`
+}
+
+func (bp *BasePagination) Normalize() {
+	if bp.Search != "" {
+		bp.Search = html.EscapeString(strings.ToLower(strings.TrimSpace(bp.Search)))
+	}
 }
 
 func (bp *BasePagination) ValidateAndUpdateOrderBy(data map[string]string) {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/rizalarfiyan/be-revend/constants"
 )
 
 type (
@@ -124,6 +125,11 @@ func (b *QueryBuilder) Order(cols string) *QueryBuilder {
 	return b
 }
 
+func (b *QueryBuilder) Ordering(cols, ordering string) *QueryBuilder {
+	b.order = fmt.Sprintf("%s %s", cols, ordering)
+	return b
+}
+
 // Offset sets the offset in SELECT.
 func (b *QueryBuilder) Offset(x int) *QueryBuilder {
 	b.offset = x
@@ -133,6 +139,26 @@ func (b *QueryBuilder) Offset(x int) *QueryBuilder {
 // Limit sets the limit in SELECT.
 func (b *QueryBuilder) Limit(x int) *QueryBuilder {
 	b.limit = x
+	return b
+}
+
+// Auto limit and offset.
+func (b *QueryBuilder) Pagination(page, limit int) *QueryBuilder {
+	if page <= 0 {
+		page = 1
+	}
+
+	if limit <= 0 {
+		limit = constants.DefaultPageLimit
+	}
+
+	offset := (page - 1) * limit
+	if offset < 0 {
+		offset = 0
+	}
+
+	b.limit = limit
+	b.offset = offset
 	return b
 }
 

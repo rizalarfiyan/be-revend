@@ -367,6 +367,21 @@ paths:
         in: query
         name: search
         type: string
+      - description: Order by
+        enum:
+        - first_name
+        - last_name
+        - phone_number
+        in: query
+        name: order_by
+        type: string
+      - description: Order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
       produces:
       - application/json
       responses:

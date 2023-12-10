@@ -382,6 +382,27 @@ const docTemplate = `{
                         "description": "Search",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "first_name",
+                            "last_name",
+                            "phone_number"
+                        ],
+                        "type": "string",
+                        "description": "Order by",
+                        "name": "order_by",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Order",
+                        "name": "order",
+                        "in": "query"
                     }
                 ],
                 "responses": {

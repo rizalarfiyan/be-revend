@@ -19,7 +19,6 @@ func NewRouter(app *fiber.App) Router {
 func (r *router) BaseRoute(handler handler.BaseHandler) {
 	r.app.Get("", handler.Home)
 	r.app.Get("health", handler.Health)
-	r.app.Get("test", handler.Test)
 }
 
 func (r *router) AuthRoute(handler handler.AuthHandler) {

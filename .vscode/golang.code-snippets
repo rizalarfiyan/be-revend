@@ -171,6 +171,35 @@
         ],
         "description": "Create repository implementation"
     },
+    "Create repository and query builder implementation": {
+        "scope": "go",
+        "prefix": "repoimplqb",
+        "body": [
+            "package repository",
+            "",
+            "import (",
+            "    \"github.com/jackc/pgx/v5/pgxpool\"",
+            "    \"github.com/rizalarfiyan/be-revend/internal/sql\"",
+            "    \"github.com/rizalarfiyan/be-revend/utils\"",
+            ")",
+            "",
+            "type ${TM_FILENAME_BASE/(.*)_impl/${1:/camelcase}/g} struct {",
+            "    db           *pgxpool.Pool",
+            "    query        *sql.Queries",
+            "    queryBuilder *sql.Queries",
+            "}",
+            "",
+            "func New${TM_FILENAME_BASE/(.*)_impl/${1:/pascalcase}/g}(db *pgxpool.Pool) ${TM_FILENAME_BASE/(.*)_impl/${1:/pascalcase}/g} {",
+            "    return &${TM_FILENAME_BASE/(.*)_impl/${1:/camelcase}/g}{",
+            "        db:           db,",
+            "        query:        sql.New(db),",
+            "        queryBuilder: sql.New(utils.QueryWrap(db)),",
+            "    }",
+            "}",
+            ""
+        ],
+        "description": "Create repository and query builder implementation"
+    },
     "Create repository and redis implementation": {
         "scope": "go",
         "prefix": "repoimplredis",

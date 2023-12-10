@@ -12,32 +12,48 @@ import (
 )
 
 type userRepository struct {
-	db    *pgxpool.Pool
-	query *sql.Queries
+	db           *pgxpool.Pool
+	query        *sql.Queries
+	queryBuilder *sql.Queries
 }
 
 func NewUserRepository(db *pgxpool.Pool) UserRepository {
 	return &userRepository{
-		db:    db,
-		query: sql.New(db),
+		db:           db,
+		query:        sql.New(db),
+		queryBuilder: sql.New(utils.QueryWrap(db)),
 	}
 }
 
 func (r *userRepository) AllUser(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.User], error) {
 	var res models.ContentPagination[sql.User]
-	// var count int
 
-	query := sql.New(utils.QueryWrap(r.db))
-	users, err := query.GetAllUsers(utils.QueryBuild(ctx, func(b *utils.QueryBuilder) {
+	baseBuilder := func(b *utils.QueryBuilder) {
 		if req.Search != "" {
-			b.Where("CONCAT(first_name, ' ', last_name) LIKE $1", fmt.Sprintf("'%%%s%%'", req.Search))
+			b.Where("LOWER(CONCAT(first_name, ' ', last_name)) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
 		}
+	}
+
+	users, err := r.queryBuilder.GetAllUsers(utils.QueryBuild(ctx, func(b *utils.QueryBuilder) {
+		baseBuilder(b)
+		if req.OrderBy != "" && req.Order != "" {
+			b.Ordering(req.OrderBy, req.Order)
+		} else {
+			b.Order("created_at DESC")
+		}
+		b.Pagination(req.Page, req.Limit)
 	}))
 
 	if err != nil {
 		return nil, err
 	}
 
+	count, err := r.queryBuilder.CountAllUsers(utils.QueryBuild(ctx, baseBuilder))
+	if err != nil {
+		return nil, err
+	}
+
 	res.Content = users
+	res.Count = count
 	return &res, nil
 }

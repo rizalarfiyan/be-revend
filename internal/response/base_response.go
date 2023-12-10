@@ -40,9 +40,9 @@ func New(ctx *fiber.Ctx, code int, message string, data interface{}) error {
 }
 
 type BaseMetadataPagination struct {
-	Total   int `json:"total"`
-	Page    int `json:"page"`
-	PerPage int `json:"per_page"`
+	Total   int64 `json:"total"`
+	Page    int   `json:"page"`
+	PerPage int   `json:"per_page"`
 }
 
 type BaseResponsePagination[T any] struct {
