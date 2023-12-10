@@ -36,8 +36,11 @@ func (s *userService) AllUser(ctx context.Context, req request.BasePagination) r
 
 	for _, val := range data.Content {
 		user := response.User{
+			Id:          utils.ConvertUUID(val.ID),
 			FirstName:   val.FirstName,
 			PhoneNumber: val.PhoneNumber,
+			Identity:    val.Identity,
+			Role:        val.Role,
 		}
 
 		if val.LastName.Valid {

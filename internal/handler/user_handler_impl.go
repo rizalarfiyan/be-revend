@@ -53,6 +53,8 @@ func (h *userHandler) AllUser(ctx *fiber.Ctx) error {
 		"first_name":   "first_name",
 		"last_name":    "last_name",
 		"phone_number": "phone_number",
+		"identity":     "identity",
+		"role":         "role",
 	}
 
 	req.ValidateAndUpdateOrderBy(fieldOrder)

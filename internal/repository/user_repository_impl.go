@@ -30,7 +30,7 @@ func (r *userRepository) AllUser(ctx context.Context, req request.BasePagination
 
 	baseBuilder := func(b *utils.QueryBuilder) {
 		if req.Search != "" {
-			b.Where("LOWER(CONCAT(first_name, ' ', last_name)) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
+			b.Where("LOWER(CONCAT(first_name, ' ', last_name)) LIKE $1 OR LOWER(identity) LIKE $1 OR LOWER(phone_number) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
 		}
 	}
 

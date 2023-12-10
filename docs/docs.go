@@ -604,11 +604,20 @@ const docTemplate = `{
                 "first_name": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string"
+                },
+                "identity": {
+                    "type": "string"
+                },
                 "last_name": {
                     "type": "string"
                 },
                 "phone_number": {
                     "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/sql.Role"
                 }
             }
         },
