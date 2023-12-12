@@ -16,7 +16,7 @@ type User struct {
 }
 
 func (u *User) FromDB(user sql.User) {
-	u.Id = utils.ToUUID(user.ID)
+	u.Id = utils.PGToUUID(user.ID)
 	u.FirstName = user.FirstName
 	u.PhoneNumber = user.PhoneNumber
 	u.Identity = user.Identity

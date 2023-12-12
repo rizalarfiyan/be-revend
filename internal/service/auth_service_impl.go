@@ -141,8 +141,10 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 	if user.LastName.Valid {
 		data.LastName = user.LastName.String
 	}
+
 	data.Identity = user.Identity
 	data.PhoneNumber = user.PhoneNumber
+	data.IsVerified = true
 	return
 }
 
@@ -181,7 +183,7 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 	}
 
 	otp := s.getOTPDetail(ctx, data.PhoneNumber)
-	if otp.IsBlocked || otp.RemainingTime > 0 || !otp.IsVerified {
+	if (otp.IsBlocked || otp.RemainingTime > 0) && !data.IsVerified {
 		res.Step = constants.AuthVerificationOtp
 		res.PhoneNumber = data.PhoneNumber
 		res.RemainingTime = int64(otp.RemainingTime.Seconds())

@@ -35,7 +35,6 @@ type OTPInformation struct {
 
 type OTPDetailStatus struct {
 	IsBlocked     bool
-	IsVerified    bool
 	RemainingTime time.Duration
 	Token         string
 }

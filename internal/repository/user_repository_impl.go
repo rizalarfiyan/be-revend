@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/request"
@@ -61,13 +60,11 @@ func (r *userRepository) AllUser(ctx context.Context, req request.BasePagination
 }
 
 func (r *userRepository) GetUserById(ctx context.Context, userId uuid.UUID) (sql.User, error) {
-	return r.query.GetUserById(ctx, utils.UUID(userId))
+	return r.query.GetUserById(ctx, utils.PGUUID(userId))
 }
 
 func (r *userRepository) GetUserByGoogleId(ctx context.Context, googleID string) (sql.User, error) {
-	return r.query.GetUserByGoogleId(ctx, pgtype.Text{
-		String: googleID,
-	})
+	return r.query.GetUserByGoogleId(ctx, utils.PGText(googleID))
 }
 
 func (r *userRepository) GetUserByPhoneNumber(ctx context.Context, googleID string) (sql.User, error) {
@@ -80,9 +77,7 @@ func (r *userRepository) GetUserByIdentity(ctx context.Context, identity string)
 
 func (r *userRepository) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, googleID, phoneNumber string) (sql.User, error) {
 	return r.query.GetUserByGoogleIdOrPhoneNumber(ctx, sql.GetUserByGoogleIdOrPhoneNumberParams{
-		GoogleID: pgtype.Text{
-			String: googleID,
-		},
+		GoogleID:    utils.PGText(googleID),
 		PhoneNumber: phoneNumber,
 	})
 }
