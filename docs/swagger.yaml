@@ -112,6 +112,15 @@ definitions:
       metadata:
         $ref: '#/definitions/response.BaseMetadataPagination'
     type: object
+  response.BaseResponsePagination-response_History:
+    properties:
+      content:
+        items:
+          $ref: '#/definitions/response.History'
+        type: array
+      metadata:
+        $ref: '#/definitions/response.BaseMetadataPagination'
+    type: object
   response.BaseResponsePagination-response_User:
     properties:
       content:
@@ -123,11 +132,42 @@ definitions:
     type: object
   response.Device:
     properties:
+      id:
+        type: string
       location:
         type: string
       name:
         type: string
       token:
+        type: string
+    type: object
+  response.History:
+    properties:
+      device:
+        $ref: '#/definitions/response.HistoryDevice'
+      failed:
+        type: integer
+      id:
+        type: string
+      success:
+        type: integer
+      user:
+        $ref: '#/definitions/response.HistoryUser'
+    type: object
+  response.HistoryDevice:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  response.HistoryUser:
+    properties:
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
         type: string
     type: object
   response.User:
@@ -427,6 +467,64 @@ paths:
       summary: Get Base Health based on parameter
       tags:
       - home
+  /history:
+    get:
+      consumes:
+      - application/json
+      description: All History
+      operationId: get-all-history
+      parameters:
+      - default: 1
+        description: Page
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Order by
+        enum:
+        - success
+        - failed
+        - name
+        - device
+        in: query
+        name: order_by
+        type: string
+      - description: Order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.BaseResponsePagination-response_History'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Get All History based on parameter
+      tags:
+      - history
   /user:
     get:
       consumes:

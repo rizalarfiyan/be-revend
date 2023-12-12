@@ -433,6 +433,97 @@ const docTemplate = `{
                 }
             }
         },
+        "/history": {
+            "get": {
+                "security": [
+                    {
+                        "AccessToken": []
+                    }
+                ],
+                "description": "All History",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "history"
+                ],
+                "summary": "Get All History based on parameter",
+                "operationId": "get-all-history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "success",
+                            "failed",
+                            "name",
+                            "device"
+                        ],
+                        "type": "string",
+                        "description": "Order by",
+                        "name": "order_by",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Order",
+                        "name": "order",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.BaseResponsePagination-response_History"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "security": [
@@ -744,6 +835,20 @@ const docTemplate = `{
                 }
             }
         },
+        "response.BaseResponsePagination-response_History": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.History"
+                    }
+                },
+                "metadata": {
+                    "$ref": "#/definitions/response.BaseMetadataPagination"
+                }
+            }
+        },
         "response.BaseResponsePagination-response_User": {
             "type": "object",
             "properties": {
@@ -761,6 +866,9 @@ const docTemplate = `{
         "response.Device": {
             "type": "object",
             "properties": {
+                "id": {
+                    "type": "string"
+                },
                 "location": {
                     "type": "string"
                 },
@@ -768,6 +876,51 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.History": {
+            "type": "object",
+            "properties": {
+                "device": {
+                    "$ref": "#/definitions/response.HistoryDevice"
+                },
+                "failed": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "integer"
+                },
+                "user": {
+                    "$ref": "#/definitions/response.HistoryUser"
+                }
+            }
+        },
+        "response.HistoryDevice": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.HistoryUser": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_name": {
                     "type": "string"
                 }
             }

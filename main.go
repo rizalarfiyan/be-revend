@@ -103,12 +103,14 @@ func main() {
 	authRepository := repository.NewAuthRepository(db, redis)
 	userRepository := repository.NewUserRepository(db)
 	deviceRepository := repository.NewDeviceRepository(db, redis)
+	historyRepository := repository.NewHistoryRepository(db)
 
 	// service
 	mqttService := service.NewMQTTService(authRepository, userRepository)
 	authService := service.NewAuthService(authRepository, userRepository, *mqtt)
 	userService := service.NewUserService(userRepository)
 	deviceService := service.NewDeviceService(deviceRepository)
+	historyService := service.NewHistoryService(historyRepository)
 
 	// handler
 	mqttHandler := handler.NewMQTTHandler(mqttService)
@@ -116,6 +118,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
 	deviceHandler := handler.NewDeviceHandler(deviceService)
+	historyHandler := handler.NewHistoryHandler(historyService)
 
 	// router
 	subscribe.BaseSubscribe(mqttHandler)
@@ -123,6 +126,7 @@ func main() {
 	route.AuthRoute(authHandler)
 	route.UserRoute(userHandler)
 	route.DeviceRoute(deviceHandler)
+	route.HistoryRoute(historyHandler)
 
 	baseUrl := fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	server := &http.Server{

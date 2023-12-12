@@ -66,7 +66,8 @@ type History struct {
 	ID        pgtype.UUID
 	UserID    pgtype.UUID
 	DeviceID  pgtype.UUID
-	Point     pgtype.Int4
+	Success   int32
+	Failed    int32
 	CreatedAt pgtype.Timestamp
 }
 

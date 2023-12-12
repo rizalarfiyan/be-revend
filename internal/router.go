@@ -7,4 +7,5 @@ type Router interface {
 	AuthRoute(handler handler.AuthHandler)
 	UserRoute(handler handler.UserHandler)
 	DeviceRoute(handler handler.DeviceHandler)
+	HistoryRoute(handler handler.HistoryHandler)
 }

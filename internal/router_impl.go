@@ -46,3 +46,8 @@ func (r *router) DeviceRoute(handler handler.DeviceHandler) {
 	user := r.app.Group("device")
 	user.Get("", handler.GetAllDevice)
 }
+
+func (r *router) HistoryRoute(handler handler.HistoryHandler) {
+	user := r.app.Group("history")
+	user.Get("", handler.GetAllHistory)
+}
