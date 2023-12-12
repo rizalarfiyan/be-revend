@@ -41,3 +41,8 @@ func (r *router) UserRoute(handler handler.UserHandler) {
 	user.Get("", handler.GetAllUser)
 	user.Get(":id", handler.GetUserById)
 }
+
+func (r *router) DeviceRoute(handler handler.DeviceHandler) {
+	user := r.app.Group("device")
+	user.Get("", handler.GetAllDevice)
+}

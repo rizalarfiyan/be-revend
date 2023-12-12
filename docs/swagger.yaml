@@ -103,6 +103,15 @@ definitions:
         example: Message!
         type: string
     type: object
+  response.BaseResponsePagination-response_Device:
+    properties:
+      content:
+        items:
+          $ref: '#/definitions/response.Device'
+        type: array
+      metadata:
+        $ref: '#/definitions/response.BaseMetadataPagination'
+    type: object
   response.BaseResponsePagination-response_User:
     properties:
       content:
@@ -111,6 +120,15 @@ definitions:
         type: array
       metadata:
         $ref: '#/definitions/response.BaseMetadataPagination'
+    type: object
+  response.Device:
+    properties:
+      location:
+        type: string
+      name:
+        type: string
+      token:
+        type: string
     type: object
   response.User:
     properties:
@@ -332,6 +350,63 @@ paths:
       summary: Post Auth Verification based on parameter
       tags:
       - auth
+  /device:
+    get:
+      consumes:
+      - application/json
+      description: All Device
+      operationId: get-all-device
+      parameters:
+      - default: 1
+        description: Page
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Order by
+        enum:
+        - token
+        - name
+        - location
+        in: query
+        name: order_by
+        type: string
+      - description: Order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.BaseResponsePagination-response_Device'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Get All Device based on parameter
+      tags:
+      - device
   /health:
     get:
       consumes:

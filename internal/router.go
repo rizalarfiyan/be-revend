@@ -6,4 +6,5 @@ type Router interface {
 	BaseRoute(handler handler.BaseHandler)
 	AuthRoute(handler handler.AuthHandler)
 	UserRoute(handler handler.UserHandler)
+	DeviceRoute(handler handler.DeviceHandler)
 }
