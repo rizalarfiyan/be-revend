@@ -38,16 +38,16 @@ func (r *router) AuthRoute(handler handler.AuthHandler) {
 
 func (r *router) UserRoute(handler handler.UserHandler) {
 	user := r.app.Group("user")
-	user.Get("", handler.GetAllUser)
-	user.Get(":id", handler.GetUserById)
+	user.Get("", middleware.Auth(true), handler.GetAllUser)
+	user.Get(":id", middleware.Auth(true), handler.GetUserById)
 }
 
 func (r *router) DeviceRoute(handler handler.DeviceHandler) {
 	user := r.app.Group("device")
-	user.Get("", handler.GetAllDevice)
+	user.Get("", middleware.Auth(true), handler.GetAllDevice)
 }
 
 func (r *router) HistoryRoute(handler handler.HistoryHandler) {
 	user := r.app.Group("history")
-	user.Get("", handler.GetAllHistory)
+	user.Get("", middleware.Auth(true), handler.GetAllHistory)
 }

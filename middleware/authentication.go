@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 
 	jwtMiddleware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
@@ -25,6 +26,8 @@ func baseAuth(isList bool, isMandatory bool) fiber.Handler {
 		SuccessHandler: func(ctx *fiber.Ctx) error {
 			_, err := utils.ValidateUser(ctx)
 			if err != nil {
+				fmt.Println(err)
+
 				if !isMandatory {
 					return ctx.Next()
 				}

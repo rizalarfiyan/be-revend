@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/rizalarfiyan/be-revend/constants"
 	"github.com/rizalarfiyan/be-revend/internal/sql"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
@@ -21,19 +22,22 @@ func ValidateUser(ctx *fiber.Ctx) (*baseModels.AuthToken, error) {
 		return nil, fmt.Errorf("could not extract claims from JWT token")
 	}
 
+	id, idOk := claims["id"].(string)
 	firstName, firstNameOk := claims["first_name"].(string)
 	lastName, lastNameOk := claims["last_name"].(string)
 	phoneNumber, phoneNumberOk := claims["phone_number"].(string)
-	role, roleOk := claims["role"].(sql.Role)
-	if !firstNameOk || !lastNameOk || !phoneNumberOk || !roleOk {
+	role, roleOk := claims["role"].(string)
+	userId, err := uuid.Parse(id)
+	if !idOk || !firstNameOk || !lastNameOk || !phoneNumberOk || !roleOk || !IsValidRole(role) || err != nil {
 		return nil, fmt.Errorf("one or more claims are missing or have incorrect types")
 	}
 
 	res := baseModels.AuthToken{
+		Id:          userId,
 		FirstName:   firstName,
 		LastName:    lastName,
 		PhoneNumber: phoneNumber,
-		Role:        role,
+		Role:        sql.Role(role),
 	}
 
 	return &res, nil

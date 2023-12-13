@@ -199,6 +199,7 @@ func (s *authService) Verification(ctx context.Context, req request.AuthVerifica
 	}
 
 	payload := baseModels.AuthToken{
+		Id:          user.ID.Bytes,
 		FirstName:   user.FirstName,
 		PhoneNumber: user.PhoneNumber,
 		Role:        user.Role,
@@ -358,6 +359,7 @@ func (s *authService) OTPVerification(ctx context.Context, req request.AuthOTPVe
 	}
 
 	payload := baseModels.AuthToken{
+		Id:          user.ID.Bytes,
 		FirstName:   user.FirstName,
 		LastName:    user.LastName.String,
 		PhoneNumber: user.PhoneNumber,
