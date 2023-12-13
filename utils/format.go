@@ -6,6 +6,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rizalarfiyan/be-revend/constants"
 )
 
@@ -47,4 +48,12 @@ func ParseTextTemplate(rawTemplate string, data interface{}) (string, error) {
 	}
 
 	return buf.String(), nil
+}
+
+func FullName(firstName string, lastName pgtype.Text) string {
+	name := firstName
+	if lastName.Valid {
+		name += " " + lastName.String
+	}
+	return strings.TrimSpace(name)
 }

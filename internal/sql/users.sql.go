@@ -46,6 +46,36 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
+const getAllNameUsers = `-- name: GetAllNameUsers :many
+SELECT id, first_name, last_name FROM users
+`
+
+type GetAllNameUsersRow struct {
+	ID        pgtype.UUID
+	FirstName string
+	LastName  pgtype.Text
+}
+
+func (q *Queries) GetAllNameUsers(ctx context.Context) ([]GetAllNameUsersRow, error) {
+	rows, err := q.db.Query(ctx, getAllNameUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllNameUsersRow
+	for rows.Next() {
+		var i GetAllNameUsersRow
+		if err := rows.Scan(&i.ID, &i.FirstName, &i.LastName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllUsers = `-- name: GetAllUsers :many
 SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
 `

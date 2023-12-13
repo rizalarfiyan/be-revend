@@ -39,6 +39,7 @@ func (r *router) AuthRoute(handler handler.AuthHandler) {
 func (r *router) UserRoute(handler handler.UserHandler) {
 	user := r.app.Group("user")
 	user.Get("", middleware.Auth(true), handler.GetAllUser)
+	user.Get("dropdown", middleware.Auth(true), handler.AllDropdownUser)
 	user.Get(":id", middleware.Auth(true), handler.GetUserById)
 }
 

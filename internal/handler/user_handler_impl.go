@@ -95,3 +95,34 @@ func (h *userHandler) GetUserById(ctx *fiber.Ctx) error {
 		Data:    res,
 	})
 }
+
+// AllDropdownUser godoc
+// @Summary      Get All Dropdown User based on parameter
+// @Description  All Dropdown User
+// @ID           get-all-dropdown-user
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Security     AccessToken
+// @Param        page query int false "Page" default(1)
+// @Param        limit query int false "Limit" default(10)
+// @Param        search query string false "Search"
+// @Success      200  {object}  response.BaseResponse{data=response.BaseResponsePagination[response.BaseDropdown]}
+// @Failure      500  {object}  response.BaseResponse
+// @Router       /user/dropdown [get]
+func (h *userHandler) AllDropdownUser(ctx *fiber.Ctx) error {
+	req := request.BasePagination{
+		Page:   ctx.QueryInt("page", 1),
+		Limit:  ctx.QueryInt("limit", constants.DefaultPageLimit),
+		Search: ctx.Query("search"),
+	}
+
+	req.Normalize()
+
+	res := h.service.GetAllDropdownUser(ctx.Context(), req)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+		Data:    res,
+	})
+}

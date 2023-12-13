@@ -85,3 +85,32 @@ func (r *userRepository) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, goo
 func (r *userRepository) CreateUser(ctx context.Context, payload sql.CreateUserParams) error {
 	return r.query.CreateUser(ctx, payload)
 }
+
+func (r *userRepository) AllDropdownUsers(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.GetAllNameUsersRow], error) {
+	var res models.ContentPagination[sql.GetAllNameUsersRow]
+
+	baseBuilder := func(b *utils.QueryBuilder) {
+		if req.Search != "" {
+			b.Where("LOWER(CONCAT(first_name, ' ', last_name)) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
+		}
+	}
+
+	users, err := r.queryBuilder.GetAllNameUsers(utils.QueryBuild(ctx, func(b *utils.QueryBuilder) {
+		baseBuilder(b)
+		b.Order("created_at DESC")
+		b.Pagination(req.Page, req.Limit)
+	}))
+
+	if err != nil {
+		return nil, err
+	}
+
+	count, err := r.queryBuilder.CountAllUsers(utils.QueryBuild(ctx, baseBuilder))
+	if err != nil {
+		return nil, err
+	}
+
+	res.Content = users
+	res.Count = count
+	return &res, nil
+}

@@ -21,6 +21,9 @@ WHERE google_id = $1 OR phone_number = $2 LIMIT 1;
 -- name: GetAllUsers :many
 SELECT * FROM users;
 
+-- name: GetAllNameUsers :many
+SELECT id, first_name, last_name FROM users;
+
 -- name: CountAllUsers :one
 SELECT count(*) FROM users;
 

@@ -675,6 +675,48 @@ paths:
       summary: Get User By Id based on parameter
       tags:
       - user
+  /user/dropdown:
+    get:
+      consumes:
+      - application/json
+      description: All Dropdown User
+      operationId: get-all-dropdown-user
+      parameters:
+      - default: 1
+        description: Page
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.BaseResponsePagination-response_BaseDropdown'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Get All Dropdown User based on parameter
+      tags:
+      - user
 securityDefinitions:
   AccessToken:
     in: header

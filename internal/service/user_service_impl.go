@@ -11,6 +11,7 @@ import (
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
+	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type userService struct {
@@ -52,4 +53,24 @@ func (s *userService) GetUserById(ctx context.Context, userId uuid.UUID) respons
 	user := response.User{}
 	user.FromDB(data)
 	return user
+}
+
+func (s *userService) GetAllDropdownUser(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.BaseDropdown] {
+	data, err := s.repo.AllDropdownUsers(ctx, req)
+	exception.PanicIfError(err, true)
+	exception.IsNotFound(data, true)
+
+	content := models.ContentPagination[response.BaseDropdown]{
+		Count:   data.Count,
+		Content: []response.BaseDropdown{},
+	}
+
+	for _, val := range data.Content {
+		content.Content = append(content.Content, response.BaseDropdown{
+			Key:   utils.FullName(val.FirstName, val.LastName),
+			Value: utils.PGToUUID(val.ID).String(),
+		})
+	}
+
+	return response.WithPagination[response.BaseDropdown](content, req)
 }
