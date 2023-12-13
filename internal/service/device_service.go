@@ -9,4 +9,5 @@ import (
 
 type DeviceService interface {
 	GetAllDevice(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.Device]
+	GetAllDropdownDevice(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.BaseDropdown]
 }

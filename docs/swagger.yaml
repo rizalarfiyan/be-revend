@@ -14,6 +14,8 @@ definitions:
     properties:
       first_name:
         type: string
+      id:
+        type: string
       last_name:
         type: string
       phone_number:
@@ -84,6 +86,13 @@ definitions:
       token:
         type: string
     type: object
+  response.BaseDropdown:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    type: object
   response.BaseMetadataPagination:
     properties:
       page:
@@ -102,6 +111,15 @@ definitions:
       message:
         example: Message!
         type: string
+    type: object
+  response.BaseResponsePagination-response_BaseDropdown:
+    properties:
+      content:
+        items:
+          $ref: '#/definitions/response.BaseDropdown'
+        type: array
+      metadata:
+        $ref: '#/definitions/response.BaseMetadataPagination'
     type: object
   response.BaseResponsePagination-response_Device:
     properties:
@@ -445,6 +463,48 @@ paths:
       security:
       - AccessToken: []
       summary: Get All Device based on parameter
+      tags:
+      - device
+  /device/dropdown:
+    get:
+      consumes:
+      - application/json
+      description: All Dropdown Device
+      operationId: get-all-dropdown-device
+      parameters:
+      - default: 1
+        description: Page
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Search
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.BaseResponsePagination-response_BaseDropdown'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Get All Dropdown Device based on parameter
       tags:
       - device
   /health:

@@ -10,4 +10,5 @@ import (
 
 type DeviceRepository interface {
 	AllDevice(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.Device], error)
+	AllDropdownDevice(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.GetAllNameDeviceRow], error)
 }

@@ -60,3 +60,8 @@ func WithPagination[T any](content models.ContentPagination[T], req request.Base
 		},
 	}
 }
+
+type BaseDropdown struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}

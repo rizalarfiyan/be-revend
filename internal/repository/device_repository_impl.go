@@ -60,3 +60,32 @@ func (r *deviceRepository) AllDevice(ctx context.Context, req request.BasePagina
 	res.Count = count
 	return &res, nil
 }
+
+func (r *deviceRepository) AllDropdownDevice(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.GetAllNameDeviceRow], error) {
+	var res models.ContentPagination[sql.GetAllNameDeviceRow]
+
+	baseBuilder := func(b *utils.QueryBuilder) {
+		if req.Search != "" {
+			b.Where("LOWER(name) LIKE $1 OR LOWER(location) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
+		}
+	}
+
+	devices, err := r.queryBuilder.GetAllNameDevice(utils.QueryBuild(ctx, func(b *utils.QueryBuilder) {
+		baseBuilder(b)
+		b.Order("created_at DESC")
+		b.Pagination(req.Page, req.Limit)
+	}))
+
+	if err != nil {
+		return nil, err
+	}
+
+	count, err := r.queryBuilder.CountAllDevice(utils.QueryBuild(ctx, baseBuilder))
+	if err != nil {
+		return nil, err
+	}
+
+	res.Content = devices
+	res.Count = count
+	return &res, nil
+}

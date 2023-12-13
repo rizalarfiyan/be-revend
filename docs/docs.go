@@ -403,6 +403,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/device/dropdown": {
+            "get": {
+                "security": [
+                    {
+                        "AccessToken": []
+                    }
+                ],
+                "description": "All Dropdown Device",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "device"
+                ],
+                "summary": "Get All Dropdown Device based on parameter",
+                "operationId": "get-all-dropdown-device",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.BaseResponsePagination-response_BaseDropdown"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Base Health",
@@ -691,6 +760,9 @@ const docTemplate = `{
                 "first_name": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string"
+                },
                 "last_name": {
                     "type": "string"
                 },
@@ -793,6 +865,17 @@ const docTemplate = `{
                 }
             }
         },
+        "response.BaseDropdown": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "response.BaseMetadataPagination": {
             "type": "object",
             "properties": {
@@ -818,6 +901,20 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "Message!"
+                }
+            }
+        },
+        "response.BaseResponsePagination-response_BaseDropdown": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.BaseDropdown"
+                    }
+                },
+                "metadata": {
+                    "$ref": "#/definitions/response.BaseMetadataPagination"
                 }
             }
         },

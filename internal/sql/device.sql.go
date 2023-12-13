@@ -7,6 +7,8 @@ package sql
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const countAllDevice = `-- name: CountAllDevice :one
@@ -41,6 +43,35 @@ func (q *Queries) GetAllDevice(ctx context.Context) ([]Device, error) {
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllNameDevice = `-- name: GetAllNameDevice :many
+SELECT id, name FROM device
+`
+
+type GetAllNameDeviceRow struct {
+	ID   pgtype.UUID
+	Name string
+}
+
+func (q *Queries) GetAllNameDevice(ctx context.Context) ([]GetAllNameDeviceRow, error) {
+	rows, err := q.db.Query(ctx, getAllNameDevice)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllNameDeviceRow
+	for rows.Next() {
+		var i GetAllNameDeviceRow
+		if err := rows.Scan(&i.ID, &i.Name); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
