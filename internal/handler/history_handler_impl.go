@@ -4,10 +4,14 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/rizalarfiyan/be-revend/constants"
+	"github.com/rizalarfiyan/be-revend/exception"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/internal/service"
+	"github.com/rizalarfiyan/be-revend/internal/sql"
+	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type historyHandler struct {
@@ -33,16 +37,33 @@ func NewHistoryHandler(service service.HistoryService) HistoryHandler {
 // @Param        search query string false "Search"
 // @Param        order_by query string false "Order by" Enums(success,failed,name,device)
 // @Param        order query string false "Order" Enums(asc, desc)
+// @Param        device_id query string false "Device ID" example(550e8400-e29b-41d4-a716-446655440000) Format(uuid)
+// @Param        user_id query string false "User ID" example(550e8400-e29b-41d4-a716-446655440000) Format(uuid)
 // @Success      200  {object}  response.BaseResponse{data=response.BaseResponsePagination[response.History]}
 // @Failure      500  {object}  response.BaseResponse
 // @Router       /history [get]
 func (h *historyHandler) GetAllHistory(ctx *fiber.Ctx) error {
-	req := request.BasePagination{
-		Page:    ctx.QueryInt("page", 1),
-		Limit:   ctx.QueryInt("limit", constants.DefaultPageLimit),
-		Search:  ctx.Query("search"),
-		OrderBy: ctx.Query("order_by"),
-		Order:   ctx.Query("order"),
+	req := request.GetAllHistoryRequest{
+		BasePagination: request.BasePagination{
+			Page:    ctx.QueryInt("page", 1),
+			Limit:   ctx.QueryInt("limit", constants.DefaultPageLimit),
+			Search:  ctx.Query("search"),
+			OrderBy: ctx.Query("order_by"),
+			Order:   ctx.Query("order"),
+		},
+	}
+
+	var err error
+	rawDeviceId := ctx.Query("device_id")
+	if rawDeviceId != "" {
+		req.DeviceId, err = uuid.Parse(rawDeviceId)
+		exception.ErrorListPaginationValidation[response.History](err, "invalid UUID format for device ID", req.BasePagination)
+	}
+
+	rawUserId := ctx.Query("user_id")
+	if rawUserId != "" {
+		req.UserId, err = uuid.Parse(ctx.Query("user_id"))
+		exception.ErrorListPaginationValidation[response.History](err, "invalid UUID format for user ID", req.BasePagination)
 	}
 
 	fieldOrder := map[string]string{
@@ -50,6 +71,11 @@ func (h *historyHandler) GetAllHistory(ctx *fiber.Ctx) error {
 		"failed":  "h.failed",
 		"name":    "CONCAT(u.first_name, ' ', u.last_name)",
 		"device":  "d.name",
+	}
+
+	user := utils.GetUser(ctx)
+	if user.Role != sql.RoleAdmin {
+		req.UserId = user.Id
 	}
 
 	req.ValidateAndUpdateOrderBy(fieldOrder)

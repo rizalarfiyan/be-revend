@@ -10,6 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5"
+	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/utils"
 	"github.com/rizalarfiyan/be-revend/validation"
@@ -131,4 +132,18 @@ func IsNotProcessRawMessage(message string, isList bool) {
 
 func IsNotProcessData(message string, data interface{}) {
 	panic(response.NewErrorMessage(http.StatusUnprocessableEntity, message, data))
+}
+
+func ErrorListPaginationValidation[T any](err error, message string, req request.BasePagination) {
+	if err != nil {
+		res := response.BaseResponsePagination[T]{
+			Content: []T{},
+			Metadata: response.BaseMetadataPagination{
+				Total:   0,
+				Page:    req.Page,
+				PerPage: req.Limit,
+			},
+		}
+		panic(response.NewErrorMessage(http.StatusBadRequest, message, res))
+	}
 }

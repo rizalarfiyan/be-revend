@@ -9,5 +9,5 @@ import (
 )
 
 type HistoryRepository interface {
-	AllHistory(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.GetAllHistoryRow], error)
+	AllHistory(ctx context.Context, req request.GetAllHistoryRequest) (*models.ContentPagination[sql.GetAllHistoryRow], error)
 }

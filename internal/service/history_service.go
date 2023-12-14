@@ -8,5 +8,5 @@ import (
 )
 
 type HistoryService interface {
-	GetAllHistory(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.History]
+	GetAllHistory(ctx context.Context, req request.GetAllHistoryRequest) response.BaseResponsePagination[response.History]
 }

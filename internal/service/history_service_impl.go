@@ -20,7 +20,7 @@ func NewHistoryService(repo repository.HistoryRepository) HistoryService {
 	}
 }
 
-func (s *historyService) GetAllHistory(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.History] {
+func (s *historyService) GetAllHistory(ctx context.Context, req request.GetAllHistoryRequest) response.BaseResponsePagination[response.History] {
 	data, err := s.repo.AllHistory(ctx, req)
 	exception.PanicIfError(err, true)
 	exception.IsNotFound(data, true)
@@ -36,5 +36,5 @@ func (s *historyService) GetAllHistory(ctx context.Context, req request.BasePagi
 		content.Content = append(content.Content, user)
 	}
 
-	return response.WithPagination[response.History](content, req)
+	return response.WithPagination[response.History](content, req.BasePagination)
 }

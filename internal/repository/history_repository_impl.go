@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/request"
@@ -25,12 +26,20 @@ func NewHistoryRepository(db *pgxpool.Pool) HistoryRepository {
 	}
 }
 
-func (r *historyRepository) AllHistory(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.GetAllHistoryRow], error) {
+func (r *historyRepository) AllHistory(ctx context.Context, req request.GetAllHistoryRequest) (*models.ContentPagination[sql.GetAllHistoryRow], error) {
 	var res models.ContentPagination[sql.GetAllHistoryRow]
 
 	baseBuilder := func(b *utils.QueryBuilder) {
 		if req.Search != "" {
 			b.Where("LOWER(d.name) LIKE $1 OR LOWER(CONCAT(u.first_name, ' ', u.last_name)) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
+		}
+
+		if req.DeviceId != uuid.Nil {
+			b.Where("h.device_id = $1", req.DeviceId)
+		}
+
+		if req.UserId != uuid.Nil {
+			b.Where("h.user_id = $1", req.UserId)
 		}
 	}
 
