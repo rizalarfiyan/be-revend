@@ -26,7 +26,7 @@ func NewUserService(repo repository.UserRepository) UserService {
 	}
 }
 
-func (s *userService) GetAllUser(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.User] {
+func (s *userService) GetAllUser(ctx context.Context, req request.GetAllUserRequest) response.BaseResponsePagination[response.User] {
 	data, err := s.repo.AllUser(ctx, req)
 	exception.PanicIfError(err, true)
 	exception.IsNotFound(data, true)
@@ -42,7 +42,7 @@ func (s *userService) GetAllUser(ctx context.Context, req request.BasePagination
 		content.Content = append(content.Content, user)
 	}
 
-	return response.WithPagination[response.User](content, req)
+	return response.WithPagination[response.User](content, req.BasePagination)
 }
 
 func (s *userService) GetUserById(ctx context.Context, userId uuid.UUID) response.User {

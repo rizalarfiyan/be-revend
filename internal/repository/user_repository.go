@@ -10,7 +10,7 @@ import (
 )
 
 type UserRepository interface {
-	AllUser(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.User], error)
+	AllUser(ctx context.Context, req request.GetAllUserRequest) (*models.ContentPagination[sql.User], error)
 	GetUserById(ctx context.Context, userId uuid.UUID) (sql.User, error)
 	GetUserByGoogleId(ctx context.Context, googleID string) (sql.User, error)
 	GetUserByPhoneNumber(ctx context.Context, googleID string) (sql.User, error)

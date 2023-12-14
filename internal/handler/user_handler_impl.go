@@ -11,7 +11,9 @@ import (
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
 	"github.com/rizalarfiyan/be-revend/internal/service"
+	"github.com/rizalarfiyan/be-revend/internal/sql"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
+	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type userHandler struct {
@@ -43,12 +45,19 @@ func NewUserHandler(service service.UserService) UserHandler {
 // @Failure      500  {object}  response.BaseResponse
 // @Router       /user [get]
 func (h *userHandler) GetAllUser(ctx *fiber.Ctx) error {
-	req := request.BasePagination{
-		Page:    ctx.QueryInt("page", 1),
-		Limit:   ctx.QueryInt("limit", constants.DefaultPageLimit),
-		Search:  ctx.Query("search"),
-		OrderBy: ctx.Query("order_by"),
-		Order:   ctx.Query("order"),
+	req := request.GetAllUserRequest{
+		BasePagination: request.BasePagination{
+			Page:    ctx.QueryInt("page", 1),
+			Limit:   ctx.QueryInt("limit", constants.DefaultPageLimit),
+			Search:  ctx.Query("search"),
+			OrderBy: ctx.Query("order_by"),
+			Order:   ctx.Query("order"),
+		},
+	}
+
+	rawRole := ctx.Query("role")
+	if rawRole != "" && utils.IsValidRole(rawRole) {
+		req.Role = sql.Role(rawRole)
 	}
 
 	fieldOrder := map[string]string{

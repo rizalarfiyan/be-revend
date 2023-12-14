@@ -62,7 +62,7 @@ func (h *historyHandler) GetAllHistory(ctx *fiber.Ctx) error {
 
 	rawUserId := ctx.Query("user_id")
 	if rawUserId != "" {
-		req.UserId, err = uuid.Parse(ctx.Query("user_id"))
+		req.UserId, err = uuid.Parse(rawUserId)
 		exception.ErrorListPaginationValidation[response.History](err, "invalid UUID format for user ID", req.BasePagination)
 	}
 
