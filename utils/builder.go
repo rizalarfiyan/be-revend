@@ -3,6 +3,8 @@ package utils
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -13,6 +15,7 @@ import (
 
 type (
 	QueryBuilder struct {
+		idx           int
 		filters       []queryFilter
 		order         string
 		offset, limit int
@@ -93,11 +96,42 @@ func (b *QueryBuilder) clone() *QueryBuilder {
 	return &cb
 }
 
+func (b *QueryBuilder) checkArgument(query *string, args ...interface{}) {
+	checkArr := make(map[string]bool)
+	listArr := []string{}
+	replaceArr := make(map[string]string)
+
+	re := regexp.MustCompile(`(\$[0-9]+)`)
+	matches := re.FindAllString(*query, -1)
+	for _, match := range matches {
+		if _, ok := checkArr[match]; !ok {
+			checkArr[match] = true
+			listArr = append(listArr, match)
+		}
+	}
+
+	if len(checkArr) != len(args) {
+		panic("Query and args not match")
+	}
+
+	sort.Strings(listArr)
+	for idx, key := range listArr {
+		replaceArr[key] = fmt.Sprintf("$%d", b.idx+idx+1)
+	}
+
+	b.idx += len(args)
+	*query = re.ReplaceAllStringFunc(*query, func(match string) string {
+		return replaceArr[match]
+	})
+
+}
+
 // Where set conditions of where in SELECT
 // Where("user = ?","tom")
 // Where("a = ? OR b = ?",1,2)
 // Where("foo = $1","bar")
 func (b *QueryBuilder) Where(query string, args ...interface{}) *QueryBuilder {
+	b.checkArgument(&query, args...)
 	b.filters = append(b.filters, queryFilter{
 		expression: query,
 		args:       args,
@@ -111,7 +145,7 @@ func (b *QueryBuilder) Where(query string, args ...interface{}) *QueryBuilder {
 func (b *QueryBuilder) In(column string, args ...interface{}) *QueryBuilder {
 	placeholders := make([]string, len(args))
 	for i := range args {
-		placeholders[i] = "?"
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
 	}
 
 	query := fmt.Sprintf("%s IN (%s)", column, strings.Join(placeholders, ","))
