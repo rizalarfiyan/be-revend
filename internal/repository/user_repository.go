@@ -18,4 +18,5 @@ type UserRepository interface {
 	GetUserByGoogleIdOrPhoneNumber(ctx context.Context, googleID, phoneNumber string) (sql.User, error)
 	CreateUser(ctx context.Context, payload sql.CreateUserParams) error
 	AllDropdownUsers(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.GetAllNameUsersRow], error)
+	ToggleDeleteUser(ctx context.Context, req sql.ToggleDeleteUserParams) error
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
+	"github.com/rizalarfiyan/be-revend/internal/sql"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
 	"github.com/rizalarfiyan/be-revend/utils"
 )
@@ -73,4 +74,12 @@ func (s *userService) GetAllDropdownUser(ctx context.Context, req request.BasePa
 	}
 
 	return response.WithPagination[response.BaseDropdown](content, req)
+}
+
+func (s *userService) ToggleDeleteUser(ctx context.Context, userId, currentUserId uuid.UUID) {
+	err := s.repo.ToggleDeleteUser(ctx, sql.ToggleDeleteUserParams{
+		ID:        utils.PGUUID(userId),
+		DeletedBy: utils.PGUUID(currentUserId),
+	})
+	exception.PanicIfError(err, true)
 }

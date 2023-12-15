@@ -3,6 +3,7 @@ package internal
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/rizalarfiyan/be-revend/internal/handler"
+	"github.com/rizalarfiyan/be-revend/internal/sql"
 	"github.com/rizalarfiyan/be-revend/middleware"
 )
 
@@ -38,15 +39,16 @@ func (r *router) AuthRoute(handler handler.AuthHandler) {
 
 func (r *router) UserRoute(handler handler.UserHandler) {
 	user := r.app.Group("user")
-	user.Get("", middleware.Auth(true), handler.GetAllUser)
-	user.Get("dropdown", middleware.Auth(true), handler.AllDropdownUser)
-	user.Get(":id", middleware.Auth(true), handler.GetUserById)
+	user.Get("", middleware.Auth(true), middleware.Role(sql.RoleAdmin, true), handler.GetAllUser)
+	user.Get("dropdown", middleware.Auth(true), middleware.Role(sql.RoleAdmin, true), handler.AllDropdownUser)
+	user.Get(":id", middleware.Auth(true), middleware.Role(sql.RoleAdmin, true), handler.GetUserById)
+	user.Delete(":id", middleware.Auth(true), middleware.Role(sql.RoleAdmin, true), handler.ToggleDeleteUser)
 }
 
 func (r *router) DeviceRoute(handler handler.DeviceHandler) {
 	device := r.app.Group("device")
-	device.Get("", middleware.Auth(true), handler.GetAllDevice)
-	device.Get("dropdown", middleware.Auth(true), handler.AllDropdownDevice)
+	device.Get("", middleware.Auth(true), middleware.Role(sql.RoleAdmin, true), handler.GetAllDevice)
+	device.Get("dropdown", middleware.Auth(true), middleware.Role(sql.RoleAdmin, true), handler.AllDropdownDevice)
 }
 
 func (r *router) HistoryRoute(handler handler.HistoryHandler) {

@@ -81,4 +81,6 @@ type User struct {
 	Role        Role
 	CreatedAt   pgtype.Timestamp
 	UpdatedAt   pgtype.Timestamp
+	DeletedBy   pgtype.UUID
+	DeletedAt   pgtype.Timestamp
 }

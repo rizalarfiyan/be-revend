@@ -135,3 +135,30 @@ func (h *userHandler) AllDropdownUser(ctx *fiber.Ctx) error {
 		Data:    res,
 	})
 }
+
+// ToggleDeleteUser godoc
+// @Summary      Toggle Delete User based on parameter
+// @Description  Toggle Delete User
+// @ID           toggle-delete-user
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Security     AccessToken
+// @Param        id path string false "User ID" example(550e8400-e29b-41d4-a716-446655440000) Format(uuid)
+// @Success      200  {object}  response.BaseResponse
+// @Failure      500  {object}  response.BaseResponse
+// @Router       /user/{id} [delete]
+func (h *userHandler) ToggleDeleteUser(ctx *fiber.Ctx) error {
+	rawId := ctx.Params("id")
+	userId, err := uuid.Parse(rawId)
+	if err != nil {
+		exception.ErrorManualValidation("id", "Path is not a valid uuid format")
+	}
+
+	user := utils.GetUser(ctx)
+	h.service.ToggleDeleteUser(ctx.Context(), userId, user.Id)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+	})
+}

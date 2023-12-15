@@ -118,3 +118,7 @@ func (r *userRepository) AllDropdownUsers(ctx context.Context, req request.BaseP
 	res.Count = count
 	return &res, nil
 }
+
+func (r *userRepository) ToggleDeleteUser(ctx context.Context, req sql.ToggleDeleteUserParams) error {
+	return r.query.ToggleDeleteUser(ctx, req)
+}

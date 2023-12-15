@@ -77,7 +77,7 @@ func (q *Queries) GetAllNameUsers(ctx context.Context) ([]GetAllNameUsersRow, er
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at, deleted_by, deleted_at FROM users
 `
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
@@ -99,6 +99,8 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 			&i.Role,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.DeletedBy,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -111,7 +113,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const getUserByGoogleId = `-- name: GetUserByGoogleId :one
-SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at, deleted_by, deleted_at FROM users
 WHERE google_id = $1 LIMIT 1
 `
 
@@ -128,12 +130,14 @@ func (q *Queries) GetUserByGoogleId(ctx context.Context, googleID pgtype.Text) (
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedBy,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserByGoogleIdOrPhoneNumber = `-- name: GetUserByGoogleIdOrPhoneNumber :one
-SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at, deleted_by, deleted_at FROM users
 WHERE google_id = $1 OR phone_number = $2 LIMIT 1
 `
 
@@ -155,12 +159,14 @@ func (q *Queries) GetUserByGoogleIdOrPhoneNumber(ctx context.Context, arg GetUse
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedBy,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at, deleted_by, deleted_at FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -177,12 +183,14 @@ func (q *Queries) GetUserById(ctx context.Context, id pgtype.UUID) (User, error)
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedBy,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserByIdentity = `-- name: GetUserByIdentity :one
-SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at, deleted_by, deleted_at FROM users
 WHERE identity = $1 LIMIT 1
 `
 
@@ -199,12 +207,14 @@ func (q *Queries) GetUserByIdentity(ctx context.Context, identity string) (User,
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedBy,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserByPhoneNumber = `-- name: GetUserByPhoneNumber :one
-SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at FROM users
+SELECT id, first_name, last_name, phone_number, google_id, identity, role, created_at, updated_at, deleted_by, deleted_at FROM users
 WHERE phone_number = $1 LIMIT 1
 `
 
@@ -221,6 +231,25 @@ func (q *Queries) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) 
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedBy,
+		&i.DeletedAt,
 	)
 	return i, err
+}
+
+const toggleDeleteUser = `-- name: ToggleDeleteUser :exec
+UPDATE users SET
+deleted_by = CASE WHEN deleted_by IS NULL THEN $1::UUID ELSE NULL END,
+deleted_at = CASE WHEN deleted_by IS NULL THEN CURRENT_TIMESTAMP ELSE NULL
+END WHERE id = $2
+`
+
+type ToggleDeleteUserParams struct {
+	DeletedBy pgtype.UUID
+	ID        pgtype.UUID
+}
+
+func (q *Queries) ToggleDeleteUser(ctx context.Context, arg ToggleDeleteUserParams) error {
+	_, err := q.db.Exec(ctx, toggleDeleteUser, arg.DeletedBy, arg.ID)
+	return err
 }

@@ -196,6 +196,8 @@ definitions:
         type: string
       identity:
         type: string
+      is_deleted:
+        type: boolean
       last_name:
         type: string
       phone_number:
@@ -655,6 +657,34 @@ paths:
       tags:
       - user
   /user/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Toggle Delete User
+      operationId: toggle-delete-user
+      parameters:
+      - description: User ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        format: uuid
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Toggle Delete User based on parameter
+      tags:
+      - user
     get:
       consumes:
       - application/json
