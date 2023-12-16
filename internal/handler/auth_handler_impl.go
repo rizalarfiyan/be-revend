@@ -28,16 +28,17 @@ func NewAuthHandler(service service.AuthService) AuthHandler {
 }
 
 // Auth Me godoc
-// @Summary      Get Auth Me based on parameter
-// @Description  Auth Me
-// @ID           get-auth-me
-// @Tags         auth
-// @Accept       json
-// @Produce      json
-// @Security     AccessToken
-// @Success      200  {object}  response.BaseResponse{data=models.AuthToken}
-// @Failure      500  {object}  response.BaseResponse
-// @Router       /auth/me [get]
+//
+//	@Summary		Get Auth Me based on parameter
+//	@Description	Auth Me
+//	@ID				get-auth-me
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Security		AccessToken
+//	@Success		200	{object}	response.BaseResponse{data=models.AuthToken}
+//	@Failure		500	{object}	response.BaseResponse
+//	@Router			/auth/me [get]
 func (h *authHandler) Me(ctx *fiber.Ctx) error {
 	user := utils.GetUser(ctx)
 	return ctx.JSON(response.BaseResponse{
@@ -48,26 +49,28 @@ func (h *authHandler) Me(ctx *fiber.Ctx) error {
 }
 
 // Auth Google Redirection godoc
-// @Summary      Get Auth Google Redirection based on parameter
-// @Description  Auth Google Redirection
-// @ID           get-auth-google
-// @Tags         auth
-// @Success      307
-// @Failure      500
-// @Router       /auth/google [get]
+//
+//	@Summary		Get Auth Google Redirection based on parameter
+//	@Description	Auth Google Redirection
+//	@ID				get-auth-google
+//	@Tags			auth
+//	@Success		307
+//	@Failure		500
+//	@Router			/auth/google [get]
 func (h *authHandler) Google(ctx *fiber.Ctx) error {
 	url := h.service.Google()
 	return ctx.Redirect(url, http.StatusTemporaryRedirect)
 }
 
 // Auth Google Redirection Callback godoc
-// @Summary      Get Auth Google Callback Redirection based on parameter
-// @Description  Auth Google Callback Redirection
-// @ID           get-auth-google-callback
-// @Tags         auth
-// @Success      307
-// @Failure      500
-// @Router       /auth/google/callback [get]
+//
+//	@Summary		Get Auth Google Callback Redirection based on parameter
+//	@Description	Auth Google Callback Redirection
+//	@ID				get-auth-google-callback
+//	@Tags			auth
+//	@Success		307
+//	@Failure		500
+//	@Router			/auth/google/callback [get]
 func (h *authHandler) GoogleCallback(ctx *fiber.Ctx) error {
 	req := new(request.GoogleCallbackRequest)
 	err := ctx.QueryParser(req)
@@ -80,16 +83,17 @@ func (h *authHandler) GoogleCallback(ctx *fiber.Ctx) error {
 }
 
 // Auth Register godoc
-// @Summary      Post Auth Register based on parameter
-// @Description  Auth Register
-// @ID           post-auth-register
-// @Tags         auth
-// @Accept       json
-// @Produce      json
-// @Param        data body request.AuthRegister true "Data"
-// @Success      200  {object}  response.BaseResponse
-// @Failure      500  {object}  response.BaseResponse
-// @Router       /auth/register [post]
+//
+//	@Summary		Post Auth Register based on parameter
+//	@Description	Auth Register
+//	@ID				post-auth-register
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			data	body		request.AuthRegister	true	"Data"
+//	@Success		200		{object}	response.BaseResponse
+//	@Failure		500		{object}	response.BaseResponse
+//	@Router			/auth/register [post]
 func (h *authHandler) Register(ctx *fiber.Ctx) error {
 	req := new(request.AuthRegister)
 	err := ctx.BodyParser(req)
@@ -110,16 +114,17 @@ func (h *authHandler) Register(ctx *fiber.Ctx) error {
 }
 
 // Auth Verification godoc
-// @Summary      Post Auth Verification based on parameter
-// @Description  Auth Verification
-// @ID           post-auth-verification
-// @Tags         auth
-// @Accept       json
-// @Produce      json
-// @Param        data body request.AuthVerification true "Data"
-// @Success      200  {object}  response.BaseResponse{data=response.AuthVerification}
-// @Failure      500  {object}  response.BaseResponse
-// @Router       /auth/verification [post]
+//
+//	@Summary		Post Auth Verification based on parameter
+//	@Description	Auth Verification
+//	@ID				post-auth-verification
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			data	body		request.AuthVerification	true	"Data"
+//	@Success		200		{object}	response.BaseResponse{data=response.AuthVerification}
+//	@Failure		500		{object}	response.BaseResponse
+//	@Router			/auth/verification [post]
 func (h *authHandler) Verification(ctx *fiber.Ctx) error {
 	req := new(request.AuthVerification)
 	err := ctx.BodyParser(req)
@@ -145,16 +150,17 @@ func (h *authHandler) Verification(ctx *fiber.Ctx) error {
 }
 
 // Auth Send OTP godoc
-// @Summary      Post Auth Send OTP based on parameter
-// @Description  Auth Send OTP
-// @ID           post-auth-send-otp
-// @Tags         auth
-// @Accept       json
-// @Produce      json
-// @Param        data body request.AuthSendOTP true "Data"
-// @Success      200  {object}  response.BaseResponse
-// @Failure      500  {object}  response.BaseResponse
-// @Router       /auth/otp [post]
+//
+//	@Summary		Post Auth Send OTP based on parameter
+//	@Description	Auth Send OTP
+//	@ID				post-auth-send-otp
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			data	body		request.AuthSendOTP	true	"Data"
+//	@Success		200		{object}	response.BaseResponse
+//	@Failure		500		{object}	response.BaseResponse
+//	@Router			/auth/otp [post]
 func (h *authHandler) SendOTP(ctx *fiber.Ctx) error {
 	req := new(request.AuthSendOTP)
 	err := ctx.BodyParser(req)
@@ -173,16 +179,17 @@ func (h *authHandler) SendOTP(ctx *fiber.Ctx) error {
 }
 
 // Auth OTP Verification godoc
-// @Summary      Post Auth Verification based on parameter
-// @Description  Auth Verification
-// @ID           post-auth-otp-verification
-// @Tags         auth
-// @Accept       json
-// @Produce      json
-// @Param        data body request.AuthOTPVerification true "Data"
-// @Success      200  {object}  response.BaseResponse
-// @Failure      500  {object}  response.BaseResponse
-// @Router       /auth/otp/verification [post]
+//
+//	@Summary		Post Auth Verification based on parameter
+//	@Description	Auth Verification
+//	@ID				post-auth-otp-verification
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			data	body		request.AuthOTPVerification	true	"Data"
+//	@Success		200		{object}	response.BaseResponse
+//	@Failure		500		{object}	response.BaseResponse
+//	@Router			/auth/otp/verification [post]
 func (h *authHandler) OTPVerification(ctx *fiber.Ctx) error {
 	req := new(request.AuthOTPVerification)
 	err := ctx.BodyParser(req)

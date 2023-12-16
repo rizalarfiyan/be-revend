@@ -240,7 +240,7 @@ func (q *Queries) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) 
 const toggleDeleteUser = `-- name: ToggleDeleteUser :exec
 UPDATE users SET
 deleted_by = CASE WHEN deleted_by IS NULL THEN $1::UUID ELSE NULL END,
-deleted_at = CASE WHEN deleted_by IS NULL THEN CURRENT_TIMESTAMP ELSE NULL
+deleted_at = CASE WHEN deleted_at IS NULL THEN CURRENT_TIMESTAMP ELSE NULL
 END WHERE id = $2
 `
 

@@ -61,12 +61,16 @@ func (r *deviceRepository) AllDevice(ctx context.Context, req request.BasePagina
 	return &res, nil
 }
 
-func (r *deviceRepository) AllDropdownDevice(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.GetAllNameDeviceRow], error) {
+func (r *deviceRepository) AllDropdownDevice(ctx context.Context, req request.AllDropdownDeviceRequest) (*models.ContentPagination[sql.GetAllNameDeviceRow], error) {
 	var res models.ContentPagination[sql.GetAllNameDeviceRow]
 
 	baseBuilder := func(b *utils.QueryBuilder) {
 		if req.Search != "" {
 			b.Where("LOWER(name) LIKE $1 OR LOWER(location) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
+		}
+
+		if req.HideDeleted {
+			b.Where("deleted_at IS NULL")
 		}
 	}
 
@@ -88,4 +92,16 @@ func (r *deviceRepository) AllDropdownDevice(ctx context.Context, req request.Ba
 	res.Content = devices
 	res.Count = count
 	return &res, nil
+}
+
+func (r *deviceRepository) CreateDevice(ctx context.Context, payload sql.CreateDeviceParams) error {
+	return r.query.CreateDevice(ctx, payload)
+}
+
+func (r *deviceRepository) UpdateDevice(ctx context.Context, payload sql.UpdateDeviceParams) error {
+	return r.query.UpdateDevice(ctx, payload)
+}
+
+func (r *deviceRepository) ToggleDeleteDevice(ctx context.Context, req sql.ToggleDeleteDeviceParams) error {
+	return r.query.ToggleDeleteDevice(ctx, req)
 }

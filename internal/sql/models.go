@@ -60,6 +60,8 @@ type Device struct {
 	Location  string
 	CreatedAt pgtype.Timestamp
 	UpdatedAt pgtype.Timestamp
+	DeletedBy pgtype.UUID
+	DeletedAt pgtype.Timestamp
 }
 
 type History struct {

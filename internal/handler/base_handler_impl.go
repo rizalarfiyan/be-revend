@@ -15,15 +15,16 @@ func NewBaseHandler() BaseHandler {
 }
 
 // Base Home godoc
-// @Summary      Get Base Home based on parameter
-// @Description  Base Home
-// @ID           get-base-home
-// @Tags         home
-// @Accept       json
-// @Produce      json
-// @Success      200  {object}  response.BaseResponse
-// @Failure      500  {object}  response.BaseResponse
-// @Router       / [get]
+//
+//	@Summary		Get Base Home based on parameter
+//	@Description	Base Home
+//	@ID				get-base-home
+//	@Tags			home
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	response.BaseResponse
+//	@Failure		500	{object}	response.BaseResponse
+//	@Router			/ [get]
 func (h *baseHandler) Home(ctx *fiber.Ctx) error {
 	return ctx.JSON(response.BaseResponse{
 		Code:    http.StatusOK,
@@ -41,15 +42,16 @@ func (h *baseHandler) Home(ctx *fiber.Ctx) error {
 }
 
 // Base Health godoc
-// @Summary      Get Base Health based on parameter
-// @Description  Base Health
-// @ID           get-base-health
-// @Tags         home
-// @Accept       json
-// @Produce      json
-// @Success      200  {object}  response.BaseResponse
-// @Failure      500  {object}  response.BaseResponse
-// @Router       /health [get]
+//
+//	@Summary		Get Base Health based on parameter
+//	@Description	Base Health
+//	@ID				get-base-health
+//	@Tags			home
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	response.BaseResponse
+//	@Failure		500	{object}	response.BaseResponse
+//	@Router			/health [get]
 func (h *baseHandler) Health(ctx *fiber.Ctx) error {
 	return ctx.JSON(response.BaseResponse{
 		Code:    http.StatusOK,

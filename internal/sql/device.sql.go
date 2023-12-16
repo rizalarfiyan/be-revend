@@ -22,8 +22,24 @@ func (q *Queries) CountAllDevice(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const createDevice = `-- name: CreateDevice :exec
+INSERT INTO device (token, name, location)
+VALUES ($1, $2, $3)
+`
+
+type CreateDeviceParams struct {
+	Token    string
+	Name     string
+	Location string
+}
+
+func (q *Queries) CreateDevice(ctx context.Context, arg CreateDeviceParams) error {
+	_, err := q.db.Exec(ctx, createDevice, arg.Token, arg.Name, arg.Location)
+	return err
+}
+
 const getAllDevice = `-- name: GetAllDevice :many
-SELECT id, token, name, location, created_at, updated_at FROM device
+SELECT id, token, name, location, created_at, updated_at, deleted_by, deleted_at FROM device
 `
 
 func (q *Queries) GetAllDevice(ctx context.Context) ([]Device, error) {
@@ -42,6 +58,8 @@ func (q *Queries) GetAllDevice(ctx context.Context) ([]Device, error) {
 			&i.Location,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.DeletedBy,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -80,4 +98,38 @@ func (q *Queries) GetAllNameDevice(ctx context.Context) ([]GetAllNameDeviceRow, 
 		return nil, err
 	}
 	return items, nil
+}
+
+const toggleDeleteDevice = `-- name: ToggleDeleteDevice :exec
+UPDATE device SET
+deleted_by = CASE WHEN deleted_by IS NULL THEN $1::UUID ELSE NULL END,
+deleted_at = CASE WHEN deleted_at IS NULL THEN CURRENT_TIMESTAMP ELSE NULL
+END WHERE id = $2
+`
+
+type ToggleDeleteDeviceParams struct {
+	DeletedBy pgtype.UUID
+	ID        pgtype.UUID
+}
+
+func (q *Queries) ToggleDeleteDevice(ctx context.Context, arg ToggleDeleteDeviceParams) error {
+	_, err := q.db.Exec(ctx, toggleDeleteDevice, arg.DeletedBy, arg.ID)
+	return err
+}
+
+const updateDevice = `-- name: UpdateDevice :exec
+UPDATE device
+SET name = $1, location = $2
+WHERE id = $3
+`
+
+type UpdateDeviceParams struct {
+	Name     string
+	Location string
+	ID       pgtype.UUID
+}
+
+func (q *Queries) UpdateDevice(ctx context.Context, arg UpdateDeviceParams) error {
+	_, err := q.db.Exec(ctx, updateDevice, arg.Name, arg.Location, arg.ID)
+	return err
 }

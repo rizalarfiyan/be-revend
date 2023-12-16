@@ -45,19 +45,19 @@ func init() {
 	validation.Init()
 }
 
-// @title BE Revend API
-// @version 1.0
-// @termsOfService http://swagger.io/terms/
-// @contact.name Rizal Arfiyan
-// @contact.url https://rizalrfiyan.com
-// @contact.email rizal.arfiyan.23@gmail.com
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @description This is a API documentation of BE Revend
-// @BasePath /
-// @securityDefinitions.apikey AccessToken
-// @in header
-// @name Authorization
+//	@title						BE Revend API
+//	@version					1.0
+//	@termsOfService				http://swagger.io/terms/
+//	@contact.name				Rizal Arfiyan
+//	@contact.url				https://rizalrfiyan.com
+//	@contact.email				rizal.arfiyan.23@gmail.com
+//	@license.name				Apache 2.0
+//	@license.url				http://www.apache.org/licenses/LICENSE-2.0.html
+//	@description				This is a API documentation of BE Revend
+//	@BasePath					/
+//	@securityDefinitions.apikey	AccessToken
+//	@in							header
+//	@name						Authorization
 func main() {
 	ctx := context.Background()
 	db := database.GetPostgres()

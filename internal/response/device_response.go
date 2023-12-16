@@ -7,10 +7,11 @@ import (
 )
 
 type Device struct {
-	Id       uuid.UUID `json:"id"`
-	Token    string    `json:"token"`
-	Name     string    `json:"name"`
-	Location string    `json:"location"`
+	Id        uuid.UUID `json:"id"`
+	Token     string    `json:"token"`
+	Name      string    `json:"name"`
+	Location  string    `json:"location"`
+	IsDeleted bool      `json:"is_deleted"`
 }
 
 func (d *Device) FromDB(device sql.Device) {
@@ -18,4 +19,5 @@ func (d *Device) FromDB(device sql.Device) {
 	d.Token = device.Token
 	d.Name = device.Name
 	d.Location = device.Location
+	d.IsDeleted = device.DeletedAt.Valid
 }

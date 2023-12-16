@@ -34,5 +34,5 @@ VALUES ($1, $2, $3, $4, $5);
 -- name: ToggleDeleteUser :exec
 UPDATE users SET
 deleted_by = CASE WHEN deleted_by IS NULL THEN sqlc.narg('deleted_by')::UUID ELSE NULL END,
-deleted_at = CASE WHEN deleted_by IS NULL THEN CURRENT_TIMESTAMP ELSE NULL
+deleted_at = CASE WHEN deleted_at IS NULL THEN CURRENT_TIMESTAMP ELSE NULL
 END WHERE id = sqlc.narg('id');

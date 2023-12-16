@@ -71,6 +71,30 @@ definitions:
     required:
     - token
     type: object
+  request.CreateDeviceRequest:
+    properties:
+      location:
+        example: Revend Universitas Amikom Yogyakarta
+        type: string
+      name:
+        example: Revend AM
+        type: string
+    required:
+    - location
+    - name
+    type: object
+  request.UpdateDeviceRequest:
+    properties:
+      location:
+        example: Revend Universitas Amikom Yogyakarta
+        type: string
+      name:
+        example: Revend AM
+        type: string
+    required:
+    - location
+    - name
+    type: object
   response.AuthVerification:
     properties:
       first_name:
@@ -152,6 +176,8 @@ definitions:
     properties:
       id:
         type: string
+      is_deleted:
+        type: boolean
       location:
         type: string
       name:
@@ -465,6 +491,97 @@ paths:
       security:
       - AccessToken: []
       summary: Get All Device based on parameter
+      tags:
+      - device
+    post:
+      consumes:
+      - application/json
+      description: Create Device
+      operationId: post-create-device
+      parameters:
+      - description: Data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateDeviceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Post Create Device based on parameter
+      tags:
+      - device
+  /device/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Toggle Delete Device
+      operationId: toggle-delete-device
+      parameters:
+      - description: Device ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        format: uuid
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Toggle Delete Device based on parameter
+      tags:
+      - device
+    put:
+      consumes:
+      - application/json
+      description: Update Device
+      operationId: post-update-device
+      parameters:
+      - description: Data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateDeviceRequest'
+      - description: Device ID
+        example: 550e8400-e29b-41d4-a716-446655440000
+        format: uuid
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Post Update Device based on parameter
       tags:
       - device
   /device/dropdown:

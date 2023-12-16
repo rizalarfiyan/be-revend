@@ -25,23 +25,24 @@ func NewHistoryHandler(service service.HistoryService) HistoryHandler {
 }
 
 // GetAllHistory godoc
-// @Summary      Get All History based on parameter
-// @Description  All History
-// @ID           get-all-history
-// @Tags         history
-// @Accept       json
-// @Produce      json
-// @Security     AccessToken
-// @Param        page query int false "Page" default(1)
-// @Param        limit query int false "Limit" default(10)
-// @Param        search query string false "Search"
-// @Param        order_by query string false "Order by" Enums(success,failed,name,device)
-// @Param        order query string false "Order" Enums(asc, desc)
-// @Param        device_id query string false "Device ID" example(550e8400-e29b-41d4-a716-446655440000) Format(uuid)
-// @Param        user_id query string false "User ID" example(550e8400-e29b-41d4-a716-446655440000) Format(uuid)
-// @Success      200  {object}  response.BaseResponse{data=response.BaseResponsePagination[response.History]}
-// @Failure      500  {object}  response.BaseResponse
-// @Router       /history [get]
+//
+//	@Summary		Get All History based on parameter
+//	@Description	All History
+//	@ID				get-all-history
+//	@Tags			history
+//	@Accept			json
+//	@Produce		json
+//	@Security		AccessToken
+//	@Param			page		query		int		false	"Page"	default(1)
+//	@Param			limit		query		int		false	"Limit"	default(10)
+//	@Param			search		query		string	false	"Search"
+//	@Param			order_by	query		string	false	"Order by"	Enums(success,failed,name,device)
+//	@Param			order		query		string	false	"Order"		Enums(asc, desc)
+//	@Param			device_id	query		string	false	"Device ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
+//	@Param			user_id		query		string	false	"User ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
+//	@Success		200			{object}	response.BaseResponse{data=response.BaseResponsePagination[response.History]}
+//	@Failure		500			{object}	response.BaseResponse
+//	@Router			/history [get]
 func (h *historyHandler) GetAllHistory(ctx *fiber.Ctx) error {
 	req := request.GetAllHistoryRequest{
 		BasePagination: request.BasePagination{
