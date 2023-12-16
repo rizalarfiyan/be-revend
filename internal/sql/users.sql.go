@@ -253,3 +253,30 @@ func (q *Queries) ToggleDeleteUser(ctx context.Context, arg ToggleDeleteUserPara
 	_, err := q.db.Exec(ctx, toggleDeleteUser, arg.DeletedBy, arg.ID)
 	return err
 }
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users
+SET first_name = $1, last_name = $2, phone_number = $3, google_id = $4, identity = $5, updated_at = CURRENT_TIMESTAMP
+WHERE id = $6
+`
+
+type UpdateUserParams struct {
+	FirstName   string
+	LastName    pgtype.Text
+	PhoneNumber string
+	GoogleID    pgtype.Text
+	Identity    string
+	ID          pgtype.UUID
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.Exec(ctx, updateUser,
+		arg.FirstName,
+		arg.LastName,
+		arg.PhoneNumber,
+		arg.GoogleID,
+		arg.Identity,
+		arg.ID,
+	)
+	return err
+}

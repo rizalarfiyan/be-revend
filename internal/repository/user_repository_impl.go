@@ -100,6 +100,10 @@ func (r *userRepository) CreateUser(ctx context.Context, payload sql.CreateUserP
 	return r.query.CreateUser(ctx, payload)
 }
 
+func (r *userRepository) UpdateUser(ctx context.Context, payload sql.UpdateUserParams) error {
+	return r.query.UpdateUser(ctx, payload)
+}
+
 func (r *userRepository) AllDropdownUsers(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.GetAllNameUsersRow], error) {
 	var res models.ContentPagination[sql.GetAllNameUsersRow]
 

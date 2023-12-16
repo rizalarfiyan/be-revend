@@ -118,6 +118,27 @@ func (s *userService) CreateUser(ctx context.Context, req request.CreateUserRequ
 	exception.PanicIfError(err, true)
 }
 
+func (s *userService) UpdateUser(ctx context.Context, req request.UpdateUserRequest) {
+	payload := sql.UpdateUserParams{
+		ID:          utils.PGUUID(req.Id),
+		FirstName:   req.FirstName,
+		PhoneNumber: req.PhoneNumber,
+		Identity:    req.Identity,
+	}
+
+	if !utils.IsEmpty(req.LastName) {
+		payload.LastName = utils.PGText(req.LastName)
+	}
+
+	if !utils.IsEmpty(req.GoogleId) {
+		payload.GoogleID = utils.PGText(req.GoogleId)
+	}
+
+	err := s.repo.UpdateUser(ctx, payload)
+	s.handleErrorUniqueUser(err)
+	exception.PanicIfError(err, true)
+}
+
 func (s *userService) ToggleDeleteUser(ctx context.Context, userId, currentUserId uuid.UUID) {
 	err := s.repo.ToggleDeleteUser(ctx, sql.ToggleDeleteUserParams{
 		ID:        utils.PGUUID(userId),

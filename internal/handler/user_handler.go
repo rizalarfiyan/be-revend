@@ -7,5 +7,6 @@ type UserHandler interface {
 	GetUserById(ctx *fiber.Ctx) error
 	AllDropdownUser(ctx *fiber.Ctx) error
 	CreateUser(ctx *fiber.Ctx) error
+	UpdateUser(ctx *fiber.Ctx) error
 	ToggleDeleteUser(ctx *fiber.Ctx) error
 }

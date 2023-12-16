@@ -13,6 +13,7 @@ type User struct {
 	PhoneNumber string    `json:"phone_number"`
 	Identity    string    `json:"identity"`
 	Role        sql.Role  `json:"role"`
+	GoogleId    string    `json:"google_id"`
 	IsDeleted   bool      `json:"is_deleted"`
 }
 
@@ -26,5 +27,9 @@ func (u *User) FromDB(user sql.User) {
 	u.Role = user.Role
 	if user.LastName.Valid {
 		u.LastName = user.LastName.String
+	}
+
+	if user.GoogleID.Valid {
+		u.GoogleId = user.GoogleID.String
 	}
 }

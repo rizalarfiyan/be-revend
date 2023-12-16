@@ -13,6 +13,6 @@ type CreateDeviceRequest struct {
 }
 
 type UpdateDeviceRequest struct {
-	ID uuid.UUID `json:"-"`
+	Id uuid.UUID `json:"-"`
 	CreateDeviceRequest
 }

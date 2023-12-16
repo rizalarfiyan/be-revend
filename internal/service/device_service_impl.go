@@ -74,7 +74,7 @@ func (s *deviceService) CreateDevice(ctx context.Context, req request.CreateDevi
 
 func (s *deviceService) UpdateDevice(ctx context.Context, req request.UpdateDeviceRequest) {
 	err := s.repo.UpdateDevice(ctx, sql.UpdateDeviceParams{
-		ID:       utils.PGUUID(req.ID),
+		ID:       utils.PGUUID(req.Id),
 		Name:     req.Name,
 		Location: req.Location,
 	})

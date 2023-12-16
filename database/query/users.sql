@@ -31,6 +31,11 @@ SELECT count(*) FROM users;
 INSERT INTO users (first_name, last_name, phone_number, google_id, identity)
 VALUES ($1, $2, $3, $4, $5);
 
+-- name: UpdateUser :exec
+UPDATE users
+SET first_name = $1, last_name = $2, phone_number = $3, google_id = $4, identity = $5, updated_at = CURRENT_TIMESTAMP
+WHERE id = $6;
+
 -- name: ToggleDeleteUser :exec
 UPDATE users SET
 deleted_by = CASE WHEN deleted_by IS NULL THEN sqlc.narg('deleted_by')::UUID ELSE NULL END,

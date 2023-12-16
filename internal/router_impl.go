@@ -43,14 +43,15 @@ func (r *router) UserRoute(handler handler.UserHandler) {
 	user.Post("", middleware.Auth(false), middleware.Role(sql.RoleAdmin, false), handler.CreateUser)
 	user.Get("dropdown", middleware.Auth(true), middleware.Role(sql.RoleAdmin, true), handler.AllDropdownUser)
 	user.Get(":id", middleware.Auth(false), middleware.Role(sql.RoleAdmin, false), handler.GetUserById)
+	user.Put(":id", middleware.Auth(false), middleware.Role(sql.RoleAdmin, false), handler.UpdateUser)
 	user.Delete(":id", middleware.Auth(false), middleware.Role(sql.RoleAdmin, false), handler.ToggleDeleteUser)
 }
 
 func (r *router) DeviceRoute(handler handler.DeviceHandler) {
 	device := r.app.Group("device")
 	device.Get("", middleware.Auth(true), middleware.Role(sql.RoleAdmin, true), handler.GetAllDevice)
-	device.Get("dropdown", middleware.Auth(true), handler.AllDropdownDevice)
 	device.Post("", middleware.Auth(false), middleware.Role(sql.RoleAdmin, false), handler.CreateDevice)
+	device.Get("dropdown", middleware.Auth(true), handler.AllDropdownDevice)
 	device.Put(":id", middleware.Auth(false), middleware.Role(sql.RoleAdmin, false), handler.UpdateDevice)
 	device.Delete(":id", middleware.Auth(false), middleware.Role(sql.RoleAdmin, false), handler.ToggleDeleteDevice)
 }

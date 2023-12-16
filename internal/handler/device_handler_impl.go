@@ -146,7 +146,7 @@ func (h *deviceHandler) CreateDevice(ctx *fiber.Ctx) error {
 //	@Produce		json
 //	@Security		AccessToken
 //	@Param			data	body		request.UpdateDeviceRequest	true	"Data"
-//	@Param			id		path		string						false	"Device ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
+//	@Param			id		path		string						true	"Device ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
 //	@Success		200		{object}	response.BaseResponse
 //	@Failure		500		{object}	response.BaseResponse
 //	@Router			/device/{id} [put]
@@ -159,7 +159,7 @@ func (h *deviceHandler) UpdateDevice(ctx *fiber.Ctx) error {
 
 	deviceId, err := uuid.Parse(ctx.Params("id"))
 	exception.IsNotProcessErrorMessage(err, "Path id is not a valid uuid format", false)
-	req.ID = deviceId
+	req.Id = deviceId
 
 	exception.ValidateStruct(*req, false)
 
@@ -179,7 +179,7 @@ func (h *deviceHandler) UpdateDevice(ctx *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Security		AccessToken
-//	@Param			id	path		string	false	"Device ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
+//	@Param			id	path		string	true	"Device ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
 //	@Success		200	{object}	response.BaseResponse
 //	@Failure		500	{object}	response.BaseResponse
 //	@Router			/device/{id} [delete]

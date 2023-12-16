@@ -173,6 +173,44 @@ func (h *userHandler) CreateUser(ctx *fiber.Ctx) error {
 	})
 }
 
+// Update User godoc
+//
+//	@Summary		Post Update User based on parameter
+//	@Description	Update User
+//	@ID				post-update-user
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Security		AccessToken
+//	@Param			data	body		request.UpdateUserRequest	true	"Data"
+//	@Param			id		path		string						true	"User ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
+//	@Success		200		{object}	response.BaseResponse
+//	@Failure		500		{object}	response.BaseResponse
+//	@Router			/user/{id} [put]
+func (h *userHandler) UpdateUser(ctx *fiber.Ctx) error {
+	req := new(request.UpdateUserRequest)
+	err := ctx.BodyParser(req)
+	if err != nil {
+		return err
+	}
+
+	userId, err := uuid.Parse(ctx.Params("id"))
+	exception.IsNotProcessErrorMessage(err, "Path id is not a valid uuid format", false)
+	req.Id = userId
+
+	exception.ValidateStruct(*req, false)
+	if !utils.IsValidRole(req.RawRole) {
+		exception.ErrorManualValidation("role", "Role is not valid")
+	}
+	req.Role = sql.Role(req.RawRole)
+
+	h.service.UpdateUser(ctx.Context(), *req)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+	})
+}
+
 // ToggleDeleteUser godoc
 //
 //	@Summary		Toggle Delete User based on parameter
@@ -182,7 +220,7 @@ func (h *userHandler) CreateUser(ctx *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Security		AccessToken
-//	@Param			id	path		string	false	"User ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
+//	@Param			id	path		string	true	"User ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
 //	@Success		200	{object}	response.BaseResponse
 //	@Failure		500	{object}	response.BaseResponse
 //	@Router			/user/{id} [delete]
