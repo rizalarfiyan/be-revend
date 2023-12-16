@@ -13,7 +13,7 @@ VALUES ($1, $2, $3);
 
 -- name: UpdateDevice :exec
 UPDATE device
-SET name = $1, location = $2
+SET name = $1, location = $2, updated_at = CURRENT_TIMESTAMP
 WHERE id = $3;
 
 -- name: ToggleDeleteDevice :exec

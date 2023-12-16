@@ -119,7 +119,7 @@ func (q *Queries) ToggleDeleteDevice(ctx context.Context, arg ToggleDeleteDevice
 
 const updateDevice = `-- name: UpdateDevice :exec
 UPDATE device
-SET name = $1, location = $2
+SET name = $1, location = $2, updated_at = CURRENT_TIMESTAMP
 WHERE id = $3
 `
 
