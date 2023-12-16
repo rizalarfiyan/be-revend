@@ -1120,10 +1120,14 @@ const docTemplate = `{
             "properties": {
                 "location": {
                     "type": "string",
+                    "maxLength": 150,
+                    "minLength": 5,
                     "example": "Revend Universitas Amikom Yogyakarta"
                 },
                 "name": {
                     "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3,
                     "example": "Revend AM"
                 }
             }
@@ -1137,10 +1141,14 @@ const docTemplate = `{
             "properties": {
                 "location": {
                     "type": "string",
+                    "maxLength": 150,
+                    "minLength": 5,
                     "example": "Revend Universitas Amikom Yogyakarta"
                 },
                 "name": {
                     "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3,
                     "example": "Revend AM"
                 }
             }

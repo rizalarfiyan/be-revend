@@ -75,9 +75,13 @@ definitions:
     properties:
       location:
         example: Revend Universitas Amikom Yogyakarta
+        maxLength: 150
+        minLength: 5
         type: string
       name:
         example: Revend AM
+        maxLength: 50
+        minLength: 3
         type: string
     required:
     - location
@@ -87,9 +91,13 @@ definitions:
     properties:
       location:
         example: Revend Universitas Amikom Yogyakarta
+        maxLength: 150
+        minLength: 5
         type: string
       name:
         example: Revend AM
+        maxLength: 50
+        minLength: 3
         type: string
     required:
     - location
