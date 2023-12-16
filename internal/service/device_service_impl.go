@@ -43,7 +43,7 @@ func (s *deviceService) GetAllDevice(ctx context.Context, req request.BasePagina
 	return response.WithPagination[response.Device](content, req)
 }
 
-func (s *deviceService) GetAllDropdownDevice(ctx context.Context, req request.AllDropdownDeviceRequest) response.BaseResponsePagination[response.BaseDropdown] {
+func (s *deviceService) GetAllDropdownDevice(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.BaseDropdown] {
 	data, err := s.repo.AllDropdownDevice(ctx, req)
 	exception.PanicIfError(err, true)
 	exception.IsNotFound(data, true)
@@ -60,7 +60,7 @@ func (s *deviceService) GetAllDropdownDevice(ctx context.Context, req request.Al
 		})
 	}
 
-	return response.WithPagination[response.BaseDropdown](content, req.BasePagination)
+	return response.WithPagination[response.BaseDropdown](content, req)
 }
 
 func (s *deviceService) CreateDevice(ctx context.Context, req request.CreateDeviceRequest) {

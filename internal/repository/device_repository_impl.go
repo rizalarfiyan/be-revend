@@ -33,10 +33,6 @@ func (r *deviceRepository) AllDevice(ctx context.Context, req request.BasePagina
 	var res models.ContentPagination[sql.Device]
 
 	baseBuilder := func(b *utils.QueryBuilder) {
-		if req.Search != "" {
-			b.Where("LOWER(name) LIKE $1 OR LOWER(location) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
-		}
-
 		if req.Status != "" {
 			switch req.Status {
 			case constants.FilterListStatusDeleted:
@@ -46,6 +42,9 @@ func (r *deviceRepository) AllDevice(ctx context.Context, req request.BasePagina
 			}
 		}
 
+		if req.Search != "" {
+			b.Where("LOWER(name) LIKE $1 OR LOWER(location) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
+		}
 	}
 
 	devices, err := r.queryBuilder.GetAllDevice(utils.QueryBuild(ctx, func(b *utils.QueryBuilder) {
@@ -72,16 +71,21 @@ func (r *deviceRepository) AllDevice(ctx context.Context, req request.BasePagina
 	return &res, nil
 }
 
-func (r *deviceRepository) AllDropdownDevice(ctx context.Context, req request.AllDropdownDeviceRequest) (*models.ContentPagination[sql.GetAllNameDeviceRow], error) {
+func (r *deviceRepository) AllDropdownDevice(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.GetAllNameDeviceRow], error) {
 	var res models.ContentPagination[sql.GetAllNameDeviceRow]
 
 	baseBuilder := func(b *utils.QueryBuilder) {
-		if req.Search != "" {
-			b.Where("LOWER(name) LIKE $1 OR LOWER(location) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
+		if req.Status != "" {
+			switch req.Status {
+			case constants.FilterListStatusDeleted:
+				b.Where("deleted_at IS NOT NULL")
+			case constants.FilterListStatusActive:
+				b.Where("deleted_at IS NULL")
+			}
 		}
 
-		if req.HideDeleted {
-			b.Where("deleted_at IS NULL")
+		if req.Search != "" {
+			b.Where("LOWER(name) LIKE $1 OR LOWER(location) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
 		}
 	}
 

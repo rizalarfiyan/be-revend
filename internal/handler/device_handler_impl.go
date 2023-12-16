@@ -38,6 +38,7 @@ func NewDeviceHandler(service service.DeviceService) DeviceHandler {
 //	@Param			search		query		string	false	"Search"
 //	@Param			order_by	query		string	false	"Order by"	Enums(token,name,location)
 //	@Param			order		query		string	false	"Order"		Enums(asc, desc)
+//	@Param			status		query		string	false	"Status"	enum(,active,deleted)
 //	@Success		200			{object}	response.BaseResponse{data=response.BaseResponsePagination[response.Device]}
 //	@Failure		500			{object}	response.BaseResponse
 //	@Router			/device [get]
@@ -80,21 +81,21 @@ func (h *deviceHandler) GetAllDevice(ctx *fiber.Ctx) error {
 //	@Param			page	query		int		false	"Page"	default(1)
 //	@Param			limit	query		int		false	"Limit"	default(10)
 //	@Param			search	query		string	false	"Search"
+//	@Param			status	query		string	false	"Status"	enum(,active,deleted)
 //	@Success		200		{object}	response.BaseResponse{data=response.BaseResponsePagination[response.BaseDropdown]}
 //	@Failure		500		{object}	response.BaseResponse
 //	@Router			/device/dropdown [get]
 func (h *deviceHandler) AllDropdownDevice(ctx *fiber.Ctx) error {
-	req := request.AllDropdownDeviceRequest{
-		BasePagination: request.BasePagination{
-			Page:   ctx.QueryInt("page", 1),
-			Limit:  ctx.QueryInt("limit", constants.DefaultPageLimit),
-			Search: ctx.Query("search"),
-		},
+	req := request.BasePagination{
+		Page:   ctx.QueryInt("page", 1),
+		Limit:  ctx.QueryInt("limit", constants.DefaultPageLimit),
+		Search: ctx.Query("search"),
+		Status: constants.FilterListStatus(ctx.Query("status")),
 	}
 
 	user := utils.GetUser(ctx)
 	if user.Role != sql.RoleAdmin {
-		req.HideDeleted = true
+		req.Status = constants.FilterListStatusActive
 	}
 
 	req.Normalize()

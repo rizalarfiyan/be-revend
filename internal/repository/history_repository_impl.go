@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rizalarfiyan/be-revend/constants"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/sql"
@@ -30,8 +31,13 @@ func (r *historyRepository) AllHistory(ctx context.Context, req request.GetAllHi
 	var res models.ContentPagination[sql.GetAllHistoryRow]
 
 	baseBuilder := func(b *utils.QueryBuilder) {
-		if req.Search != "" {
-			b.Where("LOWER(d.name) LIKE $1 OR LOWER(CONCAT(u.first_name, ' ', u.last_name)) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
+		if req.Status != "" {
+			switch req.Status {
+			case constants.FilterListStatusDeleted:
+				b.Where("u.deleted_at IS NOT NULL AND d.deleted_at IS NOT NULL")
+			case constants.FilterListStatusActive:
+				b.Where("u.deleted_at IS NULL AND d.deleted_at IS NULL")
+			}
 		}
 
 		if req.DeviceId != uuid.Nil {
@@ -40,6 +46,10 @@ func (r *historyRepository) AllHistory(ctx context.Context, req request.GetAllHi
 
 		if req.UserId != uuid.Nil {
 			b.Where("h.user_id = $1", req.UserId)
+		}
+
+		if req.Search != "" {
+			b.Where("LOWER(d.name) LIKE $1 OR LOWER(CONCAT(u.first_name, ' ', u.last_name)) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
 		}
 	}
 

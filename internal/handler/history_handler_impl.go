@@ -40,6 +40,7 @@ func NewHistoryHandler(service service.HistoryService) HistoryHandler {
 //	@Param			order		query		string	false	"Order"		Enums(asc, desc)
 //	@Param			device_id	query		string	false	"Device ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
 //	@Param			user_id		query		string	false	"User ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
+//	@Param			status		query		string	false	"Status"	enum(,active,deleted)
 //	@Success		200			{object}	response.BaseResponse{data=response.BaseResponsePagination[response.History]}
 //	@Failure		500			{object}	response.BaseResponse
 //	@Router			/history [get]
@@ -51,6 +52,7 @@ func (h *historyHandler) GetAllHistory(ctx *fiber.Ctx) error {
 			Search:  ctx.Query("search"),
 			OrderBy: ctx.Query("order_by"),
 			Order:   ctx.Query("order"),
+			Status:  constants.FilterListStatus(ctx.Query("status")),
 		},
 	}
 
@@ -77,6 +79,7 @@ func (h *historyHandler) GetAllHistory(ctx *fiber.Ctx) error {
 	user := utils.GetUser(ctx)
 	if user.Role != sql.RoleAdmin {
 		req.UserId = user.Id
+		req.Status = constants.FilterListStatusActive
 	}
 
 	req.ValidateAndUpdateOrderBy(fieldOrder)

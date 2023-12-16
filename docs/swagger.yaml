@@ -548,6 +548,10 @@ paths:
         in: query
         name: order
         type: string
+      - description: Status
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:
@@ -683,6 +687,10 @@ paths:
         in: query
         name: search
         type: string
+      - description: Status
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:
@@ -773,6 +781,10 @@ paths:
         in: query
         name: user_id
         type: string
+      - description: Status
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:
@@ -829,6 +841,10 @@ paths:
         - desc
         in: query
         name: order
+        type: string
+      - description: Status
+        in: query
+        name: status
         type: string
       produces:
       - application/json
@@ -996,6 +1012,10 @@ paths:
       - description: Search
         in: query
         name: search
+        type: string
+      - description: Status
+        in: query
+        name: status
         type: string
       produces:
       - application/json

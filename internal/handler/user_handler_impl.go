@@ -42,6 +42,7 @@ func NewUserHandler(service service.UserService) UserHandler {
 //	@Param			search		query		string	false	"Search"
 //	@Param			order_by	query		string	false	"Order by"	Enums(first_name,last_name,phone_number)
 //	@Param			order		query		string	false	"Order"		Enums(asc, desc)
+//	@Param			status		query		string	false	"Status"	enum(,active,deleted)
 //	@Success		200			{object}	response.BaseResponse{data=response.BaseResponsePagination[response.User]}
 //	@Failure		500			{object}	response.BaseResponse
 //	@Router			/user [get]
@@ -120,6 +121,7 @@ func (h *userHandler) GetUserById(ctx *fiber.Ctx) error {
 //	@Param			page	query		int		false	"Page"	default(1)
 //	@Param			limit	query		int		false	"Limit"	default(10)
 //	@Param			search	query		string	false	"Search"
+//	@Param			status	query		string	false	"Status"	enum(,active,deleted)
 //	@Success		200		{object}	response.BaseResponse{data=response.BaseResponsePagination[response.BaseDropdown]}
 //	@Failure		500		{object}	response.BaseResponse
 //	@Router			/user/dropdown [get]
@@ -128,9 +130,15 @@ func (h *userHandler) AllDropdownUser(ctx *fiber.Ctx) error {
 		Page:   ctx.QueryInt("page", 1),
 		Limit:  ctx.QueryInt("limit", constants.DefaultPageLimit),
 		Search: ctx.Query("search"),
+		Status: constants.FilterListStatus(ctx.Query("status")),
 	}
 
 	req.Normalize()
+
+	user := utils.GetUser(ctx)
+	if user.Role != sql.RoleAdmin {
+		req.Status = constants.FilterListStatusActive
+	}
 
 	res := h.service.GetAllDropdownUser(ctx.Context(), req)
 	return ctx.JSON(response.BaseResponse{

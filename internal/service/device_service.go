@@ -10,7 +10,7 @@ import (
 
 type DeviceService interface {
 	GetAllDevice(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.Device]
-	GetAllDropdownDevice(ctx context.Context, req request.AllDropdownDeviceRequest) response.BaseResponsePagination[response.BaseDropdown]
+	GetAllDropdownDevice(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.BaseDropdown]
 	CreateDevice(ctx context.Context, req request.CreateDeviceRequest)
 	UpdateDevice(ctx context.Context, req request.UpdateDeviceRequest)
 	ToggleDeleteDevice(ctx context.Context, deviceId, userId uuid.UUID)
