@@ -140,6 +140,39 @@ func (h *userHandler) AllDropdownUser(ctx *fiber.Ctx) error {
 	})
 }
 
+// Create User godoc
+//
+//	@Summary		Post Create User based on parameter
+//	@Description	Create User
+//	@ID				post-create-user
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Security		AccessToken
+//	@Param			data	body		request.CreateUserRequest	true	"Data"
+//	@Success		200		{object}	response.BaseResponse
+//	@Failure		500		{object}	response.BaseResponse
+//	@Router			/user [post]
+func (h *userHandler) CreateUser(ctx *fiber.Ctx) error {
+	req := new(request.CreateUserRequest)
+	err := ctx.BodyParser(req)
+	if err != nil {
+		return err
+	}
+
+	exception.ValidateStruct(*req, false)
+	if !utils.IsValidRole(req.RawRole) {
+		exception.ErrorManualValidation("role", "Role is not valid")
+	}
+	req.Role = sql.Role(req.RawRole)
+
+	h.service.CreateUser(ctx.Context(), *req)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+	})
+}
+
 // ToggleDeleteUser godoc
 //
 //	@Summary		Toggle Delete User based on parameter

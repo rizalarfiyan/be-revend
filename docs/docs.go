@@ -838,6 +838,50 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "AccessToken": []
+                    }
+                ],
+                "description": "Create User",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Post Create User based on parameter",
+                "operationId": "post-create-user",
+                "parameters": [
+                    {
+                        "description": "Data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    }
+                }
             }
         },
         "/user/dropdown": {
@@ -1129,6 +1173,48 @@ const docTemplate = `{
                     "maxLength": 50,
                     "minLength": 3,
                     "example": "Revend AM"
+                }
+            }
+        },
+        "request.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "first_name",
+                "identity",
+                "role"
+            ],
+            "properties": {
+                "first_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3,
+                    "example": "Rizal"
+                },
+                "google_id": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 8,
+                    "example": "1234567890"
+                },
+                "identity": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 8,
+                    "example": "1234567890"
+                },
+                "last_name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3,
+                    "example": "Arfiyan"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "62895377233002"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "guest"
                 }
             }
         },

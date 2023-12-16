@@ -87,6 +87,39 @@ definitions:
     - location
     - name
     type: object
+  request.CreateUserRequest:
+    properties:
+      first_name:
+        example: Rizal
+        maxLength: 100
+        minLength: 3
+        type: string
+      google_id:
+        example: "1234567890"
+        maxLength: 30
+        minLength: 8
+        type: string
+      identity:
+        example: "1234567890"
+        maxLength: 50
+        minLength: 8
+        type: string
+      last_name:
+        example: Arfiyan
+        maxLength: 100
+        minLength: 3
+        type: string
+      phone_number:
+        example: "62895377233002"
+        type: string
+      role:
+        example: guest
+        type: string
+    required:
+    - first_name
+    - identity
+    - role
+    type: object
   request.UpdateDeviceRequest:
     properties:
       location:
@@ -779,6 +812,34 @@ paths:
       security:
       - AccessToken: []
       summary: Get All User based on parameter
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Create User
+      operationId: post-create-user
+      parameters:
+      - description: Data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Post Create User based on parameter
       tags:
       - user
   /user/{id}:

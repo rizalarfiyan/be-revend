@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/exception"
 	"github.com/rizalarfiyan/be-revend/internal/models"
@@ -76,10 +78,50 @@ func (s *userService) GetAllDropdownUser(ctx context.Context, req request.BasePa
 	return response.WithPagination[response.BaseDropdown](content, req)
 }
 
+func (s *userService) handleErrorUniqueUser(err error) {
+	pgErr, ok := err.(*pgconn.PgError)
+	if !ok {
+		return
+	}
+
+	if pgErr.Code != pgerrcode.UniqueViolation {
+		return
+	}
+
+	switch pgErr.ConstraintName {
+	case "users_phone_number_key":
+		exception.ErrorManualValidation("phone_number", "Phone Number already exist.")
+	case "users_google_id_key":
+		exception.ErrorManualValidation("google_id", "Google Id already exist.")
+	case "users_identity_key":
+		exception.ErrorManualValidation("identity", "Identity already exist.")
+	}
+}
+
+func (s *userService) CreateUser(ctx context.Context, req request.CreateUserRequest) {
+	payload := sql.CreateUserParams{
+		FirstName:   req.FirstName,
+		PhoneNumber: req.PhoneNumber,
+		Identity:    req.Identity,
+	}
+
+	if !utils.IsEmpty(req.LastName) {
+		payload.LastName = utils.PGText(req.LastName)
+	}
+
+	if !utils.IsEmpty(req.GoogleId) {
+		payload.GoogleID = utils.PGText(req.GoogleId)
+	}
+
+	err := s.repo.CreateUser(ctx, payload)
+	s.handleErrorUniqueUser(err)
+	exception.PanicIfError(err, true)
+}
+
 func (s *userService) ToggleDeleteUser(ctx context.Context, userId, currentUserId uuid.UUID) {
 	err := s.repo.ToggleDeleteUser(ctx, sql.ToggleDeleteUserParams{
 		ID:        utils.PGUUID(userId),
 		DeletedBy: utils.PGUUID(currentUserId),
 	})
-	exception.PanicIfError(err, true)
+	exception.PanicIfError(err, false)
 }

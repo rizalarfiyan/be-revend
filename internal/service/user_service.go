@@ -12,5 +12,6 @@ type UserService interface {
 	GetAllUser(ctx context.Context, req request.GetAllUserRequest) response.BaseResponsePagination[response.User]
 	GetUserById(ctx context.Context, userId uuid.UUID) response.User
 	GetAllDropdownUser(ctx context.Context, req request.BasePagination) response.BaseResponsePagination[response.BaseDropdown]
+	CreateUser(ctx context.Context, req request.CreateUserRequest)
 	ToggleDeleteUser(ctx context.Context, userId, currentUserId uuid.UUID)
 }

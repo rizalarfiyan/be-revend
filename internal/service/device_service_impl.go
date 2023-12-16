@@ -69,7 +69,7 @@ func (s *deviceService) CreateDevice(ctx context.Context, req request.CreateDevi
 		Location: req.Location,
 		Token:    ksuid.New().String(),
 	})
-	exception.PanicIfError(err, true)
+	exception.PanicIfError(err, false)
 }
 
 func (s *deviceService) UpdateDevice(ctx context.Context, req request.UpdateDeviceRequest) {
@@ -78,7 +78,7 @@ func (s *deviceService) UpdateDevice(ctx context.Context, req request.UpdateDevi
 		Name:     req.Name,
 		Location: req.Location,
 	})
-	exception.PanicIfError(err, true)
+	exception.PanicIfError(err, false)
 }
 
 func (s *deviceService) ToggleDeleteDevice(ctx context.Context, deviceId, userId uuid.UUID) {
@@ -86,5 +86,5 @@ func (s *deviceService) ToggleDeleteDevice(ctx context.Context, deviceId, userId
 		ID:        utils.PGUUID(deviceId),
 		DeletedBy: utils.PGUUID(userId),
 	})
-	exception.PanicIfError(err, true)
+	exception.PanicIfError(err, false)
 }
