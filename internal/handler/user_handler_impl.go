@@ -53,6 +53,7 @@ func (h *userHandler) GetAllUser(ctx *fiber.Ctx) error {
 			Search:  ctx.Query("search"),
 			OrderBy: ctx.Query("order_by"),
 			Order:   ctx.Query("order"),
+			Status:  constants.FilterListStatus(ctx.Query("status")),
 		},
 	}
 

@@ -32,3 +32,19 @@ const (
 	MQTTCheckUserMustRegister
 	MQTTCheckUserSuccessRegister
 )
+
+type FilterListStatus string
+
+const (
+	FilterListStatusActive  FilterListStatus = "active"
+	FilterListStatusDeleted FilterListStatus = "deleted"
+)
+
+func (v FilterListStatus) IsValid() bool {
+	switch v {
+	case FilterListStatusActive, FilterListStatusDeleted:
+		return true
+	}
+
+	return false
+}

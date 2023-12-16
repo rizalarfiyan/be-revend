@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rizalarfiyan/be-revend/constants"
 	"github.com/rizalarfiyan/be-revend/database"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/request"
@@ -35,6 +36,16 @@ func (r *deviceRepository) AllDevice(ctx context.Context, req request.BasePagina
 		if req.Search != "" {
 			b.Where("LOWER(name) LIKE $1 OR LOWER(location) LIKE $1", fmt.Sprintf("%%%s%%", req.Search))
 		}
+
+		if req.Status != "" {
+			switch req.Status {
+			case constants.FilterListStatusDeleted:
+				b.Where("deleted_at IS NOT NULL")
+			case constants.FilterListStatusActive:
+				b.Where("deleted_at IS NULL")
+			}
+		}
+
 	}
 
 	devices, err := r.queryBuilder.GetAllDevice(utils.QueryBuild(ctx, func(b *utils.QueryBuilder) {

@@ -1,9 +1,15 @@
 package utils
 
 import (
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+func Str(str string) string {
+	return strings.ToLower(strings.TrimSpace(str))
+}
 
 func PGUUID(u uuid.UUID) pgtype.UUID {
 	return pgtype.UUID{
