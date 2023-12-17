@@ -7,6 +7,9 @@ SELECT id, name FROM device;
 -- name: CountAllDevice :one
 SELECT count(*) FROM device;
 
+-- name: GetDeviceByToken :one
+SELECT * FROM device where token = $1 LIMIT 1;
+
 -- name: CreateDevice :exec
 INSERT INTO device (token, name, location)
 VALUES ($1, $2, $3);

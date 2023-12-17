@@ -100,6 +100,26 @@ func (q *Queries) GetAllNameDevice(ctx context.Context) ([]GetAllNameDeviceRow, 
 	return items, nil
 }
 
+const getDeviceByToken = `-- name: GetDeviceByToken :one
+SELECT id, token, name, location, created_at, updated_at, deleted_by, deleted_at FROM device where token = $1 LIMIT 1
+`
+
+func (q *Queries) GetDeviceByToken(ctx context.Context, token string) (Device, error) {
+	row := q.db.QueryRow(ctx, getDeviceByToken, token)
+	var i Device
+	err := row.Scan(
+		&i.ID,
+		&i.Token,
+		&i.Name,
+		&i.Location,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedBy,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const toggleDeleteDevice = `-- name: ToggleDeleteDevice :exec
 UPDATE device SET
 deleted_by = CASE WHEN deleted_by IS NULL THEN $1::UUID ELSE NULL END,

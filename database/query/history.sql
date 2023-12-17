@@ -7,3 +7,7 @@ JOIN device d ON d.id = h.device_id;
 SELECT count(h.*) FROM history h
 JOIN users u ON u.id = h.user_id
 JOIN device d ON d.id = h.device_id;
+
+-- name: CreateHistory :exec
+INSERT INTO history (user_id, device_id, success, failed)
+VALUES ($1, $2, $3, $4);

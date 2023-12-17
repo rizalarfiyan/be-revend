@@ -109,6 +109,10 @@ func (r *deviceRepository) AllDropdownDevice(ctx context.Context, req request.Ba
 	return &res, nil
 }
 
+func (r *deviceRepository) GetDeviceByToken(ctx context.Context, token string) (sql.Device, error) {
+	return r.query.GetDeviceByToken(ctx, token)
+}
+
 func (r *deviceRepository) CreateDevice(ctx context.Context, payload sql.CreateDeviceParams) error {
 	return r.query.CreateDevice(ctx, payload)
 }

@@ -9,6 +9,7 @@ var (
 	KeyVerificationSession = "verification#%s#%s#%s#%s"
 	KeyOTP                 = "otp#%s"
 	KeyOTPIncrement        = "otp#%s#increment"
+	KeyUserPoint           = "user_point#%s"
 
 	// Key Locals
 	KeyLocalsUser = "user"

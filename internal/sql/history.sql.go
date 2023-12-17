@@ -24,6 +24,28 @@ func (q *Queries) CountAllHistory(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const createHistory = `-- name: CreateHistory :exec
+INSERT INTO history (user_id, device_id, success, failed)
+VALUES ($1, $2, $3, $4)
+`
+
+type CreateHistoryParams struct {
+	UserID   pgtype.UUID
+	DeviceID pgtype.UUID
+	Success  int32
+	Failed   int32
+}
+
+func (q *Queries) CreateHistory(ctx context.Context, arg CreateHistoryParams) error {
+	_, err := q.db.Exec(ctx, createHistory,
+		arg.UserID,
+		arg.DeviceID,
+		arg.Success,
+		arg.Failed,
+	)
+	return err
+}
+
 const getAllHistory = `-- name: GetAllHistory :many
 SELECT h.id, h.user_id, h.device_id, h.success, h.failed, h.created_at, u.first_name, u.last_name, d.name as device_name FROM history h
 JOIN users u ON u.id = h.user_id

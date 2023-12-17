@@ -76,3 +76,7 @@ func (r *historyRepository) AllHistory(ctx context.Context, req request.GetAllHi
 	res.Count = count
 	return &res, nil
 }
+
+func (r *historyRepository) CreateHistory(ctx context.Context, payload sql.CreateHistoryParams) error {
+	return r.query.CreateHistory(ctx, payload)
+}
