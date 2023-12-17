@@ -1,6 +1,8 @@
 package response
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/rizalarfiyan/be-revend/internal/sql"
 	"github.com/rizalarfiyan/be-revend/utils"
@@ -12,6 +14,7 @@ type History struct {
 	Failed  int32         `json:"failed"`
 	User    HistoryUser   `json:"user"`
 	Device  HistoryDevice `json:"device"`
+	Date    time.Time     `json:"date"`
 }
 
 type HistoryUser struct {
@@ -36,4 +39,7 @@ func (h *History) FromDB(history sql.GetAllHistoryRow) {
 	}
 	h.Device.Id = utils.PGToUUID(history.DeviceID)
 	h.Device.Name = history.DeviceName
+	if history.CreatedAt.Valid {
+		h.Date = history.CreatedAt.Time
+	}
 }

@@ -261,6 +261,8 @@ definitions:
     type: object
   response.History:
     properties:
+      date:
+        type: string
       device:
         $ref: '#/definitions/response.HistoryDevice'
       failed:

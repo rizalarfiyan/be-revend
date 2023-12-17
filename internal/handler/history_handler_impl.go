@@ -74,6 +74,7 @@ func (h *historyHandler) GetAllHistory(ctx *fiber.Ctx) error {
 		"failed":  "h.failed",
 		"name":    "CONCAT(u.first_name, ' ', u.last_name)",
 		"device":  "d.name",
+		"date":    "h.created_at",
 	}
 
 	user := utils.GetUser(ctx)

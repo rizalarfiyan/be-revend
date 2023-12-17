@@ -1508,6 +1508,9 @@ const docTemplate = `{
         "response.History": {
             "type": "object",
             "properties": {
+                "date": {
+                    "type": "string"
+                },
                 "device": {
                     "$ref": "#/definitions/response.HistoryDevice"
                 },
