@@ -398,7 +398,7 @@ func (s *authService) Register(ctx context.Context, req request.AuthRegister) {
 	exception.PanicIfErrorWithoutNoSqlResult(err, false)
 
 	if !utils.IsEmpty(user) {
-		exception.IsNotProcessRawMessage("Phone number is already exist", false)
+		exception.ErrorManualValidation("phone_number", "Phone Number already exist.")
 	}
 
 	data := s.GetSession(ctx, req.Token)

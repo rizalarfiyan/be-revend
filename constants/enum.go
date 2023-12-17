@@ -11,7 +11,7 @@ const (
 type BaseMQTTActionStep int
 
 const (
-	MQTTStepCancel BaseMQTTActionStep = iota
+	MQTTStepCancel BaseMQTTActionStep = iota + 1
 	MQTTStepCheckUser
 	MQTTStepStatus
 )

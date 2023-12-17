@@ -11,8 +11,10 @@ import (
 	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
+	"github.com/rizalarfiyan/be-revend/logger"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
 	"github.com/rizalarfiyan/be-revend/utils"
+	"github.com/rs/zerolog"
 	"github.com/segmentio/ksuid"
 )
 
@@ -21,6 +23,7 @@ type mqttService struct {
 	userRepo repository.UserRepository
 	conf     *baseModels.Config
 	utils    utils.MQTTUtils
+	log      *zerolog.Logger
 }
 
 func NewMQTTService(authRepo repository.AuthRepository, userRepo repository.UserRepository) MQTTService {
@@ -29,6 +32,7 @@ func NewMQTTService(authRepo repository.AuthRepository, userRepo repository.User
 		userRepo: userRepo,
 		conf:     config.Get(),
 		utils:    utils.NewMqttUtils(),
+		log:      logger.Get("mqtt-subscribe").Logs(),
 	}
 }
 
@@ -117,4 +121,5 @@ func (s *mqttService) sendTopic(req request.MQTTTriggerRequest, payload response
 
 	topic := "revend/action/" + req.Data.DeviceId
 	req.Client.Publish(topic, 0, false, bytePayload)
+	s.log.Info().Str("topic", topic).RawJSON("payload", bytePayload).Msg("send topic")
 }

@@ -4,6 +4,7 @@ import "github.com/rs/zerolog"
 
 type Logger interface {
 	Logger() zerolog.Logger
+	Logs() *zerolog.Logger
 	Debug(msg string)
 	Debugf(format string, v ...interface{})
 	Info(msg string)
@@ -30,6 +31,10 @@ func Get(types string) Logger {
 
 func (l *logger) Logger() zerolog.Logger {
 	return l.log
+}
+
+func (l *logger) Logs() *zerolog.Logger {
+	return &l.log
 }
 
 func (l *logger) Debug(msg string) {

@@ -5,6 +5,7 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/rizalarfiyan/be-revend/constants"
+	"github.com/segmentio/ksuid"
 )
 
 type BaseMQTTRequest struct {
@@ -26,8 +27,9 @@ type MQTTTriggerDataRequest struct {
 }
 
 func (bs *MQTTTriggerRequest) IsValid() bool {
-	bs.Data.DeviceId = strings.ToLower(strings.TrimSpace(bs.Data.DeviceId))
-	if bs.Data.DeviceId == "" || len(bs.Data.DeviceId) != 42 {
+	bs.Data.DeviceId = strings.TrimSpace(bs.Data.DeviceId)
+	_, err := ksuid.Parse(bs.Data.DeviceId)
+	if err != nil {
 		return false
 	}
 
