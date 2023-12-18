@@ -290,6 +290,21 @@ definitions:
       success:
         type: integer
     type: object
+  response.HistoryTopPerformance:
+    properties:
+      failed:
+        type: integer
+      first_name:
+        type: string
+      is_me:
+        type: boolean
+      last_name:
+        type: string
+      phone_number:
+        type: string
+      success:
+        type: integer
+    type: object
   response.HistoryUser:
     properties:
       first_name:
@@ -864,6 +879,51 @@ paths:
       security:
       - AccessToken: []
       summary: Get All History Statistic based on parameter
+      tags:
+      - history
+  /history/top-performance:
+    get:
+      consumes:
+      - application/json
+      description: All History Top Performance
+      operationId: get-all-history-top-performance
+      parameters:
+      - description: Time Frequency
+        enum:
+        - today
+        - week
+        - month
+        - quarter
+        - year
+        in: query
+        name: time_frequency
+        type: string
+      - default: 6
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.HistoryTopPerformance'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Get All History Top Performance based on parameter
       tags:
       - history
   /user:

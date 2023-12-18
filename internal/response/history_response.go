@@ -49,3 +49,12 @@ type HistoryStatistic struct {
 	Success int64  `json:"success"`
 	Failed  int64  `json:"failed"`
 }
+
+type HistoryTopPerformance struct {
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	PhoneNumber string `json:"phone_number"`
+	Success     int64  `json:"success"`
+	Failed      int64  `json:"failed"`
+	IsMe        bool   `json:"is_me"`
+}

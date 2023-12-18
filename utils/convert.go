@@ -2,6 +2,7 @@ package utils
 
 import (
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -22,6 +23,13 @@ func PGText(str string) pgtype.Text {
 	return pgtype.Text{
 		String: str,
 		Valid:  true,
+	}
+}
+
+func PGDate(date time.Time) pgtype.Date {
+	return pgtype.Date{
+		Time:  date,
+		Valid: true,
 	}
 }
 

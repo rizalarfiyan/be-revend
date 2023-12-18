@@ -104,3 +104,7 @@ func (r *historyRepository) AllHistoryStatistic(ctx context.Context, req models.
 
 	return histories, nil
 }
+
+func (r *historyRepository) AllHistoryTopPerformance(ctx context.Context, payload sql.GetAllHistoryTopPerformanceParams) ([]sql.GetAllHistoryTopPerformanceRow, error) {
+	return r.query.GetAllHistoryTopPerformance(ctx, payload)
+}

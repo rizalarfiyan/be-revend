@@ -8,6 +8,8 @@ import (
 	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
+	"github.com/rizalarfiyan/be-revend/internal/sql"
+	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type historyService struct {
@@ -42,13 +44,6 @@ func (s *historyService) GetAllHistory(ctx context.Context, req request.GetAllHi
 func (s *historyService) GetAllHistoryStatistic(ctx context.Context, req request.GetAllHistoryStatisticRequest) []response.HistoryStatistic {
 	timeFrequency := req.BuildTimeFrequency()
 
-	payload := models.AllHistoryStatistic{
-		StartDate:     timeFrequency.StartDate,
-		EndDate:       timeFrequency.EndDate,
-		UserId:        req.UserId,
-		TimeFrequency: req.TimeFrequency,
-	}
-
 	idx := 0
 	var tempArr = make(map[string]int)
 	var res []response.HistoryStatistic
@@ -65,6 +60,12 @@ func (s *historyService) GetAllHistoryStatistic(ctx context.Context, req request
 		idx++
 	}
 
+	payload := models.AllHistoryStatistic{
+		StartDate:     timeFrequency.StartDate,
+		EndDate:       timeFrequency.EndDate,
+		UserId:        req.UserId,
+		TimeFrequency: req.TimeFrequency,
+	}
 	data, err := s.repo.AllHistoryStatistic(ctx, payload)
 	exception.PanicIfError(err, true)
 
@@ -78,6 +79,41 @@ func (s *historyService) GetAllHistoryStatistic(ctx context.Context, req request
 			res[idx].Success += data.Success
 			res[idx].Failed += data.Failed
 		}
+	}
+
+	return res
+}
+
+func (s *historyService) GetAllHistoryTopPerformance(ctx context.Context, req request.GetAllHistoryTopPerformanceRequest) []response.HistoryTopPerformance {
+	timeFrequency := req.BuildTimeFrequency()
+
+	payload := sql.GetAllHistoryTopPerformanceParams{
+		StartDate: utils.PGDate(timeFrequency.StartDate),
+		EndDate:   utils.PGDate(timeFrequency.EndDate),
+		Limit:     int32(req.Limit),
+	}
+
+	data, err := s.repo.AllHistoryTopPerformance(ctx, payload)
+	exception.PanicIfError(err, true)
+
+	res := []response.HistoryTopPerformance{}
+	for _, v := range data {
+		resPayload := response.HistoryTopPerformance{
+			FirstName:   v.FirstName,
+			PhoneNumber: utils.CensorPhoneNumber(v.PhoneNumber),
+			Success:     v.Success,
+			Failed:      v.Failed,
+		}
+
+		if v.UserID.Valid {
+			resPayload.IsMe = utils.PGToUUID(v.UserID) == req.UserId
+		}
+
+		if v.LastName.Valid {
+			resPayload.LastName = v.LastName.String
+		}
+
+		res = append(res, resPayload)
 	}
 
 	return res

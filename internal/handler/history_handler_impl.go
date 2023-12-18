@@ -124,3 +124,36 @@ func (h *historyHandler) GetAllHistoryStatistic(ctx *fiber.Ctx) error {
 		Data:    res,
 	})
 }
+
+// GetAllHistoryTopPerformance godoc
+//
+//	@Summary		Get All History Top Performance based on parameter
+//	@Description	All History Top Performance
+//	@ID				get-all-history-top-performance
+//	@Tags			history
+//	@Accept			json
+//	@Produce		json
+//	@Security		AccessToken
+//	@Param			time_frequency	query		string	false	"Time Frequency"	Enums(today,week,month,quarter,year)
+//	@Param			limit			query		int		false	"Limit"				default(6)
+//	@Success		200				{object}	response.BaseResponse{data=[]response.HistoryTopPerformance}
+//	@Failure		500				{object}	response.BaseResponse
+//	@Router			/history/top-performance [get]
+func (h *historyHandler) GetAllHistoryTopPerformance(ctx *fiber.Ctx) error {
+	req := request.GetAllHistoryTopPerformanceRequest{
+		WithTimeFrequency: request.WithTimeFrequency{
+			TimeFrequency: constants.FilterTimeFrequency(ctx.Query("time_frequency")),
+		},
+		UserId: utils.GetUser(ctx).Id,
+		Limit:  ctx.QueryInt("limit", constants.DefaultPageLimitStatistic),
+	}
+
+	req.Normalize()
+
+	res := h.service.GetAllHistoryTopPerformance(ctx.Context(), req)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+		Data:    res,
+	})
+}

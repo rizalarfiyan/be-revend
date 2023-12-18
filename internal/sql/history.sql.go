@@ -124,3 +124,55 @@ func (q *Queries) GetAllHistoryStatistic(ctx context.Context) ([]GetAllHistorySt
 	}
 	return items, nil
 }
+
+const getAllHistoryTopPerformance = `-- name: GetAllHistoryTopPerformance :many
+SELECT h.user_id AS user_id, u.first_name, u.last_name, u.phone_number, SUM(h.success) AS success, SUM(h.failed) AS failed
+FROM history h
+JOIN users u ON u.id = h.user_id
+WHERE h.created_at BETWEEN $1::date AND $2::date
+GROUP BY h.user_id, u.first_name, u.last_name, u.phone_number
+ORDER BY success DESC
+LIMIT $3
+`
+
+type GetAllHistoryTopPerformanceParams struct {
+	StartDate pgtype.Date
+	EndDate   pgtype.Date
+	Limit     int32
+}
+
+type GetAllHistoryTopPerformanceRow struct {
+	UserID      pgtype.UUID
+	FirstName   string
+	LastName    pgtype.Text
+	PhoneNumber string
+	Success     int64
+	Failed      int64
+}
+
+func (q *Queries) GetAllHistoryTopPerformance(ctx context.Context, arg GetAllHistoryTopPerformanceParams) ([]GetAllHistoryTopPerformanceRow, error) {
+	rows, err := q.db.Query(ctx, getAllHistoryTopPerformance, arg.StartDate, arg.EndDate, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllHistoryTopPerformanceRow
+	for rows.Next() {
+		var i GetAllHistoryTopPerformanceRow
+		if err := rows.Scan(
+			&i.UserID,
+			&i.FirstName,
+			&i.LastName,
+			&i.PhoneNumber,
+			&i.Success,
+			&i.Failed,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

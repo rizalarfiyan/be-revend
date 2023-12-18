@@ -57,3 +57,12 @@ func FullName(firstName string, lastName pgtype.Text) string {
 	}
 	return strings.TrimSpace(name)
 }
+
+func CensorPhoneNumber(phoneNumber string) string {
+	re := regexp.MustCompile(`(\d{5})\d+(\d{2})`)
+	matches := re.FindStringSubmatch(phoneNumber)
+	if len(matches) > 2 {
+		return phoneNumber[:len(matches[1])] + strings.Repeat("*", len(phoneNumber)-len(matches[1])-len(matches[2])) + phoneNumber[len(phoneNumber)-len(matches[2]):]
+	}
+	return re.ReplaceAllString(phoneNumber, "$1*****$2")
+}
