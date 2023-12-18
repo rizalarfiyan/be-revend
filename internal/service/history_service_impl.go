@@ -10,6 +10,7 @@ import (
 	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
+	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type historyService struct {
@@ -47,13 +48,11 @@ func (s *historyService) GetAllHistoryStatistic(ctx context.Context, req request
 	var callbackDate func(time.Time) time.Time
 
 	now := time.Now()
-	startDateToday := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	startDateToday := utils.StartOfDay(now)
 	switch req.TimeFrequency {
 	case constants.FilterTimeFrequencyWeek:
-		first := now.AddDate(0, 0, -int(now.Weekday()-time.Sunday))
-		startDate = time.Date(first.Year(), first.Month(), first.Day(), 0, 0, 0, 0, first.Location())
-		end := now.AddDate(0, 0, int(time.Saturday-now.Weekday()))
-		endDate = time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0, end.Location())
+		startDate = utils.StartOfWeek(now)
+		endDate = utils.EndOfWeek(now)
 		callbackName = func(val time.Time) string {
 			return val.Format(time.DateOnly)
 		}
@@ -61,8 +60,8 @@ func (s *historyService) GetAllHistoryStatistic(ctx context.Context, req request
 			return val.AddDate(0, 0, 1)
 		}
 	case constants.FilterTimeFrequencyMonth:
-		startDate = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-		endDate = time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second)
+		startDate = utils.StartOfMonth(now)
+		endDate = utils.EndOfMonth(now)
 		callbackName = func(val time.Time) string {
 			return val.Format(time.DateOnly)
 		}
@@ -70,9 +69,8 @@ func (s *historyService) GetAllHistoryStatistic(ctx context.Context, req request
 			return val.AddDate(0, 0, 1)
 		}
 	case constants.FilterTimeFrequencyQuarter:
-		date := startDateToday.AddDate(0, -6, 0)
-		startDate = time.Date(date.Year(), date.Month(), 1, 0, 0, 0, 0, date.Location())
-		endDate = time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second)
+		startDate = utils.StartOfMonth(startDateToday.AddDate(0, -6, 0))
+		endDate = utils.EndOfMonth(now)
 		callbackName = func(val time.Time) string {
 			return val.Format("Jan 2006")
 		}
@@ -80,9 +78,8 @@ func (s *historyService) GetAllHistoryStatistic(ctx context.Context, req request
 			return val.AddDate(0, 1, 0)
 		}
 	case constants.FilterTimeFrequencyYear:
-		date := startDateToday.AddDate(-1, 0, 0)
-		startDate = time.Date(date.Year(), date.Month(), 1, 0, 0, 0, 0, date.Location())
-		endDate = time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location()).Add(-time.Second)
+		startDate = utils.StartOfMonth(startDateToday.AddDate(-1, 0, 0))
+		endDate = utils.EndOfMonth(now)
 		callbackName = func(val time.Time) string {
 			return val.Format("Jan 2006")
 		}
@@ -91,7 +88,7 @@ func (s *historyService) GetAllHistoryStatistic(ctx context.Context, req request
 		}
 	default:
 		startDate = startDateToday
-		endDate = startDateToday.AddDate(0, 0, 1).Add(-time.Second)
+		endDate = utils.EndOfDay(now)
 		callbackName = func(val time.Time) string {
 			return val.Format(time.TimeOnly)
 		}
