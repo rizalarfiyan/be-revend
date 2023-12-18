@@ -41,3 +41,8 @@ UPDATE users SET
 deleted_by = CASE WHEN deleted_by IS NULL THEN sqlc.narg('deleted_by')::UUID ELSE NULL END,
 deleted_at = CASE WHEN deleted_at IS NULL THEN CURRENT_TIMESTAMP ELSE NULL
 END WHERE id = sqlc.narg('id');
+
+-- name: UpdateUserProfile :exec
+UPDATE users
+SET first_name = $1, last_name = $2, updated_at = CURRENT_TIMESTAMP
+WHERE id = $3;

@@ -15,4 +15,5 @@ type UserService interface {
 	CreateUser(ctx context.Context, req request.CreateUserRequest)
 	UpdateUser(ctx context.Context, req request.UpdateUserRequest)
 	ToggleDeleteUser(ctx context.Context, userId, currentUserId uuid.UUID)
+	UpdateUserProfile(ctx context.Context, req request.UpdateUserProfileRequest)
 }

@@ -266,3 +266,32 @@ func (h *userHandler) GetUserProfile(ctx *fiber.Ctx) error {
 		Data:    res,
 	})
 }
+
+// Update User profile godoc
+//
+//	@Summary		Post Update User Profile based on parameter
+//	@Description	Update User Profile
+//	@ID				post-update-user-profile
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Security		AccessToken
+//	@Param			data	body		request.UpdateUserProfileRequest	true	"Data"
+//	@Success		200		{object}	response.BaseResponse
+//	@Failure		500		{object}	response.BaseResponse
+//	@Router			/user/profile [put]
+func (h *userHandler) UpdateUserProfile(ctx *fiber.Ctx) error {
+	req := new(request.UpdateUserProfileRequest)
+	err := ctx.BodyParser(req)
+	if err != nil {
+		return err
+	}
+
+	req.Id = utils.GetUser(ctx).Id
+
+	h.service.UpdateUserProfile(ctx.Context(), *req)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+	})
+}

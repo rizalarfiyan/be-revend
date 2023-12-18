@@ -136,6 +136,21 @@ definitions:
     - location
     - name
     type: object
+  request.UpdateUserProfileRequest:
+    properties:
+      first_name:
+        example: Rizal
+        maxLength: 100
+        minLength: 3
+        type: string
+      last_name:
+        example: Arfiyan
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - first_name
+    type: object
   request.UpdateUserRequest:
     properties:
       first_name:
@@ -1189,6 +1204,34 @@ paths:
       security:
       - AccessToken: []
       summary: Get User Profile based on parameter
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Update User Profile
+      operationId: post-update-user-profile
+      parameters:
+      - description: Data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateUserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Post Update User Profile based on parameter
       tags:
       - user
 securityDefinitions:

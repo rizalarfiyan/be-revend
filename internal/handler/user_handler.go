@@ -10,4 +10,5 @@ type UserHandler interface {
 	UpdateUser(ctx *fiber.Ctx) error
 	ToggleDeleteUser(ctx *fiber.Ctx) error
 	GetUserProfile(ctx *fiber.Ctx) error
+	UpdateUserProfile(ctx *fiber.Ctx) error
 }

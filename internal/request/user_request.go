@@ -24,3 +24,9 @@ type GetAllUserRequest struct {
 	BasePagination
 	Role sql.Role `json:"role"`
 }
+
+type UpdateUserProfileRequest struct {
+	FirstName string    `json:"first_name" field:"FirstName" validate:"required,min=3,max=100" example:"Rizal"`
+	LastName  string    `json:"last_name" field:"LastName" validate:"omitempty,min=3,max=100" example:"Arfiyan"`
+	Id        uuid.UUID `json:"-"`
+}

@@ -50,8 +50,8 @@ func (s *userService) GetAllUser(ctx context.Context, req request.GetAllUserRequ
 
 func (s *userService) GetUserById(ctx context.Context, userId uuid.UUID) response.User {
 	data, err := s.repo.GetUserById(ctx, userId)
-	exception.PanicIfError(err, true)
-	exception.IsNotFound(data, true)
+	exception.PanicIfError(err, false)
+	exception.IsNotFound(data, false)
 
 	user := response.User{}
 	user.FromDB(data)
@@ -115,7 +115,7 @@ func (s *userService) CreateUser(ctx context.Context, req request.CreateUserRequ
 
 	err := s.repo.CreateUser(ctx, payload)
 	s.handleErrorUniqueUser(err)
-	exception.PanicIfError(err, true)
+	exception.PanicIfError(err, false)
 }
 
 func (s *userService) UpdateUser(ctx context.Context, req request.UpdateUserRequest) {
@@ -144,5 +144,19 @@ func (s *userService) ToggleDeleteUser(ctx context.Context, userId, currentUserI
 		ID:        utils.PGUUID(userId),
 		DeletedBy: utils.PGUUID(currentUserId),
 	})
+	exception.PanicIfError(err, false)
+}
+
+func (s *userService) UpdateUserProfile(ctx context.Context, req request.UpdateUserProfileRequest) {
+	payload := sql.UpdateUserProfileParams{
+		ID:        utils.PGUUID(req.Id),
+		FirstName: req.FirstName,
+	}
+
+	if !utils.IsEmpty(req.LastName) {
+		payload.LastName = utils.PGText(req.LastName)
+	}
+
+	err := s.repo.UpdateUserProfile(ctx, payload)
 	exception.PanicIfError(err, false)
 }

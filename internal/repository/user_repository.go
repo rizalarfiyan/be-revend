@@ -20,4 +20,5 @@ type UserRepository interface {
 	UpdateUser(ctx context.Context, payload sql.UpdateUserParams) error
 	AllDropdownUsers(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.GetAllNameUsersRow], error)
 	ToggleDeleteUser(ctx context.Context, req sql.ToggleDeleteUserParams) error
+	UpdateUserProfile(ctx context.Context, payload sql.UpdateUserProfileParams) error
 }
