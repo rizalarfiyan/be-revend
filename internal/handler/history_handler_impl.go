@@ -40,7 +40,7 @@ func NewHistoryHandler(service service.HistoryService) HistoryHandler {
 //	@Param			order		query		string	false	"Order"		Enums(asc, desc)
 //	@Param			device_id	query		string	false	"Device ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
 //	@Param			user_id		query		string	false	"User ID"	example(550e8400-e29b-41d4-a716-446655440000)	Format(uuid)
-//	@Param			status		query		string	false	"Status"	enum(,active,deleted)
+//	@Param			status		query		string	false	"Status"	Enums(active,deleted)
 //	@Success		200			{object}	response.BaseResponse{data=response.BaseResponsePagination[response.History]}
 //	@Failure		500			{object}	response.BaseResponse
 //	@Router			/history [get]
@@ -87,6 +87,37 @@ func (h *historyHandler) GetAllHistory(ctx *fiber.Ctx) error {
 	req.Normalize()
 
 	res := h.service.GetAllHistory(ctx.Context(), req)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+		Data:    res,
+	})
+}
+
+// GetAllHistoryStatistic godoc
+//
+//	@Summary		Get All History Statistic based on parameter
+//	@Description	All History Statistic
+//	@ID				get-all-history-statistic
+//	@Tags			history
+//	@Accept			json
+//	@Produce		json
+//	@Security		AccessToken
+//	@Param			time_frequency	query		string	false	"Time Frequency"	Enums(today,week,month,quarter,year)
+//	@Success		200				{object}	response.BaseResponse{data=[]response.HistoryStatistic}
+//	@Failure		500				{object}	response.BaseResponse
+//	@Router			/history/statistic [get]
+func (h *historyHandler) GetAllHistoryStatistic(ctx *fiber.Ctx) error {
+	req := request.GetAllHistoryStatisticRequest{
+		TimeFrequency: constants.FilterTimeFrequency(ctx.Query("time_frequency")),
+		UserId:        utils.GetUser(ctx).Id,
+	}
+
+	if !req.TimeFrequency.IsValid() {
+		req.TimeFrequency = constants.FilterTimeFrequencyToday
+	}
+
+	res := h.service.GetAllHistoryStatistic(ctx.Context(), req)
 	return ctx.JSON(response.BaseResponse{
 		Code:    http.StatusOK,
 		Message: "Success!",

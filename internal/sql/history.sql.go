@@ -93,3 +93,34 @@ func (q *Queries) GetAllHistory(ctx context.Context) ([]GetAllHistoryRow, error)
 	}
 	return items, nil
 }
+
+const getAllHistoryStatistic = `-- name: GetAllHistoryStatistic :many
+SELECT MIN(created_at)::date as date, SUM(success) AS success, SUM(failed) AS failed
+FROM history
+`
+
+type GetAllHistoryStatisticRow struct {
+	Date    pgtype.Date
+	Success int64
+	Failed  int64
+}
+
+func (q *Queries) GetAllHistoryStatistic(ctx context.Context) ([]GetAllHistoryStatisticRow, error) {
+	rows, err := q.db.Query(ctx, getAllHistoryStatistic)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllHistoryStatisticRow
+	for rows.Next() {
+		var i GetAllHistoryStatisticRow
+		if err := rows.Scan(&i.Date, &i.Success, &i.Failed); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

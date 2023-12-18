@@ -38,7 +38,7 @@ func NewDeviceHandler(service service.DeviceService) DeviceHandler {
 //	@Param			search		query		string	false	"Search"
 //	@Param			order_by	query		string	false	"Order by"	Enums(token,name,location)
 //	@Param			order		query		string	false	"Order"		Enums(asc, desc)
-//	@Param			status		query		string	false	"Status"	enum(,active,deleted)
+//	@Param			status		query		string	false	"Status"	Enums(active,deleted)
 //	@Success		200			{object}	response.BaseResponse{data=response.BaseResponsePagination[response.Device]}
 //	@Failure		500			{object}	response.BaseResponse
 //	@Router			/device [get]
@@ -81,7 +81,7 @@ func (h *deviceHandler) GetAllDevice(ctx *fiber.Ctx) error {
 //	@Param			page	query		int		false	"Page"	default(1)
 //	@Param			limit	query		int		false	"Limit"	default(10)
 //	@Param			search	query		string	false	"Search"
-//	@Param			status	query		string	false	"Status"	enum(,active,deleted)
+//	@Param			status	query		string	false	"Status"	Enums(active,deleted)
 //	@Success		200		{object}	response.BaseResponse{data=response.BaseResponsePagination[response.BaseDropdown]}
 //	@Failure		500		{object}	response.BaseResponse
 //	@Router			/device/dropdown [get]

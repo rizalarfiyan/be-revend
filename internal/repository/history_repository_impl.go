@@ -80,3 +80,27 @@ func (r *historyRepository) AllHistory(ctx context.Context, req request.GetAllHi
 func (r *historyRepository) CreateHistory(ctx context.Context, payload sql.CreateHistoryParams) error {
 	return r.query.CreateHistory(ctx, payload)
 }
+
+func (r *historyRepository) AllHistoryStatistic(ctx context.Context, req models.AllHistoryStatistic) ([]sql.GetAllHistoryStatisticRow, error) {
+	histories, err := r.queryBuilder.GetAllHistoryStatistic(utils.QueryBuild(ctx, func(b *utils.QueryBuilder) {
+		b.Where("created_at BETWEEN $1 AND $2", req.StartDate, req.EndDate)
+		b.Where("user_id = $1", req.UserId)
+
+		switch req.TimeFrequency {
+		case constants.FilterTimeFrequencyToday:
+			b.GroupBy("DATE_TRUNC('hour', created_at)")
+		case constants.FilterTimeFrequencyYear:
+			b.GroupBy("DATE_TRUNC('month', created_at)")
+		default:
+			b.GroupBy("DATE_TRUNC('day', created_at)")
+		}
+
+		b.Order("date DESC")
+	}))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return histories, nil
+}

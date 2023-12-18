@@ -59,4 +59,5 @@ func (r *router) DeviceRoute(handler handler.DeviceHandler) {
 func (r *router) HistoryRoute(handler handler.HistoryHandler) {
 	history := r.app.Group("history")
 	history.Get("", middleware.Auth(true), handler.GetAllHistory)
+	history.Get("statistic", middleware.Auth(true), handler.GetAllHistoryStatistic)
 }

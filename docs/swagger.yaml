@@ -281,6 +281,15 @@ definitions:
       name:
         type: string
     type: object
+  response.HistoryStatistic:
+    properties:
+      failed:
+        type: integer
+      name:
+        type: string
+      success:
+        type: integer
+    type: object
   response.HistoryUser:
     properties:
       first_name:
@@ -551,6 +560,9 @@ paths:
         name: order
         type: string
       - description: Status
+        enum:
+        - active
+        - deleted
         in: query
         name: status
         type: string
@@ -690,6 +702,9 @@ paths:
         name: search
         type: string
       - description: Status
+        enum:
+        - active
+        - deleted
         in: query
         name: status
         type: string
@@ -784,6 +799,9 @@ paths:
         name: user_id
         type: string
       - description: Status
+        enum:
+        - active
+        - deleted
         in: query
         name: status
         type: string
@@ -806,6 +824,46 @@ paths:
       security:
       - AccessToken: []
       summary: Get All History based on parameter
+      tags:
+      - history
+  /history/statistic:
+    get:
+      consumes:
+      - application/json
+      description: All History Statistic
+      operationId: get-all-history-statistic
+      parameters:
+      - description: Time Frequency
+        enum:
+        - today
+        - week
+        - month
+        - quarter
+        - year
+        in: query
+        name: time_frequency
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.HistoryStatistic'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Get All History Statistic based on parameter
       tags:
       - history
   /user:
@@ -845,6 +903,9 @@ paths:
         name: order
         type: string
       - description: Status
+        enum:
+        - active
+        - deleted
         in: query
         name: status
         type: string
@@ -1016,6 +1077,9 @@ paths:
         name: search
         type: string
       - description: Status
+        enum:
+        - active
+        - deleted
         in: query
         name: status
         type: string

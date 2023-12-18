@@ -43,3 +43,9 @@ func (h *History) FromDB(history sql.GetAllHistoryRow) {
 		h.Date = history.CreatedAt.Time
 	}
 }
+
+type HistoryStatistic struct {
+	Name    string `json:"name"`
+	Success int64  `json:"success"`
+	Failed  int64  `json:"failed"`
+}

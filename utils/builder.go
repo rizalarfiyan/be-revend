@@ -18,6 +18,7 @@ type (
 		idx           int
 		filters       []queryFilter
 		order         string
+		groupBy       string
 		offset, limit int
 	}
 
@@ -196,6 +197,12 @@ func (b *QueryBuilder) Pagination(page, limit int) *QueryBuilder {
 	return b
 }
 
+// GroupBy sets the group by in SELECT.
+func (b *QueryBuilder) GroupBy(groupBy string) *QueryBuilder {
+	b.groupBy = groupBy
+	return b
+}
+
 // Build returns compiled SELECT string and args.
 func (b *QueryBuilder) Build(query string, args ...interface{}) (string, []interface{}) {
 	var sb strings.Builder
@@ -217,6 +224,12 @@ func (b *QueryBuilder) Build(query string, args ...interface{}) (string, []inter
 		sb.WriteByte('\n')
 
 		args = append(args, filter.args...)
+	}
+
+	if b.groupBy != "" {
+		sb.WriteString("GROUP BY ")
+		sb.WriteString(b.groupBy)
+		sb.WriteByte('\n')
 	}
 
 	if b.order != "" {
