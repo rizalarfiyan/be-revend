@@ -11,7 +11,7 @@ FROM history;
 SELECT h.user_id AS user_id, u.first_name, u.last_name, u.phone_number, SUM(h.success) AS success, SUM(h.failed) AS failed
 FROM history h
 JOIN users u ON u.id = h.user_id
-WHERE h.created_at BETWEEN sqlc.arg('start_date')::date AND sqlc.arg('end_date')::date
+WHERE h.created_at BETWEEN sqlc.arg('start_date') AND sqlc.arg('end_date')
 GROUP BY h.user_id, u.first_name, u.last_name, u.phone_number
 ORDER BY success DESC
 LIMIT sqlc.arg('limit');

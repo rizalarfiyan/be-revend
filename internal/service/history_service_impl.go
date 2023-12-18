@@ -88,8 +88,8 @@ func (s *historyService) GetAllHistoryTopPerformance(ctx context.Context, req re
 	timeFrequency := req.BuildTimeFrequency()
 
 	payload := sql.GetAllHistoryTopPerformanceParams{
-		StartDate: utils.PGDate(timeFrequency.StartDate),
-		EndDate:   utils.PGDate(timeFrequency.EndDate),
+		StartDate: utils.PGTimeStamp(timeFrequency.StartDate),
+		EndDate:   utils.PGTimeStamp(timeFrequency.EndDate),
 		Limit:     int32(req.Limit),
 	}
 

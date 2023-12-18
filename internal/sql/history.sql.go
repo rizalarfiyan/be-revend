@@ -129,15 +129,15 @@ const getAllHistoryTopPerformance = `-- name: GetAllHistoryTopPerformance :many
 SELECT h.user_id AS user_id, u.first_name, u.last_name, u.phone_number, SUM(h.success) AS success, SUM(h.failed) AS failed
 FROM history h
 JOIN users u ON u.id = h.user_id
-WHERE h.created_at BETWEEN $1::date AND $2::date
+WHERE h.created_at BETWEEN $1 AND $2
 GROUP BY h.user_id, u.first_name, u.last_name, u.phone_number
 ORDER BY success DESC
 LIMIT $3
 `
 
 type GetAllHistoryTopPerformanceParams struct {
-	StartDate pgtype.Date
-	EndDate   pgtype.Date
+	StartDate pgtype.Timestamp
+	EndDate   pgtype.Timestamp
 	Limit     int32
 }
 

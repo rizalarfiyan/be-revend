@@ -61,7 +61,7 @@ const (
 
 func (v FilterTimeFrequency) IsValid() bool {
 	switch v {
-	case FilterTimeFrequencyToday, FilterTimeFrequencyWeek, FilterTimeFrequencyMonth, FilterTimeFrequencyYear:
+	case FilterTimeFrequencyToday, FilterTimeFrequencyWeek, FilterTimeFrequencyMonth, FilterTimeFrequencyQuarter, FilterTimeFrequencyYear:
 		return true
 	}
 

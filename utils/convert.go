@@ -26,8 +26,8 @@ func PGText(str string) pgtype.Text {
 	}
 }
 
-func PGDate(date time.Time) pgtype.Date {
-	return pgtype.Date{
+func PGTimeStamp(date time.Time) pgtype.Timestamp {
+	return pgtype.Timestamp{
 		Time:  date,
 		Valid: true,
 	}
