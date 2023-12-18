@@ -160,3 +160,8 @@ func (s *userService) UpdateUserProfile(ctx context.Context, req request.UpdateU
 	err := s.repo.UpdateUserProfile(ctx, payload)
 	exception.PanicIfError(err, false)
 }
+
+func (s *userService) DeleteGoogleUserProfile(ctx context.Context, userId uuid.UUID) {
+	err := s.repo.DeleteGoogleUserProfile(ctx, userId)
+	exception.PanicIfError(err, false)
+}

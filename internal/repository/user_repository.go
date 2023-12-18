@@ -21,4 +21,5 @@ type UserRepository interface {
 	AllDropdownUsers(ctx context.Context, req request.BasePagination) (*models.ContentPagination[sql.GetAllNameUsersRow], error)
 	ToggleDeleteUser(ctx context.Context, req sql.ToggleDeleteUserParams) error
 	UpdateUserProfile(ctx context.Context, payload sql.UpdateUserProfileParams) error
+	DeleteGoogleUserProfile(ctx context.Context, userId uuid.UUID) error
 }

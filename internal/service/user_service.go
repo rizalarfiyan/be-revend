@@ -16,4 +16,5 @@ type UserService interface {
 	UpdateUser(ctx context.Context, req request.UpdateUserRequest)
 	ToggleDeleteUser(ctx context.Context, userId, currentUserId uuid.UUID)
 	UpdateUserProfile(ctx context.Context, req request.UpdateUserProfileRequest)
+	DeleteGoogleUserProfile(ctx context.Context, userId uuid.UUID)
 }

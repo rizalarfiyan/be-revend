@@ -46,6 +46,17 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
+const deleteGoogleUserProfile = `-- name: DeleteGoogleUserProfile :exec
+UPDATE users
+SET google_id = NULL, updated_at = CURRENT_TIMESTAMP
+WHERE id = $1
+`
+
+func (q *Queries) DeleteGoogleUserProfile(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteGoogleUserProfile, id)
+	return err
+}
+
 const getAllNameUsers = `-- name: GetAllNameUsers :many
 SELECT id, first_name, last_name FROM users
 `

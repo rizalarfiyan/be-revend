@@ -42,6 +42,7 @@ func (r *router) UserRoute(handler handler.UserHandler) {
 	profile := user.Group("profile")
 	profile.Get("", middleware.Auth(false), handler.GetUserProfile)
 	profile.Put("", middleware.Auth(false), handler.UpdateUserProfile)
+	profile.Delete("google", middleware.Auth(false), handler.DeleteGoogleUserProfile)
 
 	user.Get("", middleware.Auth(true), middleware.Role(sql.RoleAdmin, true), handler.GetAllUser)
 	user.Post("", middleware.Auth(false), middleware.Role(sql.RoleAdmin, false), handler.CreateUser)

@@ -11,4 +11,5 @@ type UserHandler interface {
 	ToggleDeleteUser(ctx *fiber.Ctx) error
 	GetUserProfile(ctx *fiber.Ctx) error
 	UpdateUserProfile(ctx *fiber.Ctx) error
+	DeleteGoogleUserProfile(ctx *fiber.Ctx) error
 }

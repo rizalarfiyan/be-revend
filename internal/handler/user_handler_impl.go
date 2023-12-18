@@ -295,3 +295,24 @@ func (h *userHandler) UpdateUserProfile(ctx *fiber.Ctx) error {
 		Message: "Success!",
 	})
 }
+
+// DeleteGoogleUserProfile godoc
+//
+//	@Summary		Delete Google User Profile based on parameter
+//	@Description	Delete Google User Profile
+//	@ID				delete-google-user-profile
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Security		AccessToken
+//	@Success		200	{object}	response.BaseResponse
+//	@Failure		500	{object}	response.BaseResponse
+//	@Router			/user/profile/google [delete]
+func (h *userHandler) DeleteGoogleUserProfile(ctx *fiber.Ctx) error {
+	userId := utils.GetUser(ctx).Id
+	h.service.DeleteGoogleUserProfile(ctx.Context(), userId)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+	})
+}

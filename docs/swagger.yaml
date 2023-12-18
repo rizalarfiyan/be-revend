@@ -1234,6 +1234,28 @@ paths:
       summary: Post Update User Profile based on parameter
       tags:
       - user
+  /user/profile/google:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Google User Profile
+      operationId: delete-google-user-profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Delete Google User Profile based on parameter
+      tags:
+      - user
 securityDefinitions:
   AccessToken:
     in: header
