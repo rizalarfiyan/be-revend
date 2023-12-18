@@ -12,4 +12,5 @@ type UserHandler interface {
 	GetUserProfile(ctx *fiber.Ctx) error
 	UpdateUserProfile(ctx *fiber.Ctx) error
 	DeleteGoogleUserProfile(ctx *fiber.Ctx) error
+	BindGoogleUserProfile(ctx *fiber.Ctx) error
 }

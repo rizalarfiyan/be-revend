@@ -33,3 +33,7 @@ func (u *User) FromDB(user sql.User) {
 		u.GoogleId = user.GoogleID.String
 	}
 }
+
+type BindGoogleUserProfile struct {
+	Url string `json:"url"`
+}

@@ -316,3 +316,23 @@ func (h *userHandler) DeleteGoogleUserProfile(ctx *fiber.Ctx) error {
 		Message: "Success!",
 	})
 }
+
+// BindGoogleUserProfile godoc
+//
+//	@Summary		Bind Google User Profile based on parameter
+//	@Description	Bind Google User Profile
+//	@ID				get-bind-google-user-profile
+//	@Tags			user
+//	@Security		AccessToken
+//	@Success		200	{object}	response.BaseResponse{data=response.BindGoogleUserProfile}
+//	@Failure		500	{object}	response.BaseResponse
+//	@Router			/user/profile/google [get]
+func (h *userHandler) BindGoogleUserProfile(ctx *fiber.Ctx) error {
+	user := utils.GetUser(ctx)
+	res := h.service.BindGoogleUserProfile(ctx.Context(), user.Id)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+		Data:    res,
+	})
+}

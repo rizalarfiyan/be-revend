@@ -10,6 +10,7 @@ var (
 	KeyOTP                 = "otp#%s"
 	KeyOTPIncrement        = "otp#%s#increment"
 	KeyUserPoint           = "user_point#%s"
+	KeyBindGoogle          = "bind_google#%s#%s"
 
 	// Key Locals
 	KeyLocalsUser = "user"

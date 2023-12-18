@@ -47,6 +47,11 @@ UPDATE users
 SET first_name = $1, last_name = $2, updated_at = CURRENT_TIMESTAMP
 WHERE id = $3;
 
+-- name: UpdateGoogleUserProfile :exec
+UPDATE users
+SET google_id = $1, updated_at = CURRENT_TIMESTAMP
+WHERE id = $2;
+
 -- name: DeleteGoogleUserProfile :exec
 UPDATE users
 SET google_id = NULL, updated_at = CURRENT_TIMESTAMP

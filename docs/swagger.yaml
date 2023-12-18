@@ -261,6 +261,11 @@ definitions:
       metadata:
         $ref: '#/definitions/response.BaseMetadataPagination'
     type: object
+  response.BindGoogleUserProfile:
+    properties:
+      url:
+        type: string
+    type: object
   response.Device:
     properties:
       id:
@@ -1254,6 +1259,28 @@ paths:
       security:
       - AccessToken: []
       summary: Delete Google User Profile based on parameter
+      tags:
+      - user
+    get:
+      description: Bind Google User Profile
+      operationId: get-bind-google-user-profile
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.BindGoogleUserProfile'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Bind Google User Profile based on parameter
       tags:
       - user
 securityDefinitions:

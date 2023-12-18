@@ -6,10 +6,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/constants"
+	"github.com/rizalarfiyan/be-revend/database"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/sql"
+	baseModels "github.com/rizalarfiyan/be-revend/models"
 	"github.com/rizalarfiyan/be-revend/utils"
 )
 
@@ -17,13 +20,17 @@ type userRepository struct {
 	db           *pgxpool.Pool
 	query        *sql.Queries
 	queryBuilder *sql.Queries
+	redis        database.RedisInstance
+	conf         *baseModels.Config
 }
 
-func NewUserRepository(db *pgxpool.Pool) UserRepository {
+func NewUserRepository(db *pgxpool.Pool, redis database.RedisInstance) UserRepository {
 	return &userRepository{
 		db:           db,
 		query:        sql.New(db),
 		queryBuilder: sql.New(utils.QueryWrap(db)),
+		redis:        redis,
+		conf:         config.Get(),
 	}
 }
 
@@ -152,4 +159,42 @@ func (r *userRepository) ToggleDeleteUser(ctx context.Context, req sql.ToggleDel
 
 func (r *userRepository) DeleteGoogleUserProfile(ctx context.Context, userId uuid.UUID) error {
 	return r.query.DeleteGoogleUserProfile(ctx, utils.PGUUID(userId))
+}
+
+func (r *userRepository) UpdateGoogleUserProfile(ctx context.Context, payload sql.UpdateGoogleUserProfileParams) error {
+	return r.query.UpdateGoogleUserProfile(ctx, payload)
+}
+
+func (r *userRepository) CreateBindGoogle(ctx context.Context, token string, userId uuid.UUID) error {
+	key := fmt.Sprintf(constants.KeyBindGoogle, token, userId)
+	return r.redis.Setxc(key, r.conf.Auth.OTP.Duration, userId.String())
+}
+
+func (r *userRepository) CreateBindGoogleFresh(ctx context.Context, token string, userId uuid.UUID) error {
+	err := r.DeleteBindGoogle(ctx, userId)
+	if err != nil {
+		return err
+	}
+
+	return r.CreateBindGoogle(ctx, token, userId)
+}
+
+func (r *userRepository) GetBindGoogle(ctx context.Context, token string) (string, error) {
+	keySearch := fmt.Sprintf(constants.KeyBindGoogle, token, "*")
+
+	key, err := r.redis.Keys(keySearch)
+	if err != nil {
+		return "", err
+	}
+
+	if len(key) <= 0 {
+		return "", nil
+	}
+
+	return r.redis.GetString(key[0])
+}
+
+func (r *userRepository) DeleteBindGoogle(ctx context.Context, userId uuid.UUID) error {
+	keySearch := fmt.Sprintf(constants.KeyBindGoogle, "*", userId.String())
+	return r.redis.DelKeysByPatern(keySearch)
 }

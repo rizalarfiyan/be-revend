@@ -12,6 +12,7 @@ import (
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rizalarfiyan/be-revend/config"
 	"github.com/rizalarfiyan/be-revend/constants"
@@ -45,36 +46,141 @@ func NewAuthService(repo repository.AuthRepository, userRepo repository.UserRepo
 	}
 }
 
-func (s *authService) Google() string {
+func (s *authService) Google(state ...string) string {
 	googleConf := config.Get().Auth.Google
 	redirectUrl, err := url.Parse(googleConf.Endpoint.AuthURL)
-	if err != nil {
-		panic(err)
-	}
+	exception.PanicIfError(err, false)
 	parameters := redirectUrl.Query()
 	parameters.Add("client_id", googleConf.ClientID)
 	parameters.Add("scope", strings.Join(googleConf.Scopes, " "))
 	parameters.Add("redirect_uri", googleConf.RedirectURL)
 	parameters.Add("response_type", "code")
+	if len(state) > 0 {
+		parameters.Add("state", state[0])
+	}
 	redirectUrl.RawQuery = parameters.Encode()
 	return redirectUrl.String()
 }
 
 func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCallbackRequest) (redirect string) {
-	var data models.VerificationSession
-	redirect = s.conf.Auth.Verification.Callback
+	isVerification := utils.IsEmpty(req.State)
+	var res models.SocialGoogle
+	var message string
 
 	defer func() {
-		token := ksuid.New().String()
-		data.IsError = data.Message != ""
-
-		if !data.IsError {
-			data.Message = "Please wait, we are processing your request"
+		if isVerification {
+			redirect = s.googleCallbackVerificationSession(ctx, res, message)
+			return
 		}
 
-		data.Token = token
-		err := s.repo.CreateVerificationSession(ctx, token, data)
-		if err != nil {
+		redirect = s.googleCallbackBindUser(ctx, res, req.State, message)
+	}()
+
+	if strings.EqualFold(req.ErrorReason, "user_denied") {
+		message = "User has denied Permission"
+		return
+	}
+
+	if utils.IsEmpty(req.Code) {
+		message = "Code Not Found to provide AccessToken"
+		return
+	}
+
+	googleConf := config.Get().Auth.Google
+	googleConf.AuthCodeURL(req.Code)
+	token, err := googleConf.Exchange(ctx, req.Code)
+	if err != nil {
+		message = err.Error()
+		return
+	}
+
+	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + url.QueryEscape(token.AccessToken))
+	if err != nil {
+		message = err.Error()
+		return
+	}
+
+	defer resp.Body.Close()
+
+	response, err := io.ReadAll(resp.Body)
+	if err != nil {
+		message = err.Error()
+		return
+	}
+
+	err = json.Unmarshal(response, &res)
+	if err != nil {
+		message = err.Error()
+		return
+	}
+
+	return
+}
+
+func (s *authService) googleCallbackVerificationSession(ctx context.Context, res models.SocialGoogle, message string) (redirect string) {
+	redirect = s.conf.Auth.Verification.Callback
+	data := models.VerificationSession{
+		Message: message,
+	}
+
+	if !utils.IsEmpty(res) {
+		data.GoogleId = res.ID
+		user, err := s.userRepo.GetUserByGoogleId(ctx, data.GoogleId)
+		exception.PanicIfErrorWithoutNoSqlResult(err, false)
+
+		if utils.IsEmpty(user) {
+			data.Message = "You must register first or bind your account"
+			return
+		}
+
+		data.FirstName = user.FirstName
+		if user.LastName.Valid {
+			data.LastName = user.LastName.String
+		}
+
+		data.Identity = user.Identity
+		data.PhoneNumber = user.PhoneNumber
+		data.IsVerified = true
+	}
+
+	token := ksuid.New().String()
+	data.IsError = data.Message != ""
+
+	if !data.IsError {
+		data.Message = "Please wait, we are processing your request"
+	}
+
+	data.Token = token
+	err := s.repo.CreateVerificationSession(ctx, token, data)
+	if err != nil {
+		return
+	}
+
+	redirectUrl, err := url.Parse(s.conf.Auth.Verification.Callback)
+	if err != nil {
+		return
+	}
+
+	parameters := redirectUrl.Query()
+	parameters.Add("token", token)
+	redirectUrl.RawQuery = parameters.Encode()
+	redirect = redirectUrl.String()
+	return
+}
+
+func (s *authService) googleCallbackBindUser(ctx context.Context, res models.SocialGoogle, token, message string) (redirect string) {
+	redirect = s.conf.Auth.Verification.ProfileCallback
+	var userId uuid.UUID
+
+	defer func() {
+		if userId != uuid.Nil {
+			err := s.userRepo.DeleteBindGoogle(ctx, userId)
+			if err != nil {
+				return
+			}
+		}
+
+		if message == "" {
 			return
 		}
 
@@ -84,67 +190,52 @@ func (s *authService) GoogleCallback(ctx context.Context, req request.GoogleCall
 		}
 
 		parameters := redirectUrl.Query()
-		parameters.Add("token", token)
+		parameters.Add("message", message)
 		redirectUrl.RawQuery = parameters.Encode()
 		redirect = redirectUrl.String()
 	}()
 
-	if strings.EqualFold(req.ErrorReason, "user_denied") {
-		data.Message = "User has denied Permission"
-		return
-	}
-
-	if utils.IsEmpty(req.Code) {
-		data.Message = "Code Not Found to provide AccessToken"
-		return
-	}
-
-	googleConf := config.Get().Auth.Google
-	googleConf.AuthCodeURL(req.Code)
-	token, err := googleConf.Exchange(ctx, req.Code)
+	_, err := ksuid.Parse(token)
 	if err != nil {
-		data.Message = err.Error()
+		message = "Token is not valid"
 		return
 	}
 
-	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + url.QueryEscape(token.AccessToken))
+	rawUserId, err := s.userRepo.GetBindGoogle(ctx, token)
 	if err != nil {
-		data.Message = err.Error()
 		return
 	}
 
-	defer resp.Body.Close()
+	if utils.IsEmpty(rawUserId) {
+		message = "Token is not valid"
+		return
+	}
 
-	response, err := io.ReadAll(resp.Body)
+	userId, err = uuid.Parse(rawUserId)
 	if err != nil {
-		data.Message = err.Error()
 		return
 	}
 
-	res := models.SocialGoogle{}
-	err = json.Unmarshal(response, &res)
+	user, err := s.userRepo.GetUserById(ctx, userId)
 	if err != nil {
-		data.Message = err.Error()
 		return
 	}
 
-	data.GoogleId = res.ID
-	user, err := s.userRepo.GetUserByGoogleId(ctx, data.GoogleId)
-	exception.PanicIfErrorWithoutNoSqlResult(err, false)
-
-	if utils.IsEmpty(user) {
-		data.Message = "You must register first or bind your account"
+	if !utils.IsEmpty(user) {
+		message = "User already bind with google"
 		return
 	}
 
-	data.FirstName = user.FirstName
-	if user.LastName.Valid {
-		data.LastName = user.LastName.String
+	payload := sql.UpdateGoogleUserProfileParams{
+		GoogleID: utils.PGText(res.ID),
+		ID:       utils.PGUUID(userId),
 	}
 
-	data.Identity = user.Identity
-	data.PhoneNumber = user.PhoneNumber
-	data.IsVerified = true
+	err = s.userRepo.UpdateGoogleUserProfile(ctx, payload)
+	if err != nil {
+		return
+	}
+
 	return
 }
 

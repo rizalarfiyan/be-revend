@@ -1234,6 +1234,45 @@ const docTemplate = `{
             }
         },
         "/user/profile/google": {
+            "get": {
+                "security": [
+                    {
+                        "AccessToken": []
+                    }
+                ],
+                "description": "Bind Google User Profile",
+                "tags": [
+                    "user"
+                ],
+                "summary": "Bind Google User Profile based on parameter",
+                "operationId": "get-bind-google-user-profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.BaseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.BindGoogleUserProfile"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.BaseResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -1785,6 +1824,14 @@ const docTemplate = `{
                 },
                 "metadata": {
                     "$ref": "#/definitions/response.BaseMetadataPagination"
+                }
+            }
+        },
+        "response.BindGoogleUserProfile": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string"
                 }
             }
         },

@@ -22,4 +22,9 @@ type UserRepository interface {
 	ToggleDeleteUser(ctx context.Context, req sql.ToggleDeleteUserParams) error
 	UpdateUserProfile(ctx context.Context, payload sql.UpdateUserProfileParams) error
 	DeleteGoogleUserProfile(ctx context.Context, userId uuid.UUID) error
+	UpdateGoogleUserProfile(ctx context.Context, payload sql.UpdateGoogleUserProfileParams) error
+	CreateBindGoogle(ctx context.Context, token string, userId uuid.UUID) error
+	CreateBindGoogleFresh(ctx context.Context, token string, userId uuid.UUID) error
+	GetBindGoogle(ctx context.Context, token string) (string, error)
+	DeleteBindGoogle(ctx context.Context, userId uuid.UUID) error
 }

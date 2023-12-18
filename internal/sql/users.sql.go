@@ -265,6 +265,22 @@ func (q *Queries) ToggleDeleteUser(ctx context.Context, arg ToggleDeleteUserPara
 	return err
 }
 
+const updateGoogleUserProfile = `-- name: UpdateGoogleUserProfile :exec
+UPDATE users
+SET google_id = $1, updated_at = CURRENT_TIMESTAMP
+WHERE id = $2
+`
+
+type UpdateGoogleUserProfileParams struct {
+	GoogleID pgtype.Text
+	ID       pgtype.UUID
+}
+
+func (q *Queries) UpdateGoogleUserProfile(ctx context.Context, arg UpdateGoogleUserProfileParams) error {
+	_, err := q.db.Exec(ctx, updateGoogleUserProfile, arg.GoogleID, arg.ID)
+	return err
+}
+
 const updateUser = `-- name: UpdateUser :exec
 UPDATE users
 SET first_name = $1, last_name = $2, phone_number = $3, google_id = $4, identity = $5, updated_at = CURRENT_TIMESTAMP

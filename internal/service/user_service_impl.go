@@ -15,17 +15,20 @@ import (
 	"github.com/rizalarfiyan/be-revend/internal/sql"
 	baseModels "github.com/rizalarfiyan/be-revend/models"
 	"github.com/rizalarfiyan/be-revend/utils"
+	"github.com/segmentio/ksuid"
 )
 
 type userService struct {
-	repo repository.UserRepository
-	conf *baseModels.Config
+	repo        repository.UserRepository
+	conf        *baseModels.Config
+	authService AuthService
 }
 
-func NewUserService(repo repository.UserRepository) UserService {
+func NewUserService(repo repository.UserRepository, authService AuthService) UserService {
 	return &userService{
-		repo: repo,
-		conf: config.Get(),
+		repo:        repo,
+		conf:        config.Get(),
+		authService: authService,
 	}
 }
 
@@ -164,4 +167,22 @@ func (s *userService) UpdateUserProfile(ctx context.Context, req request.UpdateU
 func (s *userService) DeleteGoogleUserProfile(ctx context.Context, userId uuid.UUID) {
 	err := s.repo.DeleteGoogleUserProfile(ctx, userId)
 	exception.PanicIfError(err, false)
+}
+
+func (s *userService) BindGoogleUserProfile(ctx context.Context, userId uuid.UUID) response.BindGoogleUserProfile {
+	user, err := s.repo.GetUserById(ctx, userId)
+	exception.PanicIfErrorWithoutNoSqlResult(err, false)
+	exception.IsNotProcess(user, false)
+
+	if user.GoogleID.Valid {
+		exception.IsNotProcessMessage(nil, "Account is already bind.", false)
+	}
+
+	token := ksuid.New().String()
+	err = s.repo.CreateBindGoogleFresh(ctx, token, userId)
+	exception.PanicIfError(err, false)
+
+	return response.BindGoogleUserProfile{
+		Url: s.authService.Google(token),
+	}
 }

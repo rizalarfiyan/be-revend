@@ -69,6 +69,7 @@ func Init() {
 	conf.Auth.Google.Endpoint = google.Endpoint
 
 	conf.Auth.Verification.Callback = cc.AsString("VERIFICATION_CALLBACK", "")
+	conf.Auth.Verification.ProfileCallback = cc.AsString("VERIFICATION_PROFILE_CALLBACK", "")
 	conf.Auth.Verification.Duration = cc.AsTimeDuration("VERIFICATION_DURATION", 15*time.Minute)
 	conf.Auth.OTP.Duration = cc.AsTimeDuration("OTP_DURATION", 15*time.Minute)
 	conf.Auth.OTP.MaxAttemp = cc.AsInt("OTP_MAX_ATTEMP", 3)

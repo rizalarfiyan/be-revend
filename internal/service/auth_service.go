@@ -8,7 +8,7 @@ import (
 )
 
 type AuthService interface {
-	Google() string
+	Google(state ...string) string
 	GoogleCallback(ctx context.Context, req request.GoogleCallbackRequest) string
 	Verification(ctx context.Context, req request.AuthVerification) response.AuthVerification
 	SendOTP(ctx context.Context, req request.AuthSendOTP) response.AuthSendOTP

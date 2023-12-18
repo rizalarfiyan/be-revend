@@ -77,8 +77,9 @@ type AuthConfigs struct {
 }
 
 type VerificationAuthConfigs struct {
-	Callback string
-	Duration time.Duration
+	Callback        string
+	ProfileCallback string
+	Duration        time.Duration
 }
 
 type OTPConfigs struct {

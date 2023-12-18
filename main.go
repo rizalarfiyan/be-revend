@@ -101,7 +101,7 @@ func main() {
 
 	// repository
 	authRepository := repository.NewAuthRepository(db, redis)
-	userRepository := repository.NewUserRepository(db)
+	userRepository := repository.NewUserRepository(db, redis)
 	deviceRepository := repository.NewDeviceRepository(db, redis)
 	historyRepository := repository.NewHistoryRepository(db)
 	mqttRepository := repository.NewMqttRepository(redis)
@@ -109,7 +109,7 @@ func main() {
 	// service
 	mqttService := service.NewMQTTService(mqttRepository, authRepository, userRepository, deviceRepository, historyRepository)
 	authService := service.NewAuthService(authRepository, userRepository, *mqtt)
-	userService := service.NewUserService(userRepository)
+	userService := service.NewUserService(userRepository, authService)
 	deviceService := service.NewDeviceService(deviceRepository)
 	historyService := service.NewHistoryService(historyRepository)
 
