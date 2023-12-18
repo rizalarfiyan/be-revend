@@ -1164,6 +1164,33 @@ paths:
       summary: Get All Dropdown User based on parameter
       tags:
       - user
+  /user/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get User Profile
+      operationId: get-user-profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.BaseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.User'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.BaseResponse'
+      security:
+      - AccessToken: []
+      summary: Get User Profile based on parameter
+      tags:
+      - user
 securityDefinitions:
   AccessToken:
     in: header

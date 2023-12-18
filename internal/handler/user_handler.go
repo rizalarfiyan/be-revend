@@ -9,4 +9,5 @@ type UserHandler interface {
 	CreateUser(ctx *fiber.Ctx) error
 	UpdateUser(ctx *fiber.Ctx) error
 	ToggleDeleteUser(ctx *fiber.Ctx) error
+	GetUserProfile(ctx *fiber.Ctx) error
 }

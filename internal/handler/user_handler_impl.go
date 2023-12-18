@@ -244,3 +244,25 @@ func (h *userHandler) ToggleDeleteUser(ctx *fiber.Ctx) error {
 		Message: "Success!",
 	})
 }
+
+// GetUserProfile godoc
+//
+//	@Summary		Get User Profile based on parameter
+//	@Description	Get User Profile
+//	@ID				get-user-profile
+//	@Tags			user
+//	@Accept			json
+//	@Produce		json
+//	@Security		AccessToken
+//	@Success		200	{object}	response.BaseResponse{data=response.User}
+//	@Failure		500	{object}	response.BaseResponse
+//	@Router			/user/profile [get]
+func (h *userHandler) GetUserProfile(ctx *fiber.Ctx) error {
+	userId := utils.GetUser(ctx).Id
+	res := h.service.GetUserById(ctx.Context(), userId)
+	return ctx.JSON(response.BaseResponse{
+		Code:    http.StatusOK,
+		Message: "Success!",
+		Data:    res,
+	})
+}

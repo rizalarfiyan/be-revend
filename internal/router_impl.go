@@ -39,6 +39,9 @@ func (r *router) AuthRoute(handler handler.AuthHandler) {
 
 func (r *router) UserRoute(handler handler.UserHandler) {
 	user := r.app.Group("user")
+	profile := user.Group("profile")
+	profile.Get("", middleware.Auth(false), handler.GetUserProfile)
+
 	user.Get("", middleware.Auth(true), middleware.Role(sql.RoleAdmin, true), handler.GetAllUser)
 	user.Post("", middleware.Auth(false), middleware.Role(sql.RoleAdmin, false), handler.CreateUser)
 	user.Get("dropdown", middleware.Auth(true), middleware.Role(sql.RoleAdmin, true), handler.AllDropdownUser)
