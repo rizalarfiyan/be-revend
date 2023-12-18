@@ -2,15 +2,12 @@ package service
 
 import (
 	"context"
-	"time"
 
-	"github.com/rizalarfiyan/be-revend/constants"
 	"github.com/rizalarfiyan/be-revend/exception"
 	"github.com/rizalarfiyan/be-revend/internal/models"
 	"github.com/rizalarfiyan/be-revend/internal/repository"
 	"github.com/rizalarfiyan/be-revend/internal/request"
 	"github.com/rizalarfiyan/be-revend/internal/response"
-	"github.com/rizalarfiyan/be-revend/utils"
 )
 
 type historyService struct {
@@ -43,63 +40,11 @@ func (s *historyService) GetAllHistory(ctx context.Context, req request.GetAllHi
 }
 
 func (s *historyService) GetAllHistoryStatistic(ctx context.Context, req request.GetAllHistoryStatisticRequest) []response.HistoryStatistic {
-	var startDate, endDate time.Time
-	var callbackName func(time.Time) string
-	var callbackDate func(time.Time) time.Time
-
-	now := time.Now()
-	startDateToday := utils.StartOfDay(now)
-	switch req.TimeFrequency {
-	case constants.FilterTimeFrequencyWeek:
-		startDate = utils.StartOfWeek(now)
-		endDate = utils.EndOfWeek(now)
-		callbackName = func(val time.Time) string {
-			return val.Format(time.DateOnly)
-		}
-		callbackDate = func(val time.Time) time.Time {
-			return val.AddDate(0, 0, 1)
-		}
-	case constants.FilterTimeFrequencyMonth:
-		startDate = utils.StartOfMonth(now)
-		endDate = utils.EndOfMonth(now)
-		callbackName = func(val time.Time) string {
-			return val.Format(time.DateOnly)
-		}
-		callbackDate = func(val time.Time) time.Time {
-			return val.AddDate(0, 0, 1)
-		}
-	case constants.FilterTimeFrequencyQuarter:
-		startDate = utils.StartOfMonth(startDateToday.AddDate(0, -6, 0))
-		endDate = utils.EndOfMonth(now)
-		callbackName = func(val time.Time) string {
-			return val.Format("Jan 2006")
-		}
-		callbackDate = func(val time.Time) time.Time {
-			return val.AddDate(0, 1, 0)
-		}
-	case constants.FilterTimeFrequencyYear:
-		startDate = utils.StartOfMonth(startDateToday.AddDate(-1, 0, 0))
-		endDate = utils.EndOfMonth(now)
-		callbackName = func(val time.Time) string {
-			return val.Format("Jan 2006")
-		}
-		callbackDate = func(val time.Time) time.Time {
-			return val.AddDate(0, 1, 0)
-		}
-	default:
-		startDate = startDateToday
-		endDate = utils.EndOfDay(now)
-		callbackName = func(val time.Time) string {
-			return val.Format(time.TimeOnly)
-		}
-		callbackDate = func(val time.Time) time.Time {
-			return val.Add(1 * time.Hour)
-		}
-	}
+	timeFrequency := req.BuildTimeFrequency()
 
 	payload := models.AllHistoryStatistic{
-		StartDate:     startDate,
-		EndDate:       endDate,
+		StartDate:     timeFrequency.StartDate,
+		EndDate:       timeFrequency.EndDate,
 		UserId:        req.UserId,
 		TimeFrequency: req.TimeFrequency,
 	}
@@ -107,8 +52,8 @@ func (s *historyService) GetAllHistoryStatistic(ctx context.Context, req request
 	idx := 0
 	var tempArr = make(map[string]int)
 	var res []response.HistoryStatistic
-	for date := startDate; !date.After(endDate); date = callbackDate(date) {
-		name := callbackName(date)
+	for date := timeFrequency.StartDate; !date.After(timeFrequency.EndDate); date = timeFrequency.CallbackDate(date) {
+		name := timeFrequency.CallbackName(date)
 		if _, ok := tempArr[name]; !ok {
 			tempArr[name] = idx
 		}
@@ -128,7 +73,7 @@ func (s *historyService) GetAllHistoryStatistic(ctx context.Context, req request
 			continue
 		}
 
-		name := callbackName(data.Date.Time)
+		name := timeFrequency.CallbackName(data.Date.Time)
 		if idx, ok := tempArr[name]; ok {
 			res[idx].Success += data.Success
 			res[idx].Failed += data.Failed

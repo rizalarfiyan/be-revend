@@ -2,7 +2,6 @@ package request
 
 import (
 	"github.com/google/uuid"
-	"github.com/rizalarfiyan/be-revend/constants"
 )
 
 type GetAllHistoryRequest struct {
@@ -12,6 +11,10 @@ type GetAllHistoryRequest struct {
 }
 
 type GetAllHistoryStatisticRequest struct {
-	UserId        uuid.UUID                     `json:"user_id"`
-	TimeFrequency constants.FilterTimeFrequency `json:"time_range"`
+	WithTimeFrequency
+	UserId uuid.UUID `json:"user_id"`
+}
+
+func (req *GetAllHistoryStatisticRequest) Normalize() {
+	req.WithTimeFrequency.Normalize()
 }

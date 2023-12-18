@@ -109,13 +109,13 @@ func (h *historyHandler) GetAllHistory(ctx *fiber.Ctx) error {
 //	@Router			/history/statistic [get]
 func (h *historyHandler) GetAllHistoryStatistic(ctx *fiber.Ctx) error {
 	req := request.GetAllHistoryStatisticRequest{
-		TimeFrequency: constants.FilterTimeFrequency(ctx.Query("time_frequency")),
-		UserId:        utils.GetUser(ctx).Id,
+		WithTimeFrequency: request.WithTimeFrequency{
+			TimeFrequency: constants.FilterTimeFrequency(ctx.Query("time_frequency")),
+		},
+		UserId: utils.GetUser(ctx).Id,
 	}
 
-	if !req.TimeFrequency.IsValid() {
-		req.TimeFrequency = constants.FilterTimeFrequencyToday
-	}
+	req.Normalize()
 
 	res := h.service.GetAllHistoryStatistic(ctx.Context(), req)
 	return ctx.JSON(response.BaseResponse{
